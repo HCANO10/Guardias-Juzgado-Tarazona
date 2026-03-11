@@ -8,17 +8,24 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
-import { Loader2, Settings2, CalendarDays } from "lucide-react"
+import { Loader2, Settings2, CalendarDays, BrainCircuit, Activity, Info } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { cn } from "@/lib/utils"
 
 interface SettingsPageClientProps {
   initialSettings: any
   initialPeriods: any[]
+  systemStats: {
+    staff: { total: number, aux: number, tra: number, ges: number }
+    periods: number
+    assignments: { complete: number, total: number }
+    holidays: number
+    vacations: number
+  }
 }
 
-export default function SettingsPageClient({ initialSettings, initialPeriods }: SettingsPageClientProps) {
+export default function SettingsPageClient({ initialSettings, initialPeriods, systemStats }: SettingsPageClientProps) {
   const { toast } = useToast()
   
   // Guard Generator States
@@ -31,6 +38,10 @@ export default function SettingsPageClient({ initialSettings, initialPeriods }: 
   const [activeYear, setActiveYear] = useState(initialSettings?.active_year || 2026)
   const [groqModel, setGroqModel] = useState(initialSettings?.groq_model || "llama-3.3-70b-versatile")
   const [savingSettings, setSavingSettings] = useState(false)
+
+  // Groq Test States
+  const [testingGroq, setTestingGroq] = useState(false)
+  const [groqStatus, setGroqStatus] = useState<{ connected: boolean, model?: string, error?: string } | null>(null)
 
   const handleGeneratePeriods = async (force: boolean = false) => {
     setGenerating(true)
@@ -75,6 +86,26 @@ export default function SettingsPageClient({ initialSettings, initialPeriods }: 
       toast({ variant: "destructive", title: "Error", description: error.message })
     } finally {
       setSavingSettings(false)
+    }
+  }
+
+  const handleTestGroq = async () => {
+    setTestingGroq(true)
+    setGroqStatus(null)
+    try {
+      const res = await fetch('/api/groq/test', { method: 'POST' })
+      const data = await res.json()
+      setGroqStatus(data)
+      if (data.connected) {
+        toast({ title: "Groq conectado", description: `Modelo: ${data.model}` })
+      } else {
+        toast({ variant: "destructive", title: "Error de conexión", description: data.error })
+      }
+    } catch (error: any) {
+      setGroqStatus({ connected: false, error: error.message })
+      toast({ variant: "destructive", title: "Error", description: "No se pudo contactar con el endpoint de test." })
+    } finally {
+      setTestingGroq(false)
     }
   }
 
@@ -171,6 +202,88 @@ export default function SettingsPageClient({ initialSettings, initialPeriods }: 
                 </Table>
               </div>
             )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Groq AI Diagnostics */}
+        <Card className="border-border/50 bg-card/60 backdrop-blur-md">
+          <CardHeader>
+            <CardTitle className="flex items-center text-sm font-bold uppercase tracking-wider">
+              <BrainCircuit className="mr-2 h-4 w-4" /> Diagnóstico Groq IA
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              La API KEY debe estar configurada en las variables de entorno del servidor. 
+              Usa este botón para verificar que el sistema puede comunicarse con Groq.
+            </p>
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={handleTestGroq} 
+              disabled={testingGroq}
+            >
+              {testingGroq ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Activity className="mr-2 h-4 w-4" />}
+              Probar conexión
+            </Button>
+            
+            {groqStatus && (
+              <div className={cn(
+                "p-3 rounded-lg border text-xs",
+                groqStatus.connected ? "bg-green-500/10 border-green-500/20 text-green-700" : "bg-destructive/10 border-destructive/20 text-destructive"
+              )}>
+                {groqStatus.connected ? (
+                  <div className="flex flex-col gap-1">
+                    <span className="font-bold flex items-center">✅ Conectado</span>
+                    <span className="opacity-70">Modelo: {groqStatus.model}</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    <span className="font-bold">❌ Error</span>
+                    <span className="opacity-70">{groqStatus.error}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* System Information */}
+        <Card className="border-border/50 bg-card/60 backdrop-blur-md md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center text-sm font-bold uppercase tracking-wider">
+              <Info className="mr-2 h-4 w-4" /> Información del Sistema
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase text-muted-foreground font-bold">Personal Activo</span>
+                <div className="text-lg font-bold">{systemStats.staff.total}</div>
+                <p className="text-[10px] opacity-60">
+                  {systemStats.staff.aux}A / {systemStats.staff.tra}T / {systemStats.staff.ges}G
+                </p>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase text-muted-foreground font-bold">Periodos {activeYear}</span>
+                <div className="text-lg font-bold">{systemStats.periods}</div>
+                <p className="text-[10px] opacity-60">Semanas generadas</p>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase text-muted-foreground font-bold">Guardias Cubiertas</span>
+                <div className="text-lg font-bold">{systemStats.assignments.complete}/{systemStats.assignments.total}</div>
+                <Progress value={(systemStats.assignments.complete / systemStats.assignments.total) * 100} className="h-1 mt-1" />
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase text-muted-foreground font-bold">Base de Datos</span>
+                <div className="text-lg font-bold">Ok</div>
+                <p className="text-[10px] opacity-60">
+                  {systemStats.holidays} Festivos / {systemStats.vacations} Vacas.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

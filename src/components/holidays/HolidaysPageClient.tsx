@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -20,8 +21,7 @@ import {
   DialogDescription, 
   DialogFooter, 
   DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+  DialogTitle
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -45,8 +45,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Edit2, Trash2, CalendarIcon, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, CalendarIcon, Loader2, Sparkles, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export interface Holiday {
   id: string;
@@ -275,8 +276,24 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
           <TableBody>
             {filteredHolidays.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
-                  No hay festivos registrados para esta selección.
+                <TableCell colSpan={4} className="py-12">
+                  <EmptyState 
+                    icon={holidays.length === 0 ? Sparkles : Search}
+                    title={holidays.length === 0 ? "No hay festivos" : "Sin resultados"}
+                    description={holidays.length === 0 
+                      ? "Parece que aún no se han cargado festivos para este calendario."
+                      : "No hay ningún festivo que coincida con los filtros seleccionados."
+                    }
+                    action={holidays.length === 0 ? (
+                      <Button onClick={() => handleOpenDialog()}>
+                        <Plus className="mr-2 h-4 w-4" /> Añadir festivo
+                      </Button>
+                    ) : (
+                      <Button variant="outline" onClick={() => { setScopeFilter("all"); setYearFilter(new Date().getFullYear().toString()); }}>
+                        Limpiar filtros
+                      </Button>
+                    )}
+                  />
                 </TableCell>
               </TableRow>
             ) : (

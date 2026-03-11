@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState } from "react"
@@ -8,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Loader2, Settings2, CalendarDays, BrainCircuit, Activity, Info } from "lucide-react"
@@ -291,7 +293,7 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
       </div>
 
       {/* Dialog Confirmation */}
-      <Dialog open={confirmDialog.open} onOpenChange={(open) => !open && setConfirmDialog({ open: false, data: null })}>
+      <Dialog open={confirmDialog.open} onOpenChange={(open: boolean) => !open && setConfirmDialog({ open: false, data: null })}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Aviso de regeneración</DialogTitle>

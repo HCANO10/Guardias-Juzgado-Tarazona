@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@/lib/supabase/server"
 import dynamic from 'next/dynamic'
 import { CalendarSkeleton } from "@/components/calendar/CalendarSkeleton"

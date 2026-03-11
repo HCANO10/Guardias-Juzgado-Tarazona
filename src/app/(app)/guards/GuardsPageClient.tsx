@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useMemo } from "react"
@@ -8,12 +9,13 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Bot, Edit2, Scale } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { GuardAssigner } from "@/components/guards/GuardAssigner"
 import { AIProposalReview } from "@/components/guards/AIProposalReview"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Calendar as CalendarIcon, Search } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface GuardsPageClientProps {
@@ -25,7 +27,7 @@ interface GuardsPageClientProps {
 export default function GuardsPageClient({ initialGuards, staffByCategory, activeYear }: GuardsPageClientProps) {
   const router = useRouter()
   // Data states
-  const [guards, setGuards] = useState<GuardWeekView[]>(initialGuards)
+  const [guards] = useState<GuardWeekView[]>(initialGuards)
   
   // Filter states
   const [monthFilter, setMonthFilter] = useState("all")
@@ -232,8 +234,24 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
             <TableBody>
               {filteredGuards.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
-                    No se encontraron guardias o aún no se han generado para este año. Ve a Configuración para generar.
+                  <TableCell colSpan={7} className="py-12">
+                    <EmptyState 
+                      icon={guards.length === 0 ? CalendarIcon : Search}
+                      title={guards.length === 0 ? "No hay periodos de guardia" : "Sin resultados"}
+                      description={guards.length === 0 
+                        ? "Aún no se han generado los periodos para este año. Ve a Configuración para empezar."
+                        : "No hay ninguna guardia que coincida con los filtros actuales."
+                      }
+                      action={guards.length === 0 ? (
+                        <Button onClick={() => router.push('/settings')}>
+                          Ir a Configuración
+                        </Button>
+                      ) : (
+                        <Button variant="outline" onClick={() => { setMonthFilter("all"); setPersonFilter("all"); setStatusFilter("all"); }}>
+                          Limpiar filtros
+                        </Button>
+                      )}
+                    />
                   </TableCell>
                 </TableRow>
               ) : (

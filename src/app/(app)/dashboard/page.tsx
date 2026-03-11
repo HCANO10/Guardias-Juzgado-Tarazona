@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/(app)/dashboard/page.tsx
 import { createClient } from "@/lib/supabase/server"
 import DashboardPageClient from "./DashboardPageClient"

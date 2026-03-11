@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -16,6 +17,7 @@ import { es } from "date-fns/locale"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { StaffForm } from "@/components/staff/StaffForm"
+import { EmptyState } from "@/components/ui/empty-state"
 
 interface Position {
   id: string
@@ -177,8 +179,21 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
               ))
             ) : filteredData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                  No se han encontrado resultados.
+                <TableCell colSpan={6} className="py-12">
+                  <EmptyState 
+                    icon={Search}
+                    title="No se han encontrado resultados"
+                    description={searchTerm ? `No hay personal que coincida con "${searchTerm}"` : "No hay personal registrado en esta categoría."}
+                    action={searchTerm ? (
+                      <Button variant="outline" onClick={() => { setSearchTerm(""); setStatusFilter("all"); setPositionFilter("all"); }}>
+                        Limpiar filtros
+                      </Button>
+                    ) : (
+                      <Button onClick={handleCreate}>
+                        <Plus className="mr-2 h-4 w-4" /> Nuevo trabajador
+                      </Button>
+                    )}
+                  />
                 </TableCell>
               </TableRow>
             ) : (

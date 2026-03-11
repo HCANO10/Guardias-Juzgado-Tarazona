@@ -17,8 +17,7 @@ export function generateGuardPeriods(year: number): GuardPeriod[] {
   const periods: GuardPeriod[] = [];
 
   // Encontrar el primer viernes del año (o el más cercano al 1 de enero)
-  const janFirst = new Date(year, 0, 1); // 1 de enero
-  let firstFriday = new Date(janFirst);
+  const firstFriday = new Date(year, 0, 1);
 
   // Avanzar hasta el primer viernes (día 5 = viernes)
   while (firstFriday.getDay() !== 5) {
@@ -31,7 +30,7 @@ export function generateGuardPeriods(year: number): GuardPeriod[] {
     firstFriday.setDate(firstFriday.getDate() - 7);
   }
 
-  let currentFriday = new Date(firstFriday);
+  const currentFriday = new Date(firstFriday);
   let weekNumber = 1;
 
   // Generar periodos hasta cubrir todo el año

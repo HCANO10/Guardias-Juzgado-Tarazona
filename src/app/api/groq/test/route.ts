@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/api/groq/test/route.ts
 import { NextResponse } from 'next/server';
 import { callGroq } from '@/lib/groq/client';

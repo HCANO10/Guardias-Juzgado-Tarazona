@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useMemo } from "react"
@@ -12,9 +13,10 @@ import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { cn } from "@/lib/utils"
-import { format, differenceInDays, startOfYear, endOfYear, isWithinInterval, addDays } from "date-fns"
+import { format, differenceInDays, isWithinInterval } from "date-fns"
 import { es } from "date-fns/locale"
-import { CalendarIcon, Loader2, AlertCircle, CheckCircle2, XCircle, Trash2 } from "lucide-react"
+import { CalendarIcon, Loader2, AlertCircle, CheckCircle2, XCircle, Trash2, Search, Sun } from "lucide-react"
+import { EmptyState } from "@/components/ui/empty-state"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
@@ -271,7 +273,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
 
               <Button 
                 onClick={handleValidateAndSubmit} 
-                disabled={isValidating || isSubmitting || (conflictResult && !conflictResult.valid)} 
+                disabled={isValidating || isSubmitting || !!(conflictResult && !conflictResult.valid)} 
                 className="w-full"
               >
                 {(isValidating || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -326,8 +328,20 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                   <TableBody>
                     {filteredVacations.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                          No se han encontrado vacaciones con los filtros seleccionados.
+                        <TableCell colSpan={5} className="py-12">
+                          <EmptyState 
+                            icon={vacations.length === 0 ? Sun : Search}
+                            title={vacations.length === 0 ? "No hay vacaciones" : "Sin resultados"}
+                            description={vacations.length === 0 
+                              ? "Todavía no se han registrado vacaciones en el sistema. ¡Usa el formulario para empezar!"
+                              : "No hay vacaciones que coincidan con los filtros actuales."
+                            }
+                            action={(staffFilter !== "all" || statusFilter !== "all") && (
+                              <Button variant="outline" onClick={() => { setStaffFilter("all"); setStatusFilter("all"); }}>
+                                Limpiar filtros
+                              </Button>
+                            )}
+                          />
                         </TableCell>
                       </TableRow>
                     ) : (

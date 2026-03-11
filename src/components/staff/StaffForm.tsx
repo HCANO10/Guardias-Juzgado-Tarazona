@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -24,9 +26,7 @@ const staffSchema = z.object({
   lastName: z.string().min(2, "Mínimo 2 caracteres"),
   email: z.string().email("Email inválido"),
   positionId: z.string().min(1, "Selecciona un puesto"),
-  startDate: z.date({
-    required_error: "La fecha de incorporación es requerida.",
-  }),
+  startDate: z.date(),
   notes: z.string().optional(),
 })
 

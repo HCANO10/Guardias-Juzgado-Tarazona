@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,7 +8,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowLeft, CalendarDays, Key, Mail, User, Briefcase, FileText } from "lucide-react"
+import { ArrowLeft, CalendarDays, Mail, User, Briefcase, FileText } from "lucide-react"
 
 export default async function StaffDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient()

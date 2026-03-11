@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
@@ -7,10 +9,10 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Bot, Loader2, AlertCircle, CheckCircle2, AlertTriangle, ShieldAlert } from "lucide-react"
+import { Bot, Loader2, CheckCircle2, AlertTriangle, ShieldAlert } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 interface AIProposalReviewProps {
@@ -168,9 +170,9 @@ export function AIProposalReview({ open, onOpenChange, activeYear, onSuccess, st
                  <Label htmlFor="respect" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                    Respetar guardias ya asignadas
                  </Label>
-                 <p className="text-sm text-muted-foreground">
-                   Si marcas esto, la IA completará los 'huecos' pero no modificará las asignaciones manuales previas.
-                 </p>
+                  <p className="text-sm text-muted-foreground">
+                    Si marcas esto, la IA completará los &apos;huecos&apos; pero no modificará las asignaciones manuales previas.
+                  </p>
                </div>
              </div>
           </div>

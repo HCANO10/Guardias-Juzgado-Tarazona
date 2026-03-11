@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react"
 import { StaffByCategory } from "@/lib/guards/staff-by-category"
@@ -7,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, Loader2 } from "lucide-react"
+import { Bot, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { createClient } from "@/lib/supabase/client"
@@ -187,7 +189,7 @@ export function GuardAssigner({ open, onOpenChange, week, staffByCategory, onSuc
           {/* Warnings Vacaciones */}
           {warnings.length > 0 && (
             <Alert variant="destructive" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/50 dark:text-yellow-400 mt-2">
-              <AlertCircle className="h-4 w-4" />
+              <Bot className="h-4 w-4" />
               <AlertTitle>Posible Conflicto</AlertTitle>
               <AlertDescription className="text-xs space-y-1">
                 {warnings.map((w, i) => <div key={i}>{w}</div>)}

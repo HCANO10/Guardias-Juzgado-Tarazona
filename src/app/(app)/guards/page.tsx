@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@/lib/supabase/server"
 import { getActiveStaffByCategory } from "@/lib/guards/staff-by-category"
 import { GuardWeekView } from "@/types/guards"

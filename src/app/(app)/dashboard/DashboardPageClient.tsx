@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useMemo } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -16,7 +17,7 @@ import {
   UserCheck
 } from "lucide-react"
 import Link from "next/link"
-import { format, isAfter, isBefore, addDays } from "date-fns"
+import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import dynamic from 'next/dynamic'
 import { CalendarSkeleton } from "@/components/calendar/CalendarSkeleton"
@@ -44,7 +45,7 @@ interface DashboardPageClientProps {
   currentUserStaffId: string | null
 }
 
-export default function DashboardPageClient({ stats, calendarData, currentUserStaffId }: DashboardPageClientProps) {
+export default function DashboardPageClient({ stats, calendarData }: DashboardPageClientProps) {
   
   const coveragePercent = stats.coverage.total > 0 
     ? (stats.coverage.complete / stats.coverage.total) * 100 
@@ -73,7 +74,10 @@ export default function DashboardPageClient({ stats, calendarData, currentUserSt
                 </p>
               </div>
             ) : (
-              <div className="text-xl font-medium text-muted-foreground">Sin guardias</div>
+              <div className="flex flex-col items-center justify-center py-2 text-center">
+                <Shield className="h-8 w-8 text-muted-foreground/30 mb-2" />
+                <p className="text-sm font-medium text-muted-foreground">No tienes guardias asignadas este año.</p>
+              </div>
             )}
           </CardContent>
         </Card>

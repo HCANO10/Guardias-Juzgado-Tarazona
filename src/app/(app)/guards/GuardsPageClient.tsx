@@ -13,6 +13,7 @@ import { Bot, Edit2, Scale } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { GuardAssigner } from "@/components/guards/GuardAssigner"
+import { AIProposalReview } from "@/components/guards/AIProposalReview"
 import { useRouter } from "next/navigation"
 
 interface GuardsPageClientProps {
@@ -34,6 +35,9 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
   // Modal state
   const [assignerOpen, setAssignerOpen] = useState(false)
   const [selectedWeek, setSelectedWeek] = useState<GuardWeekView | null>(null)
+  
+  // AI Modal state
+  const [aiReviewOpen, setAiReviewOpen] = useState(false)
 
   // Equidad calculation function
   const calculateEquidad = (categoryId: 'auxilio' | 'tramitador' | 'gestor') => {
@@ -106,18 +110,9 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Gestión de Guardias {activeYear}</h2>
         <div className="flex items-center space-x-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button disabled className="bg-primary/50 cursor-not-allowed">
-                  <Bot className="mr-2 h-4 w-4" /> Generar guardias con IA
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Disponible en la siguiente fase</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Button onClick={() => setAiReviewOpen(true)} className="bg-primary shadow-sm hover:shadow-md transition-shadow">
+            <Bot className="mr-2 h-4 w-4" /> Generar guardias con IA
+          </Button>
         </div>
       </div>
 
@@ -293,6 +288,15 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
         week={selectedWeek} 
         staffByCategory={staffByCategory} 
         onSuccess={handleSuccessSave} 
+      />
+
+      <AIProposalReview
+        open={aiReviewOpen}
+        onOpenChange={setAiReviewOpen}
+        activeYear={activeYear}
+        onSuccess={handleSuccessSave}
+        staffByCategory={staffByCategory}
+        weeksCount={guards.length}
       />
     </div>
   )

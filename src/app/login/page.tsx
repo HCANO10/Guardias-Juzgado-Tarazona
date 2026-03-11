@@ -140,10 +140,11 @@ export default function LoginPage() {
 
       {/* LADO DERECHO - IMAGEN */}
       <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
-        {/* Imagen de fondo */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('/juzgado-tarazona.png')" }}
+        {/* Imagen real del juzgado */}
+        <img
+          src="/juzgado-tarazona.jpg"
+          alt="Juzgado de Tarazona"
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
         {/* Overlay con gradiente */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />

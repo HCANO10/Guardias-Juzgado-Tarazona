@@ -1,8 +1,15 @@
-export default function HolidaysPage() {
+import { createClient } from "@/lib/supabase/server"
+import HolidaysPageClient from "@/components/holidays/HolidaysPageClient"
+
+export default async function HolidaysPage() {
+  const supabase = await createClient()
+
+  const { data: holidays } = await supabase
+    .from('holidays')
+    .select('*')
+    .order('date', { ascending: true })
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Festivos</h1>
-      <p>Próximamente</p>
-    </div>
+    <HolidaysPageClient initialHolidays={holidays || []} />
   )
 }

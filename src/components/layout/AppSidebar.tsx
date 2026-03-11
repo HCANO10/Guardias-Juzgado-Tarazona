@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Calendar, Users, Shield, Palmtree, Star, Settings, LogOut } from "lucide-react"
+import { Home, Calendar, Users, Shield, Palmtree, Star, Settings, LogOut, UserCircle } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
@@ -22,6 +22,7 @@ const items = [
   { title: "Guardias", url: "/guards", icon: Shield },
   { title: "Vacaciones", url: "/vacations", icon: Palmtree },
   { title: "Festivos", url: "/holidays", icon: Star },
+  { title: "Mi Perfil", url: "/profile", icon: UserCircle },
   { title: "Configuración", url: "/settings", icon: Settings },
 ]
 
@@ -66,9 +67,10 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
 
       <SidebarFooter className="border-t p-4">
         {userEmail && (
-          <div className="text-sm font-medium mb-2 truncate px-2 text-muted-foreground" title={userEmail}>
-            {userEmail}
-          </div>
+          <a href="/profile" className="block mb-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors">
+            <div className="text-xs text-muted-foreground">Conectado como</div>
+            <div className="text-sm font-medium truncate" title={userEmail}>{userEmail}</div>
+          </a>
         )}
         <SidebarMenu>
           <SidebarMenuItem>

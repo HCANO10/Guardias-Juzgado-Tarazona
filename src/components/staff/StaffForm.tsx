@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -27,6 +26,7 @@ const staffSchema = z.object({
   email: z.string().email("Email inválido"),
   positionId: z.string().min(1, "Selecciona un puesto"),
   startDate: z.date(),
+  password: z.string().optional(),
   notes: z.string().optional(),
 })
 
@@ -59,17 +59,16 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
       lastName: initialData?.last_name || "",
       email: initialData?.email || "",
       positionId: initialData?.position_id || "",
-      startDate: initialData?.start_date ? new Date(initialData.start_date) : new Date(),
+      startDate: initialData?.start_date ? new Date(initialData.start_date + 'T00:00:00') : new Date(),
+      password: "",
       notes: initialData?.notes || "",
     },
   })
 
   async function onSubmit(data: StaffFormValues) {
     setLoading(true)
-
     try {
       if (isEditing) {
-        // Actualizar registro existente
         const { error } = await supabase
           .from('staff')
           .update({
@@ -77,40 +76,44 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
             last_name: data.lastName,
             position_id: data.positionId,
             start_date: format(data.startDate, 'yyyy-MM-dd'),
-            notes: data.notes || null
-            // No actualizamos el email aquí por implicaciones en Auth.
+            notes: data.notes || null,
           })
           .eq('id', initialData.id)
 
         if (error) throw error
-
-        toast({ title: "Datos actualizados correctamente" })
+        toast({ title: "✅ Datos actualizados correctamente" })
       } else {
-        // Crear nuevo
         const response = await fetch('/api/staff/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firstName: data.firstName,
-            lastName: data.lastName,
+            first_name: data.firstName,
+            last_name: data.lastName,
             email: data.email,
-            positionId: data.positionId,
-            startDate: format(data.startDate, 'yyyy-MM-dd'),
-            notes: data.notes
+            position_id: data.positionId,
+            start_date: format(data.startDate, 'yyyy-MM-dd'),
+            password: data.password || undefined,
+            notes: data.notes || undefined,
           }),
         })
 
         const result = await response.json()
+        if (response.status === 409) {
+          throw new Error(`Ya existe un usuario con el email ${data.email}`)
+        }
         if (!response.ok) throw new Error(result.error || 'Error al crear trabajador')
 
-        toast({ title: "Trabajador creado", description: "Se ha enviado invitación por email." })
+        toast({
+          title: "✅ Usuario creado",
+          description: result.message || `${data.firstName} ${data.lastName} ya puede acceder a la aplicación.`,
+        })
       }
 
       onSuccess()
       onOpenChange(false)
       form.reset()
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message })
+      toast({ variant: "destructive", title: "❌ Error", description: error.message })
     } finally {
       setLoading(false)
     }
@@ -118,11 +121,13 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Editar Trabajador' : 'Nuevo Trabajador'}</DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Modifica los datos del personal.' : 'Añade un nuevo miembro al equipo. Se le enviará una invitación.'}
+            {isEditing
+              ? 'Modifica los datos del trabajador.'
+              : 'Añade un nuevo miembro al equipo. Se creará su cuenta de acceso inmediatamente.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -134,9 +139,9 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
                 name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nombre</FormLabel>
+                    <FormLabel>Nombre *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: Juan" {...field} />
+                      <Input placeholder="Ej: Cristina" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -147,9 +152,9 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
                 name="lastName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Apellidos</FormLabel>
+                    <FormLabel>Apellidos *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: Pérez" {...field} />
+                      <Input placeholder="Ej: García López" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -162,9 +167,9 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email * {isEditing && <span className="text-muted-foreground text-xs">(no editable)</span>}</FormLabel>
                   <FormControl>
-                    <Input placeholder="correo@juzgado.es" {...field} disabled={isEditing} />
+                    <Input type="email" placeholder="correo@juzgado.es" {...field} disabled={isEditing} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -176,7 +181,7 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
               name="positionId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Puesto de Trabajo</FormLabel>
+                  <FormLabel>Puesto de Trabajo *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -201,7 +206,7 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
               name="startDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Fecha de incorporación</FormLabel>
+                  <FormLabel>Fecha de incorporación *</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -229,14 +234,33 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
               )}
             />
 
+            {!isEditing && (
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Dejar vacío para usar la contraseña por defecto" {...field} />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Si no se indica, se usará la contraseña por defecto: <code className="bg-muted px-1 rounded">Tarazona123456</code>
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             <FormField
               control={form.control}
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notas (Opcional)</FormLabel>
+                  <FormLabel>Notas <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Ej: Sustitución por maternidad" {...field} />
+                    <Textarea placeholder="Ej: Interina sustitución maternidad hasta septiembre 2026" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -249,7 +273,7 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
               </Button>
               <Button type="submit" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isEditing ? 'Guardar Cambios' : 'Crear Trabajador'}
+                {isEditing ? 'Guardar Cambios' : 'Crear usuario'}
               </Button>
             </div>
           </form>

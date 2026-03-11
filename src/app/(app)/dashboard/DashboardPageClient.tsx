@@ -4,10 +4,10 @@ import { useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/badge" // Actually want button but user asked for badge? No, I'll use shadcn Button/Card
+import { Button } from "@/components/ui/button"
 import { 
   Shield, 
-  PalmTree, 
+  Palmtree, 
   Users, 
   ShieldCheck, 
   AlertTriangle, 
@@ -82,7 +82,7 @@ export default function DashboardPageClient({ stats, calendarData, currentUserSt
         <Card className="border-border/50 bg-card/60 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Vacaciones {new Date().getFullYear()}</CardTitle>
-            <PalmTree className="h-4 w-4 text-green-500" />
+            <Palmtree className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.vacationDays} días</div>
@@ -133,7 +133,7 @@ export default function DashboardPageClient({ stats, calendarData, currentUserSt
       {stats.alerts.length > 0 && (
         <div className="space-y-3">
           {stats.alerts.map((alert, i) => (
-            <Alert key={i} variant="warning" className="bg-yellow-500/10 border-yellow-500/30 text-yellow-800 dark:text-yellow-200">
+            <Alert key={i} variant="default" className="bg-yellow-500/10 border-yellow-500/30 text-yellow-800 dark:text-yellow-200">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Falta cobertura en próxima guardia</AlertTitle>
               <AlertDescription className="text-xs">
@@ -189,7 +189,7 @@ export default function DashboardPageClient({ stats, calendarData, currentUserSt
               </Link>
               <Link href="/vacations" className="w-full">
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10 hover:bg-green-500/20 transition-colors border border-green-500/20">
-                  <PalmTree className="h-5 w-5 text-green-600" />
+                  <Palmtree className="h-5 w-5 text-green-600" />
                   <span className="text-sm font-medium">Solicitar vacaciones</span>
                 </div>
               </Link>

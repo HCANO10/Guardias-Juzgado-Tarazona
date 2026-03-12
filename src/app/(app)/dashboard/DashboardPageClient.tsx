@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { 
   Shield, 
   Palmtree, 
@@ -46,7 +48,24 @@ interface DashboardPageClientProps {
 }
 
 export default function DashboardPageClient({ stats, calendarData }: DashboardPageClientProps) {
-  
+  const supabase = createClient()
+  const [currentUserStaffId, setCurrentUserStaffId] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchCurrentUser() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: staff } = await supabase
+          .from('staff')
+          .select('id')
+          .eq('auth_user_id', user.id)
+          .single()
+        if (staff) setCurrentUserStaffId(staff.id)
+      }
+    }
+    fetchCurrentUser()
+  }, [supabase])
+
   const coveragePercent = stats.coverage.total > 0 
     ? (stats.coverage.complete / stats.coverage.total) * 100 
     : 0
@@ -59,7 +78,7 @@ export default function DashboardPageClient({ stats, calendarData }: DashboardPa
   }, [])
 
   const currentUser = useMemo(() => {
-    if (!currentUserStaffId) return null
+    if (!currentUserStaffId || !calendarData.staff) return null
     return calendarData.staff.find((s: any) => s.id === currentUserStaffId)
   }, [calendarData.staff, currentUserStaffId])
 

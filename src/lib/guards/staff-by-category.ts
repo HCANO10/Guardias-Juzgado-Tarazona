@@ -25,6 +25,7 @@ export async function getActiveStaffByCategory(
       positions!inner(guard_role)
     `)
     .eq('is_active', true)
+    .eq('is_guard_eligible', true)
     .not('positions.guard_role', 'is', null);
 
   if (error) throw error;

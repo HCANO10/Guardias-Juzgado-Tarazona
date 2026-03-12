@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
       .from('staff')
       .select('id, first_name, last_name, positions!inner(guard_role)')
       .eq('is_active', true)
+      .eq('is_guard_eligible', true)
       .not('positions.guard_role', 'is', null);
 
     if (staffError) throw new Error("Error obteniendo personal activo");

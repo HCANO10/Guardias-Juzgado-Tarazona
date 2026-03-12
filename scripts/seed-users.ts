@@ -1,130 +1,163 @@
-// scripts/seed-users.ts
-// Ejecutar UNA VEZ después de las migraciones para crear usuarios Auth y vincularlos con staff
-// Uso: npx tsx scripts/seed-users.ts
-//
-// REQUISITOS PREVIOS:
-// - .env.local debe tener:
-//   NEXT_PUBLIC_SUPABASE_URL=https://vwgvrjsxrcknycqtkoeq.supabase.co
-//   SUPABASE_SERVICE_ROLE_KEY=<tu service role key — obtener de Supabase Dashboard > Settings > API>
-//
-// IMPORTANTE: Sustituir emails y apellidos provisionales por los reales antes de ejecutar
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-import 'dotenv/config'; // Para leer .env.local
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// Cliente con Service Role para crear usuarios (SOLO en scripts de servidor)
-const supabase = createClient(supabaseUrl, serviceRoleKey, {
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error('❌ Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local');
+  process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false }
 });
 
-const DEFAULT_PASSWORD = 'Tarazona123456';
-
-interface StaffMember {
+interface UserSeed {
   first_name: string;
   last_name: string;
   email: string;
   position_name: string;
 }
 
-// Personal real del Juzgado de Tarazona
-const staffMembers: StaffMember[] = [
-  // Auxilios Judiciales
-  { first_name: 'Cristina', last_name: 'Auxilio', email: 'cristina.auxilio@juzgado-tarazona.es', position_name: 'Auxilio Judicial' },
-  { first_name: 'Natalia', last_name: 'Auxilio', email: 'natalia.auxilio@juzgado-tarazona.es', position_name: 'Auxilio Judicial' },
-  // Tramitadores/as Procesales
-  { first_name: 'Iris', last_name: 'Tramitadora', email: 'iris.tramitadora@juzgado-tarazona.es', position_name: 'Tramitador/a Procesal' },
-  { first_name: 'Belén', last_name: 'Tramitadora', email: 'belen.tramitadora@juzgado-tarazona.es', position_name: 'Tramitador/a Procesal' },
-  { first_name: 'Luis', last_name: 'Tramitador', email: 'luis.tramitador@juzgado-tarazona.es', position_name: 'Tramitador/a Procesal' },
-  { first_name: 'Irene', last_name: 'Tramitadora', email: 'irene.tramitadora@juzgado-tarazona.es', position_name: 'Tramitador/a Procesal' },
-  // Gestoras Procesales
-  { first_name: 'Mónica', last_name: 'Gestora', email: 'monica.gestora@juzgado-tarazona.es', position_name: 'Gestor/a Procesal' },
-  { first_name: 'Rocío', last_name: 'Gestora', email: 'rocio.gestora@juzgado-tarazona.es', position_name: 'Gestor/a Procesal' },
-  { first_name: 'Valeria', last_name: 'Gestora', email: 'valeria.gestora@juzgado-tarazona.es', position_name: 'Gestor/a Procesal' },
+const USERS: UserSeed[] = [
+  // Auxilio Judicial
+  { first_name: 'Cristina', last_name: 'Auxilio', email: 'cristina.test@juzgado-tarazona.local', position_name: 'Auxilio Judicial' },
+  { first_name: 'Natalia', last_name: 'Auxilio', email: 'natalia.test@juzgado-tarazona.local', position_name: 'Auxilio Judicial' },
+  // Tramitador/a Procesal
+  { first_name: 'Iris', last_name: 'Tramitadora', email: 'iris.test@juzgado-tarazona.local', position_name: 'Tramitador/a Procesal' },
+  { first_name: 'Belén', last_name: 'Tramitadora', email: 'belen.test@juzgado-tarazona.local', position_name: 'Tramitador/a Procesal' },
+  { first_name: 'Luis', last_name: 'Tramitador', email: 'luis.test@juzgado-tarazona.local', position_name: 'Tramitador/a Procesal' },
+  { first_name: 'Irene', last_name: 'Tramitadora', email: 'irene.test@juzgado-tarazona.local', position_name: 'Tramitador/a Procesal' },
+  // Gestor/a Procesal
+  { first_name: 'Mónica', last_name: 'Gestora', email: 'monica.test@juzgado-tarazona.local', position_name: 'Gestor/a Procesal' },
+  { first_name: 'Rocío', last_name: 'Gestora', email: 'rocio.test@juzgado-tarazona.local', position_name: 'Gestor/a Procesal' },
+  { first_name: 'Valeria', last_name: 'Gestora', email: 'valeria.test@juzgado-tarazona.local', position_name: 'Gestor/a Procesal' },
 ];
 
-async function seedUsers() {
-  console.log('🏛️ Creando usuarios del Juzgado de Tarazona...\n');
+async function main() {
+  console.log('🚀 Seed script starting...\n');
 
-  // 1. Obtener los puestos de trabajo
-  const { data: positions, error: posError } = await supabase
+  // 1. Fetch position UUIDs
+  const { data: positions, error: posErr } = await supabase
     .from('positions')
     .select('id, name');
 
-  if (posError || !positions) {
-    console.error('❌ Error obteniendo puestos:', posError);
-    return;
+  if (posErr || !positions) {
+    console.error('❌ Error fetching positions:', posErr);
+    process.exit(1);
   }
 
-  const positionMap = new Map(positions.map(p => [p.name, p.id]));
+  const positionMap = new Map<string, string>();
+  positions.forEach(p => positionMap.set(p.name, p.id));
 
-  for (const member of staffMembers) {
-    console.log(`👤 Procesando: ${member.first_name} ${member.last_name} (${member.position_name})`);
+  console.log('📋 Positions found:');
+  positionMap.forEach((id, name) => console.log(`   ${name} → ${id}`));
+  console.log('');
 
-    // 2. Crear usuario en Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: member.email,
-      password: DEFAULT_PASSWORD,
-      email_confirm: true, // Confirmar email automáticamente (no necesitan verificar)
+  // 2. Create users
+  let created = 0;
+  let skipped = 0;
+
+  for (const user of USERS) {
+    const positionId = positionMap.get(user.position_name);
+    if (!positionId) {
+      console.error(`❌ Position "${user.position_name}" not found — skipping ${user.email}`);
+      skipped++;
+      continue;
+    }
+
+    // Create auth user
+    const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
+      email: user.email,
+      password: 'Tarazona123456',
+      email_confirm: true,
+      user_metadata: {
+        first_name: user.first_name,
+        last_name: user.last_name,
+      }
     });
 
-    if (authError) {
-      console.error(`  ❌ Error Auth: ${authError.message}`);
-      // Si el usuario ya existe, intentar obtener su ID
-      if (authError.message.includes('already')) {
-        console.log(`  ℹ️ El usuario ya existe, intentando vincular...`);
-        const { data: existingUsers } = await supabase.auth.admin.listUsers();
-        const existing = existingUsers?.users?.find(u => u.email === member.email);
-        if (existing) {
-          await insertStaff(member, existing.id, positionMap);
-        }
+    if (authErr) {
+      if (authErr.message?.includes('already been registered') || authErr.message?.includes('already exists')) {
+        console.log(`⏭️  ${user.first_name} ${user.last_name} (${user.email}) — ya existe, skipping`);
+        skipped++;
+        continue;
       }
+      console.error(`❌ Auth error for ${user.email}:`, authErr.message);
+      skipped++;
       continue;
     }
 
-    if (!authData.user) {
-      console.error(`  ❌ No se pudo crear el usuario Auth`);
+    const authUserId = authData.user.id;
+
+    // Insert staff record
+    const { error: staffErr } = await supabase
+      .from('staff')
+      .insert({
+        auth_user_id: authUserId,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        position_id: positionId,
+        role: 'worker',
+        is_active: true,
+        is_guard_eligible: true,
+        start_date: '2025-01-01',
+      });
+
+    if (staffErr) {
+      console.error(`❌ Staff insert error for ${user.email}:`, staffErr.message);
+      skipped++;
       continue;
     }
 
-    console.log(`  ✅ Usuario Auth creado: ${authData.user.id}`);
-
-    // 3. Insertar en tabla staff
-    await insertStaff(member, authData.user.id, positionMap);
+    console.log(`✅ ${user.first_name} ${user.last_name} (${user.email}) — created`);
+    created++;
   }
 
-  console.log('\n🎉 Seed completado');
-  console.log(`📧 Todos los usuarios pueden acceder con su email y contraseña: ${DEFAULT_PASSWORD}`);
-}
+  console.log(`\n📊 Results: ${created} created, ${skipped} skipped out of ${USERS.length}\n`);
 
-async function insertStaff(
-  member: StaffMember,
-  authUserId: string,
-  positionMap: Map<string, string>
-) {
-  const positionId = positionMap.get(member.position_name);
-  if (!positionId) {
-    console.error(`  ❌ Puesto no encontrado: ${member.position_name}`);
-    return;
-  }
+  // 3. Verification query
+  const { data: verification, error: verErr } = await supabase
+    .from('staff')
+    .select('first_name, last_name, email, role, is_guard_eligible, positions(name)')
+    .order('first_name', { ascending: true });
 
-  const { error: staffError } = await supabase.from('staff').upsert({
-    auth_user_id: authUserId,
-    first_name: member.first_name,
-    last_name: member.last_name,
-    email: member.email,
-    position_id: positionId,
-    is_active: true,
-    start_date: '2026-01-01',
-  }, { onConflict: 'email' });
-
-  if (staffError) {
-    console.error(`  ❌ Error Staff: ${staffError.message}`);
+  if (verErr) {
+    console.error('❌ Verification query error:', verErr);
   } else {
-    console.log(`  ✅ Staff insertado: ${member.first_name} → ${member.position_name}`);
+    console.log('📋 Final staff table:');
+    console.log('─'.repeat(100));
+    console.log(
+      'Name'.padEnd(25) +
+      'Email'.padEnd(40) +
+      'Position'.padEnd(25) +
+      'Role'.padEnd(12) +
+      'Guard?'
+    );
+    console.log('─'.repeat(100));
+    verification?.forEach((s: any) => {
+      console.log(
+        `${s.first_name} ${s.last_name}`.padEnd(25) +
+        s.email.padEnd(40) +
+        ((s.positions as any)?.name || 'N/A').padEnd(25) +
+        s.role.padEnd(12) +
+        (s.is_guard_eligible ? '✅' : '❌')
+      );
+    });
+    console.log('─'.repeat(100));
+    console.log(`Total: ${verification?.length} staff members`);
   }
+
+  console.log('\n🎉 Seed complete!');
 }
 
-seedUsers();
+main().catch(err => {
+  console.error('Fatal error:', err);
+  process.exit(1);
+});

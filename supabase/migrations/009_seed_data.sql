@@ -27,11 +27,17 @@ INSERT INTO holidays (date, name, scope, year) VALUES
   ('2026-05-01', 'Fiesta del Trabajo', 'nacional', 2026),
   ('2026-08-15', 'Asunción de la Virgen', 'nacional', 2026),
   ('2026-10-12', 'Fiesta Nacional de España', 'nacional', 2026),
-  ('2026-11-01', 'Todos los Santos', 'nacional', 2026),
-  ('2026-12-06', 'Día de la Constitución', 'nacional', 2026),
+  ('2026-11-02', 'Todos los Santos (trasladado del domingo)', 'nacional', 2026),
+  ('2026-12-07', 'Día de la Constitución (trasladado del domingo)', 'nacional', 2026),
   ('2026-12-08', 'Inmaculada Concepción', 'nacional', 2026),
   ('2026-12-25', 'Natividad del Señor', 'nacional', 2026);
 
 -- === FESTIVO ARAGÓN ===
 INSERT INTO holidays (date, name, scope, year) VALUES
   ('2026-04-23', 'San Jorge / Día de Aragón', 'aragon', 2026);
+
+-- === FESTIVOS LOCALES TARAZONA ===
+INSERT INTO holidays (date, name, scope, year) VALUES
+  ('2026-08-28', 'San Agustín (Fiestas de Tarazona)', 'tarazona', 2026),
+  ('2026-10-05', 'San Atilano (Patrón de Tarazona)', 'tarazona', 2026);
+

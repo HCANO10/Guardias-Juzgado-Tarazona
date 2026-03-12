@@ -58,10 +58,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // Headmaster-only routes
-  const headmasterRoutes = ['/staff', '/settings', '/activity']
+  const headmasterRoutes = ['/settings', '/activity']
   const isHeadmasterRoute = headmasterRoutes.some(route => 
     pathname === route || pathname.startsWith(route + '/')
-  )
+  ) || pathname.startsWith('/staff/') // Specific detail pages are still restricted
   
   if (isHeadmasterRoute && staff.role !== 'headmaster') {
     return NextResponse.redirect(new URL('/dashboard', request.url))

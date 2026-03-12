@@ -59,6 +59,7 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
       ]
     : [
         { title: "Dashboard", url: "/dashboard", icon: Home },
+        { title: "Personal", url: "/staff", icon: Users },
         { title: "Guardias", url: "/guards", icon: Shield },
         { title: "Vacaciones", url: "/vacations", icon: Palmtree },
         { title: "Festivos", url: "/holidays", icon: Star },

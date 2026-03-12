@@ -59,8 +59,32 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Verificar profile_completed
-  const profileCompleted = user.user_metadata?.profile_completed === true
+  // Verificar profile_completed (Prioridad: Cookie > Metadata > DB)
+  const profileStatusCookie = request.cookies.get('staff-profile-status')?.value
+  let profileCompleted = profileStatusCookie === 'true'
+
+  if (!profileStatusCookie) {
+    // Si no hay cookie, intentamos metadata
+    profileCompleted = user.user_metadata?.profile_completed === true
+    
+    // Si tampoco está en metadata, consultamos DB (último recurso)
+    if (!profileCompleted) {
+      const { data: staff } = await supabase
+        .from('staff')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single()
+      
+      profileCompleted = !!staff
+    }
+
+    // Guardar en cookie para futuras peticiones
+    supabaseResponse.cookies.set('staff-profile-status', profileCompleted ? 'true' : 'false', {
+      maxAge: 60 * 60 * 24 * 7, // 1 semana
+      path: '/',
+    })
+  }
+
   if (!profileCompleted) {
     return NextResponse.redirect(new URL('/auth/complete-profile', request.url))
   }

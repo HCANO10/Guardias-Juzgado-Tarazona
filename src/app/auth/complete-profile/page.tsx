@@ -68,10 +68,22 @@ export default function CompleteProfilePage() {
         return
       }
 
+      // Check DB for existing staff record (safety net)
+      const { data: staff } = await supabase
+        .from('staff')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single()
+      
+      if (staff) {
+        router.push('/dashboard')
+        return
+      }
+
       setIsCheckingProfile(false)
     }
     init()
-  }, [router, supabase.auth])
+  }, [router, supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -41,11 +41,7 @@ export async function POST(request: NextRequest) {
       .eq('auth_user_id', user.id)
       .single();
 
-    if (existingStaff) {
-      return NextResponse.json({ error: 'Ya tienes un perfil creado' }, { status: 409 });
-    }
-
-    // Usar normalizeStaffData para insertar datos coherentes
+    // Usar normalizeStaffData para los datos coherentes
     const staffData = normalizeStaffData({
       auth_user_id: user.id,
       first_name, last_name, second_last_name,
@@ -53,19 +49,36 @@ export async function POST(request: NextRequest) {
       phone, position_id, notes: null,
     });
 
-    const { data: insertedStaff, error: staffError } = await supabaseAdmin
-      .from('staff')
-      .insert(staffData)
-      .select('*, positions(name)')
-      .single();
+    let result;
+    if (existingStaff) {
+      // Actualizar si ya existe (idempotencia)
+      const { data: updatedStaff, error: updateError } = await supabaseAdmin
+        .from('staff')
+        .update(staffData)
+        .eq('id', existingStaff.id)
+        .select('*, positions(name)')
+        .single();
+      
+      if (updateError) throw updateError;
+      result = { success: true, staff: updatedStaff, updated: true };
+    } else {
+      // Insertar nuevo si no existe
+      const { data: insertedStaff, error: staffError } = await supabaseAdmin
+        .from('staff')
+        .insert(staffData)
+        .select('*, positions(name)')
+        .single();
 
-    if (staffError) throw staffError;
+      if (staffError) throw staffError;
+      result = { success: true, staff: insertedStaff, updated: false };
+    }
 
+    // Actualizar metadata de Supabase Auth
     await supabaseAdmin.auth.admin.updateUserById(user.id, {
       user_metadata: { ...user.user_metadata, profile_completed: true },
     });
 
-    return NextResponse.json({ success: true, staff: insertedStaff });
+    return NextResponse.json(result);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

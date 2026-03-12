@@ -67,24 +67,40 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
         { title: "Mi Perfil", url: "/profile", icon: UserCircle },
       ]
 
+  const userInitials = userEmail ? userEmail.substring(0, 2).toUpperCase() : "??"
+
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4 border-b">
-        <h2 className="text-lg font-bold tracking-tight text-primary">Guardias Tarazona</h2>
+    <Sidebar className="border-r border-sidebar-border bg-sidebar-background">
+      <SidebarHeader className="h-16 flex items-center px-6 border-b border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+            <Shield className="h-5 w-5" />
+          </div>
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Guardias</h2>
+        </div>
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="px-3 py-4">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {items.map((item) => {
-                const isActive = pathname.startsWith(item.url)
+                const isActive = pathname === item.url || pathname.startsWith(item.url + "/")
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-                      <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive} 
+                      className={`
+                        rounded-xl transition-all duration-200 h-10 px-3
+                        ${isActive 
+                          ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground" 
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}
+                      `}
+                    >
+                      <a href={item.url} className="flex items-center gap-3">
+                        <item.icon className={`h-5 w-5 ${isActive ? "text-primary-foreground" : ""}`} />
+                        <span className="font-medium">{item.title}</span>
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -95,35 +111,43 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-4">
-        {userEmail && (
-          <a href="/profile" className="block mb-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors">
-            <div className="flex items-center gap-2 mb-0.5">
-              <div className="text-xs text-muted-foreground">Conectado como</div>
-              {!isLoading && role && (
-                <Badge
-                  variant={isHeadmaster ? "default" : "secondary"}
-                  className={`text-[10px] px-1.5 py-0 h-4 ${
-                    isHeadmaster
-                      ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                      : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  {isHeadmaster ? '👑 Headmaster' : '👤 Trabajador'}
-                </Badge>
-              )}
+      <SidebarFooter className="border-t border-sidebar-border p-4 bg-sidebar-background mt-auto">
+        <div className="space-y-4">
+          {userEmail && (
+            <div className="flex items-center gap-3 px-2 py-2">
+              <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold shadow-inner ring-2 ring-background">
+                {userInitials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-foreground truncate">{userEmail.split('@')[0]}</div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] px-1.5 py-0 h-4 border-none shadow-none font-medium ${
+                      isHeadmaster
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-blue-100 text-blue-700'
+                    }`}
+                  >
+                    {isHeadmaster ? '👑 Admin' : '👤 Personal'}
+                  </Badge>
+                </div>
+              </div>
             </div>
-            <div className="text-sm font-medium truncate" title={userEmail}>{userEmail}</div>
-          </a>
-        )}
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleLogout} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-              <LogOut />
-              <span>Cerrar sesión</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+          )}
+          
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                onClick={handleLogout} 
+                className="rounded-xl h-10 px-3 text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="font-medium">Cerrar sesión</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </div>
       </SidebarFooter>
     </Sidebar>
   )

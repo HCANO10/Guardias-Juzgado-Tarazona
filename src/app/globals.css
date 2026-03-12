@@ -11,83 +11,118 @@
 
 @layer base {
   :root {
-    --background: oklch(0.96 0.02 260); /* Suave azul/morado pastel */
-    --foreground: oklch(0.2 0.05 260);
-    --card: oklch(1 0 0 / 0.8); /* Semi-transparente para glassmorphism */
-    --card-foreground: oklch(0.2 0.05 260);
-    --popover: oklch(1 0 0 / 0.9);
-    --popover-foreground: oklch(0.2 0.05 260);
-    --primary: oklch(0.45 0.2 260); /* Azul/morado principal vibrante */
-    --primary-foreground: oklch(0.98 0 0);
-    --secondary: oklch(0.9 0.05 260);
-    --secondary-foreground: oklch(0.3 0.1 260);
-    --muted: oklch(0.95 0.02 260);
-    --muted-foreground: oklch(0.5 0.05 260);
-    --accent: oklch(0.9 0.05 260);
-    --accent-foreground: oklch(0.3 0.1 260);
-    --destructive: oklch(0.6 0.25 25);
-    --border: oklch(0.9 0.05 260);
-    --input: oklch(0.9 0.05 260);
-    --ring: oklch(0.45 0.2 260);
-    --radius: 1rem; /* Bordes más redondeados para toque moderno */
-    --sidebar-background: 240 20% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Backgrounds */
+    --background: 210 20% 98%;        /* Very light blue-gray (#f8fafc) */
+    --foreground: 222 47% 11%;        /* Near black for text (#0f172a) */
+    
+    /* Cards and surfaces */
+    --card: 0 0% 100%;                /* Pure white */
+    --card-foreground: 222 47% 11%;
+    
+    /* Primary accent — Indigo blue */
+    --primary: 226 70% 55%;           /* Vibrant indigo (#4f6de5) */
+    --primary-foreground: 0 0% 100%;  /* White text on primary */
+    
+    /* Secondary — Soft gray */
+    --secondary: 214 20% 94%;         /* Light gray-blue (#eef2f6) */
+    --secondary-foreground: 222 47% 20%;
+    
+    /* Muted elements */
+    --muted: 214 20% 96%;
+    --muted-foreground: 215 16% 47%;  /* Medium gray for secondary text */
+    
+    /* Accent — Light indigo tint */
+    --accent: 226 76% 96%;            /* Very light indigo (#eef0ff) */
+    --accent-foreground: 226 70% 45%;
+    
+    /* Destructive — Soft red */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders and inputs */
+    --border: 214 20% 90%;            /* Subtle border */
+    --input: 214 20% 90%;
+    --ring: 226 70% 55%;              /* Focus ring matches primary */
+    
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 226 70% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 226 76% 96%;
+    --sidebar-accent-foreground: 226 70% 45%;
+    --sidebar-border: 214 20% 92%;
+    
+    /* Chart colors */
+    --chart-1: 226 70% 55%;           /* Indigo */
+    --chart-2: 173 58% 39%;           /* Teal */
+    --chart-3: 43 96% 56%;            /* Amber */
+    --chart-4: 280 67% 60%;           /* Purple */
+    --chart-5: 12 76% 61%;            /* Orange */
+    
+    --radius: 0.75rem;                /* More rounded corners */
   }
 
   .dark {
-    --background: oklch(0.15 0.05 260);
-    --foreground: oklch(0.95 0.02 260);
-    --card: oklch(0.2 0.05 260 / 0.7);
-    --card-foreground: oklch(0.95 0.02 260);
-    --popover: oklch(0.2 0.05 260 / 0.9);
-    --popover-foreground: oklch(0.95 0.02 260);
-    --primary: oklch(0.6 0.2 260);
-    --primary-foreground: oklch(0.1 0.05 260);
-    --secondary: oklch(0.25 0.05 260);
-    --secondary-foreground: oklch(0.9 0.02 260);
-    --muted: oklch(0.25 0.05 260);
-    --muted-foreground: oklch(0.7 0.05 260);
-    --accent: oklch(0.25 0.05 260);
-    --accent-foreground: oklch(0.9 0.02 260);
-    --destructive: oklch(0.6 0.25 25);
-    --border: oklch(0.3 0.05 260);
-    --input: oklch(0.3 0.05 260);
-    --ring: oklch(0.6 0.2 260);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 222 47% 11%;
+    --foreground: 210 20% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 20% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 226 70% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 226 70% 55%;
   }
 
-  .theme {
-    --font-sans: var(--font-sans);
-  }
   * {
     border-color: var(--border);
   }
+
   body {
     @apply bg-background text-foreground;
-    background-image: linear-gradient(135deg, hsl(230, 40%, 95%) 0%, hsl(260, 40%, 92%) 100%);
-    background-attachment: fixed;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  .dark body {
-    background-image: linear-gradient(135deg, hsl(230, 40%, 15%) 0%, hsl(260, 40%, 12%) 100%);
-  }
-  .bg-card {
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
+
   html {
     @apply font-sans;
+    overflow-x: hidden;
   }
 }
+
+/* Modern card style */
+.card-modern {
+  @apply bg-white rounded-2xl border border-slate-100 shadow-sm 
+         hover:shadow-md transition-shadow duration-200;
+}
+
+/* Glass effect for special elements */
+.glass {
+  @apply bg-white/70 backdrop-blur-xl border border-white/20;
+}
+
+/* Gradient header backgrounds */
+.gradient-header {
+  @apply bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-700;
+}
+
+/* Smooth page transitions */
+.page-container {
+  @apply animate-in fade-in duration-300;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

@@ -114,40 +114,54 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
   }
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Configuración del Sistema</h2>
+    <div className="space-y-8 pb-10">
+      <div className="space-y-1">
+        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Configuración del Sistema</h1>
+        <p className="text-muted-foreground">Administra los parámetros globales, la IA de Groq y la generación de periodos.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Parámetros de configuración */}
-        <Card className="border-border/50 bg-card/60 backdrop-blur-md">
-          <CardHeader>
-            <CardTitle className="flex items-center"><Settings2 className="mr-2 h-5 w-5" /> Parámetros Generales</CardTitle>
-            <CardDescription>Variables de entorno e IA de la aplicación</CardDescription>
+        <Card className="card-modern border-none bg-white p-2">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center text-xl font-bold text-foreground">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mr-3">
+                <Settings2 className="h-5 w-5" />
+              </div>
+              Parámetros Generales
+            </CardTitle>
+            <CardDescription>Configuración base del sistema y modelo de IA</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label>Personas por guardia</Label>
-              <Input value="3 (1 auxilio + 1 tramitador + 1 gestor)" readOnly disabled className="bg-muted" />
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Personas por guardia</Label>
+              <div className="px-3 py-2 rounded-xl bg-accent/30 text-sm font-medium border border-border/50 text-foreground/80">
+                3 (1 Auxilio + 1 Tramitador + 1 Gestor)
+              </div>
             </div>
             <div className="space-y-2">
-              <Label>Modelo de Groq (IA)</Label>
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Modelo de Groq (IA)</Label>
               <Input 
                 value={groqModel} 
                 onChange={(e) => setGroqModel(e.target.value)} 
                 placeholder="Ej. llama-3.3-70b-versatile"
+                className="rounded-xl border-border/50 h-11 focus-visible:ring-primary/20"
               />
             </div>
             <div className="space-y-2">
-              <Label>Año activo (por defecto)</Label>
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Año activo (por defecto)</Label>
               <Input 
                 type="number" 
                 value={activeYear} 
                 onChange={(e) => setActiveYear(parseInt(e.target.value) || 2026)} 
+                className="rounded-xl border-border/50 h-11 focus-visible:ring-primary/20"
               />
             </div>
-            <Button onClick={handleSaveSettings} disabled={savingSettings} className="w-full mt-4">
+            <Button 
+              onClick={handleSaveSettings} 
+              disabled={savingSettings} 
+              className="w-full h-11 rounded-xl bg-primary shadow-lg shadow-primary/20 hover:scale-[1.01] transition-all mt-2"
+            >
               {savingSettings && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Guardar Cambios
             </Button>
@@ -155,55 +169,63 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
         </Card>
 
         {/* Generar Periodos */}
-        <Card className="border-border/50 bg-card/60 backdrop-blur-md">
-          <CardHeader>
-            <CardTitle className="flex items-center"><CalendarDays className="mr-2 h-5 w-5" /> Calendario de Guardias</CardTitle>
-            <CardDescription>Generador de periodos anuales automáticos (viernes → jueves)</CardDescription>
+        <Card className="card-modern border-none bg-white p-2">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center text-xl font-bold text-foreground">
+              <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 mr-3">
+                <CalendarDays className="h-5 w-5" />
+              </div>
+              Calendario de Guardias
+            </CardTitle>
+            <CardDescription>Generador de periodos anuales automáticos</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex space-x-2">
-              <div className="flex-1 space-y-2">
-                <Select value={yearToGenerate} onValueChange={setYearToGenerate}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Año a generar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2025">2025</SelectItem>
-                    <SelectItem value="2026">2026</SelectItem>
-                    <SelectItem value="2027">2027</SelectItem>
-                    <SelectItem value="2028">2028</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-end">
-                <Button onClick={() => handleGeneratePeriods(false)} disabled={generating}>
-                  {generating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Generar periodos
-                </Button>
-              </div>
+          <CardContent className="space-y-6">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Select value={yearToGenerate} onValueChange={setYearToGenerate}>
+                <SelectTrigger className="w-full sm:w-[140px] h-11 rounded-xl border-border/50">
+                  <SelectValue placeholder="Año" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="2025">2025</SelectItem>
+                  <SelectItem value="2026">2026</SelectItem>
+                  <SelectItem value="2027">2027</SelectItem>
+                  <SelectItem value="2028">2028</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button 
+                onClick={() => handleGeneratePeriods(false)} 
+                disabled={generating}
+                variant="secondary"
+                className="flex-1 h-11 rounded-xl hover:scale-[1.01] transition-all"
+              >
+                {generating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Generar periodos anuales
+              </Button>
             </div>
 
             {/* Resumen de periodos */}
             {periods && periods.length > 0 && (
-              <div className="mt-6 border rounded-md max-h-64 overflow-auto">
-                <Table>
-                  <TableHeader className="sticky top-0 bg-secondary">
-                    <TableRow>
-                      <TableHead>Semana</TableHead>
-                      <TableHead>Inicio</TableHead>
-                      <TableHead>Fin</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {periods.map((p) => (
-                      <TableRow key={p.id || p.week_number}>
-                        <TableCell>S. {p.week_number}</TableCell>
-                        <TableCell>{format(new Date(p.start_date), 'dd MMM yyyy', { locale: es })}</TableCell>
-                        <TableCell>{format(new Date(p.end_date), 'dd MMM yyyy', { locale: es })}</TableCell>
+              <div className="mt-4 rounded-xl border border-border/50 overflow-hidden bg-accent/10">
+                <div className="max-h-56 overflow-auto scrollbar-hide">
+                  <Table>
+                    <TableHeader className="bg-accent/50 sticky top-0 z-10">
+                      <TableRow className="hover:bg-transparent h-10 border-border/20">
+                        <TableHead className="text-[10px] font-bold uppercase px-4 h-10 text-muted-foreground">Semana</TableHead>
+                        <TableHead className="text-[10px] font-bold uppercase px-4 h-10 text-muted-foreground">Inicio</TableHead>
+                        <TableHead className="text-[10px] font-bold uppercase px-4 h-10 text-muted-foreground">Fin</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {periods.map((p) => (
+                        <TableRow key={p.id || p.week_number} className="h-10 border-border/20 hover:bg-white/50 transition-colors">
+                          <TableCell className="px-4 py-2 font-bold text-xs">Sem. {p.week_number}</TableCell>
+                          <TableCell className="px-4 py-2 text-xs">{format(new Date(p.start_date), 'dd MMM yyyy', { locale: es })}</TableCell>
+                          <TableCell className="px-4 py-2 text-xs">{format(new Date(p.end_date), 'dd MMM yyyy', { locale: es })}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             )}
           </CardContent>
@@ -212,80 +234,100 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* Groq AI Diagnostics */}
-        <Card className="border-border/50 bg-card/60 backdrop-blur-md">
-          <CardHeader>
-            <CardTitle className="flex items-center text-sm font-bold uppercase tracking-wider">
-              <BrainCircuit className="mr-2 h-4 w-4" /> Diagnóstico Groq IA
+        <Card className="card-modern border-none bg-white p-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center text-xs font-black uppercase tracking-[0.15em] text-muted-foreground">
+              <BrainCircuit className="mr-2 h-3.5 w-3.5 text-primary" /> IA Diagnostics (Groq)
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              La API KEY debe estar configurada en las variables de entorno del servidor. 
-              Usa este botón para verificar que el sistema puede comunicarse con Groq.
-            </p>
+            <div className="p-3.5 rounded-xl bg-accent/30 border border-border/50">
+              <p className="text-[11px] leading-relaxed text-muted-foreground font-medium">
+                Verifica la conexión con el servidor de IA para la generación automática de guardias.
+              </p>
+            </div>
+            
             <Button 
               variant="outline" 
-              className="w-full" 
+              className="w-full h-10 rounded-xl border-border/50 hover:bg-accent/50 transition-colors shadow-sm"
               onClick={handleTestGroq} 
               disabled={testingGroq}
             >
-              {testingGroq ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Activity className="mr-2 h-4 w-4" />}
-              Probar conexión
+              {testingGroq ? <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" /> : <Activity className="mr-2 h-4 w-4 text-primary" />}
+              <span className="font-bold text-xs uppercase tracking-wider">Probar conexión</span>
             </Button>
             
             {groqStatus && (
               <div className={cn(
-                "p-3 rounded-lg border text-xs",
-                groqStatus.connected ? "bg-green-500/10 border-green-500/20 text-green-700" : "bg-destructive/10 border-destructive/20 text-destructive"
+                "p-4 rounded-2xl border transition-all animate-in fade-in zoom-in duration-300",
+                groqStatus.connected 
+                  ? "bg-green-50 border-green-200 text-green-800" 
+                  : "bg-red-50 border-red-200 text-red-800"
               )}>
-                {groqStatus.connected ? (
-                  <div className="flex flex-col gap-1">
-                    <span className="font-bold flex items-center">✅ Conectado</span>
-                    <span className="opacity-70">Modelo: {groqStatus.model}</span>
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "h-8 w-8 rounded-full flex items-center justify-center shadow-sm",
+                    groqStatus.connected ? "bg-white" : "bg-white"
+                  )}>
+                    {groqStatus.connected ? "✅" : "❌"}
                   </div>
-                ) : (
-                  <div className="flex flex-col gap-1">
-                    <span className="font-bold">❌ Error</span>
-                    <span className="opacity-70">{groqStatus.error}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-black text-[10px] uppercase tracking-wider">
+                      {groqStatus.connected ? "Sistema Operativo" : "Conexión Fallida"}
+                    </span>
+                    <span className="text-[11px] font-medium opacity-80 leading-tight">
+                      {groqStatus.connected ? `Modelo: ${groqStatus.model}` : groqStatus.error}
+                    </span>
                   </div>
-                )}
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* System Information */}
-        <Card className="border-border/50 bg-card/60 backdrop-blur-md md:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center text-sm font-bold uppercase tracking-wider">
-              <Info className="mr-2 h-4 w-4" /> Información del Sistema
+        <Card className="card-modern border-none bg-white p-2 md:col-span-2">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center text-xs font-black uppercase tracking-[0.15em] text-muted-foreground">
+              <Info className="mr-2 h-4 w-4 text-indigo-500" /> Estadísticas del Sistema
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="space-y-1">
-                <span className="text-[10px] uppercase text-muted-foreground font-bold">Personal Activo</span>
-                <div className="text-lg font-bold">{systemStats.staff.total}</div>
-                <p className="text-[10px] opacity-60">
-                  {systemStats.staff.aux}A / {systemStats.staff.tra}T / {systemStats.staff.ges}G
-                </p>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="p-4 rounded-2xl bg-accent/30 border border-border/50 transition-all hover:shadow-md group">
+                <span className="text-[10px] uppercase text-muted-foreground font-black tracking-wider">Personal Activo</span>
+                <div className="text-2xl font-black text-foreground mt-1 group-hover:text-primary transition-colors">{systemStats.staff.total}</div>
+                <div className="flex gap-1.5 mt-2">
+                  <Badge className="h-4 text-[9px] px-1 bg-white text-primary border-none font-bold">{systemStats.staff.aux}A</Badge>
+                  <Badge className="h-4 text-[9px] px-1 bg-white text-primary border-none font-bold">{systemStats.staff.tra}T</Badge>
+                  <Badge className="h-4 text-[9px] px-1 bg-white text-primary border-none font-bold">{systemStats.staff.ges}G</Badge>
+                </div>
               </div>
-              <div className="space-y-1">
-                <span className="text-[10px] uppercase text-muted-foreground font-bold">Periodos {activeYear}</span>
-                <div className="text-lg font-bold">{systemStats.periods}</div>
-                <p className="text-[10px] opacity-60">Semanas generadas</p>
+
+              <div className="p-4 rounded-2xl bg-accent/30 border border-border/50 transition-all hover:shadow-md group">
+                <span className="text-[10px] uppercase text-muted-foreground font-black tracking-wider">Periodos {activeYear}</span>
+                <div className="text-2xl font-black text-foreground mt-1 group-hover:text-indigo-600 transition-colors">{systemStats.periods}</div>
+                <p className="text-[10px] font-bold text-muted-foreground mt-2 uppercase opacity-60">Semanas Ok</p>
               </div>
-              <div className="space-y-1">
-                <span className="text-[10px] uppercase text-muted-foreground font-bold">Guardias Cubiertas</span>
-                <div className="text-lg font-bold">{systemStats.assignments.complete}/{systemStats.assignments.total}</div>
-                <Progress value={(systemStats.assignments.complete / systemStats.assignments.total) * 100} className="h-1 mt-1" />
+
+              <div className="p-4 rounded-2xl bg-accent/30 border border-border/50 transition-all hover:shadow-md group">
+                <span className="text-[10px] uppercase text-muted-foreground font-black tracking-wider">Cobertura</span>
+                <div className="flex items-end gap-2 mt-1">
+                  <div className="text-2xl font-black text-foreground group-hover:text-green-600 transition-colors">
+                    {Math.round((systemStats.assignments.complete / systemStats.assignments.total) * 100)}%
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-bold mb-1 opacity-60">Goal</span>
+                </div>
+                <Progress value={(systemStats.assignments.complete / systemStats.assignments.total) * 100} className="h-1.5 mt-3 bg-white" />
               </div>
-              <div className="space-y-1">
-                <span className="text-[10px] uppercase text-muted-foreground font-bold">Base de Datos</span>
-                <div className="text-lg font-bold">Ok</div>
-                <p className="text-[10px] opacity-60">
-                  {systemStats.holidays} Festivos / {systemStats.vacations} Vacas.
-                </p>
+
+              <div className="p-4 rounded-2xl bg-accent/30 border border-border/50 transition-all hover:shadow-md group">
+                <span className="text-[10px] uppercase text-muted-foreground font-black tracking-wider">Base de Datos</span>
+                <div className="text-2xl font-black text-foreground mt-1 group-hover:text-blue-600 transition-colors">Estado: Ok</div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 rounded">{systemStats.holidays} Festivos</span>
+                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 rounded">{systemStats.vacations} Vacas.</span>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -294,22 +336,45 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
 
       {/* Dialog Confirmation */}
       <Dialog open={confirmDialog.open} onOpenChange={(open: boolean) => !open && setConfirmDialog({ open: false, data: null })}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Aviso de regeneración</DialogTitle>
-            <DialogDescription>
-              {confirmDialog.data?.message} <br/><br/>
-              <strong>¡Peligro!</strong> Si decides continuar, se borrarán todos los periodos actuales y perderás permanentemente cualquier guardia o persona asignada a esos periodos de {yearToGenerate}.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmDialog({ open: false, data: null })} disabled={generating}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={() => handleGeneratePeriods(true)} disabled={generating}>
-              {generating ? "Regenerando..." : "Sí, continuar y sobreescribir"}
-            </Button>
-          </DialogFooter>
+        <DialogContent className="rounded-2xl border-none shadow-2xl p-0 overflow-hidden max-w-md">
+          <div className="bg-red-50 p-6 flex items-center gap-4 border-b border-red-100">
+            <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center text-red-600 shadow-sm">
+              <Activity className="h-6 w-6" />
+            </div>
+            <div>
+              <DialogTitle className="text-red-900 font-black tracking-tight">Regeneración Crítica</DialogTitle>
+              <DialogDescription className="text-red-700/80 font-medium text-xs">Aviso importante de sobreescritura</DialogDescription>
+            </div>
+          </div>
+          <div className="p-6 space-y-4">
+            <p className="text-sm text-foreground/80 leading-relaxed">
+              {confirmDialog.data?.message}
+            </p>
+            <div className="p-4 rounded-xl bg-red-100/50 border border-red-200">
+              <p className="text-xs text-red-900 font-bold leading-tight">
+                ⚠️ ¡Peligro! Se borrarán todos los periodos actuales y perderás permanentemente cualquier guardia asignada a {yearToGenerate}.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button 
+                variant="destructive" 
+                onClick={() => handleGeneratePeriods(true)} 
+                disabled={generating}
+                className="h-11 rounded-xl font-bold shadow-lg shadow-red-200"
+              >
+                {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Sí, continuar y sobreescribir
+              </Button>
+              <Button 
+                variant="ghost" 
+                onClick={() => setConfirmDialog({ open: false, data: null })} 
+                disabled={generating}
+                className="h-11 rounded-xl text-muted-foreground font-bold"
+              >
+                Cancelar operación
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

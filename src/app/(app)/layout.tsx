@@ -1,6 +1,7 @@
 import { AppSidebar } from "@/components/layout/AppSidebar"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { createClient } from "@/lib/supabase/server"
+import { UserAvatar } from "@/components/layout/UserAvatar"
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
@@ -8,17 +9,25 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <SidebarProvider>
-      <AppSidebar userEmail={user?.email} />
-      <main className="flex-1 overflow-auto bg-muted/20 relative min-h-screen">
-        {/* Header móvil para mostrar en dispositivos pequeños formados por el trigger */}
-        <div className="md:hidden flex items-center h-16 px-4 border-b bg-background sticky top-0 z-10 w-full">
-          <SidebarTrigger />
-          <h1 className="ml-4 font-semibold text-lg truncate">Guardias Tarazona</h1>
+      <div className="flex min-h-screen w-full bg-background">
+        <AppSidebar userEmail={user?.email} />
+        
+        <div className="flex flex-1 flex-col">
+          {/* Mobile top bar - only visible on small screens */}
+          <header className="md:hidden sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-white/80 px-4 backdrop-blur-lg">
+            <SidebarTrigger />
+            <span className="text-sm font-semibold text-foreground tracking-tight">Guardias Juzgado</span>
+            <UserAvatar email={user?.email} />
+          </header>
+
+          {/* Main content area */}
+          <main className="flex-1 overflow-y-auto">
+            <div className="mx-auto max-w-7xl p-4 md:p-8 page-container">
+              {children}
+            </div>
+          </main>
         </div>
-        <div className="h-full">
-          {children}
-        </div>
-      </main>
+      </div>
     </SidebarProvider>
   )
 }

@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import { GoogleButton } from "@/components/auth/GoogleButton"
 import { AuthDivider } from "@/components/auth/AuthDivider"
-import { Loader2, Shield, Eye, EyeOff } from "lucide-react"
+import { Loader2, Shield, Eye, EyeOff, Activity, CheckCircle2, AlertCircle } from "lucide-react"
 
 interface Position {
   id: string
@@ -162,7 +162,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="flex min-h-screen w-full bg-white selection:bg-primary/20">
       {/* LEFT SIDE - FORM */}
       <div className="flex flex-1 flex-col justify-center px-6 py-8 lg:px-12 xl:px-20 overflow-y-auto">
         <div className="mx-auto w-full max-w-[440px]">
@@ -180,42 +180,61 @@ export default function LoginPage() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Iniciar sesión</TabsTrigger>
-              <TabsTrigger value="register">Crear cuenta</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-8 bg-accent/50 p-1 rounded-2xl border border-border/50">
+              <TabsTrigger value="login" className="rounded-xl font-bold transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm">Iniciar sesión</TabsTrigger>
+              <TabsTrigger value="register" className="rounded-xl font-bold transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm">Crear cuenta</TabsTrigger>
             </TabsList>
 
             {/* ===== LOGIN TAB ===== */}
-            <TabsContent value="login" className="space-y-0 mt-0">
+            <TabsContent value="login" className="space-y-0 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <div className="mb-6">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">Bienvenido de nuevo</h1>
-                <p className="text-sm text-muted-foreground mt-1">Introduce tus credenciales para acceder.</p>
+                <h1 className="text-3xl font-black tracking-tight text-foreground">Bienvenido</h1>
+                <p className="text-sm text-muted-foreground mt-2 font-medium">Gestiona las guardias de Tarazona con inteligencia.</p>
               </div>
 
               <GoogleButton label="Continuar con Google" />
               <AuthDivider />
 
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
-                  <Input id="login-email" type="email" placeholder="usuario@juzgado-tarazona.es"
-                    value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required
-                    className="h-11" />
+                  <Label htmlFor="login-email" className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Email corporativo</Label>
+                  <Input 
+                    id="login-email" 
+                    type="email" 
+                    placeholder="usuario@juzgado-tarazona.es"
+                    value={loginEmail} 
+                    onChange={(e) => setLoginEmail(e.target.value)} 
+                    required
+                    className="h-12 rounded-2xl border-border/50 bg-accent/30 focus-visible:bg-white transition-all" 
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="login-password">Contraseña</Label>
+                  <Label htmlFor="login-password" title="Contraseña" className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Contraseña</Label>
                   <div className="relative">
-                    <Input id="login-password" type={showLoginPassword ? "text" : "password"}
-                      placeholder="••••••••" value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)} required className="h-11 pr-12" />
-                    <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                      {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    <Input 
+                      id="login-password" 
+                      type={showLoginPassword ? "text" : "password"}
+                      placeholder="••••••••" 
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)} 
+                      required 
+                      className="h-12 rounded-2xl border-border/50 bg-accent/30 focus-visible:bg-white transition-all pr-12" 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      {showLoginPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full h-11 font-semibold bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-lg shadow-blue-500/25" disabled={isLoginLoading}>
-                  {isLoginLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Iniciando sesión...</> : "Iniciar sesión"}
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 rounded-2xl font-black text-sm uppercase tracking-widest bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.98]" 
+                  disabled={isLoginLoading}
+                >
+                  {isLoginLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Accediendo...</> : "Entrar en el sistema"}
                 </Button>
               </form>
 
@@ -228,87 +247,95 @@ export default function LoginPage() {
             </TabsContent>
 
             {/* ===== REGISTER TAB ===== */}
-            <TabsContent value="register" className="space-y-0 mt-0">
+            <TabsContent value="register" className="space-y-0 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <div className="mb-6">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">Crear cuenta</h1>
-                <p className="text-sm text-muted-foreground mt-1">Regístrate para acceder al sistema de guardias.</p>
+                <h1 className="text-3xl font-black tracking-tight text-foreground">Registro</h1>
+                <p className="text-sm text-muted-foreground mt-2 font-medium">Únete al personal del Juzgado de Tarazona.</p>
               </div>
 
               <GoogleButton label="Registrarse con Google" />
               <AuthDivider />
 
-              <form onSubmit={handleRegister} className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="reg-name">Nombre *</Label>
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-name" className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Nombre</Label>
                     <Input id="reg-name" placeholder="Hugo" value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)} required className="h-10" />
+                      onChange={(e) => setFirstName(e.target.value)} required className="h-11 rounded-2xl border-border/50 bg-accent/30 focus-visible:bg-white transition-all" />
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="reg-lastname">Primer apellido *</Label>
-                    <Input id="reg-lastname" placeholder="García" value={lastName}
-                      onChange={(e) => setLastName(e.target.value)} required className="h-10" />
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-lastname" className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Primer Apellido</Label>
+                    <Input id="reg-lastname" placeholder="Cano" value={lastName}
+                      onChange={(e) => setLastName(e.target.value)} required className="h-11 rounded-2xl border-border/50 bg-accent/30 focus-visible:bg-white transition-all" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="reg-lastname2">Segundo apellido</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-lastname2" className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Segundo Apellido</Label>
                     <Input id="reg-lastname2" placeholder="López" value={secondLastName}
-                      onChange={(e) => setSecondLastName(e.target.value)} className="h-10" />
+                      onChange={(e) => setSecondLastName(e.target.value)} className="h-11 rounded-2xl border-border/50 bg-accent/30 focus-visible:bg-white transition-all" />
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="reg-phone">Teléfono</Label>
-                    <Input id="reg-phone" type="tel" placeholder="600 123 456" value={phone}
-                      onChange={(e) => setPhone(e.target.value)} className="h-10" />
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-phone" className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Teléfono</Label>
+                    <Input id="reg-phone" type="tel" placeholder="600 000 000" value={phone}
+                      onChange={(e) => setPhone(e.target.value)} className="h-11 rounded-2xl border-border/50 bg-accent/30 focus-visible:bg-white transition-all" />
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="reg-email">Email *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="reg-email" className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Email</Label>
                   <Input id="reg-email" type="email" placeholder="usuario@juzgado-tarazona.es"
-                    value={regEmail} onChange={(e) => setRegEmail(e.target.value)} required className="h-10" />
+                    value={regEmail} onChange={(e) => setRegEmail(e.target.value)} required className="h-11 rounded-2xl border-border/50 bg-accent/30 focus-visible:bg-white transition-all" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="reg-pass">Contraseña *</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-pass" className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Seguridad</Label>
                     <div className="relative">
                       <Input id="reg-pass" type={showRegPassword ? "text" : "password"}
-                        placeholder="Mín. 8 caracteres" value={regPassword}
-                        onChange={(e) => setRegPassword(e.target.value)} required className="h-10 pr-10" />
+                        placeholder="Mín. 8 car." value={regPassword}
+                        onChange={(e) => setRegPassword(e.target.value)} required className="h-11 rounded-2xl border-border/50 bg-accent/30 focus-visible:bg-white transition-all pr-10" />
                       <button type="button" onClick={() => setShowRegPassword(!showRegPassword)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                        {showRegPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">
+                        {showRegPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="reg-pass2">Repetir contraseña *</Label>
-                    <Input id="reg-pass2" type="password" placeholder="Repite la contraseña"
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-pass2" className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Confirmar</Label>
+                    <Input id="reg-pass2" type="password" placeholder="Repite password"
                       value={regPasswordConfirm} onChange={(e) => setRegPasswordConfirm(e.target.value)}
-                      required className="h-10" />
+                      required className="h-11 rounded-2xl border-border/50 bg-accent/30 focus-visible:bg-white transition-all" />
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Puesto de trabajo *</Label>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Puesto de trabajo</Label>
                   <Select onValueChange={setPositionId} value={positionId}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Selecciona tu puesto de trabajo..." />
+                    <SelectTrigger className="h-11 rounded-2xl border-border/50 bg-accent/30 focus:bg-white transition-all">
+                      <SelectValue placeholder="Selecciona tu puesto..." />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-2xl border-border/50">
                       {positions.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        <SelectItem key={p.id} value={p.id} className="rounded-xl">{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex items-center space-x-2 pt-1">
-                  <Checkbox id="terms" checked={acceptTerms}
-                    onCheckedChange={(checked) => setAcceptTerms(checked === true)} />
-                  <Label htmlFor="terms" className="text-xs text-muted-foreground leading-tight cursor-pointer">
-                    He leído y acepto las condiciones de uso
+                <div className="flex items-center space-x-3 py-1">
+                  <Checkbox 
+                    id="terms" 
+                    checked={acceptTerms}
+                    onCheckedChange={(checked) => setAcceptTerms(checked === true)} 
+                    className="rounded-lg border-border/50"
+                  />
+                  <Label htmlFor="terms" className="text-[11px] text-muted-foreground font-medium leading-none cursor-pointer">
+                    Acepto las condiciones de uso y política de privacidad
                   </Label>
                 </div>
-                <Button type="submit" className="w-full h-11 font-semibold bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-lg shadow-blue-500/25" disabled={isRegLoading}>
-                  {isRegLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creando cuenta...</> : "Crear cuenta"}
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 rounded-2xl font-black text-sm uppercase tracking-widest bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.98]" 
+                  disabled={isRegLoading}
+                >
+                  {isRegLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Procesando...</> : "Completar Registro"}
                 </Button>
               </form>
 
@@ -333,32 +360,56 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT SIDE - IMAGE */}
-      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
-        <img src="/juzgado-tarazona.jpg" alt="Juzgado de Tarazona"
-          className="absolute inset-0 w-full h-full object-cover object-center" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/10 to-transparent" />
-        <div className="relative z-10 flex flex-col justify-end p-12 pb-16">
-          <div className="max-w-lg">
-            <h2 className="text-3xl font-bold text-white mb-3 drop-shadow-lg leading-tight">
-              Gestión integral de guardias judiciales
+      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden bg-slate-900">
+        <img 
+          src="/juzgado-tarazona.jpg" 
+          alt="Juzgado de Tarazona"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-60 scale-105" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-transparent to-black/80" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent opacity-50" />
+        
+        <div className="relative z-10 flex flex-col justify-end p-16 pb-20 w-full">
+          <div className="max-w-xl animate-in fade-in slide-in-from-right-8 duration-1000">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6 shadow-xl">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/90">Sistema Operativo</span>
+            </div>
+            
+            <h2 className="text-5xl font-black text-white mb-6 leading-[1.1] tracking-tight drop-shadow-2xl">
+              Inteligencia aplicada <br />
+              <span className="text-primary-foreground/80">a la justicia local.</span>
             </h2>
-            <p className="text-white/85 text-base leading-relaxed drop-shadow-md">
-              Organiza turnos de guardia, gestiona vacaciones y festivos, y genera calendarios automáticos con inteligencia artificial.
+            <p className="text-white/80 text-lg leading-relaxed font-medium max-w-md">
+              La plataforma definitiva para la gestión de personal, guardias y disponibilidad del Juzgado de Tarazona.
             </p>
           </div>
-          <div className="flex gap-6 mt-8">
-            <div className="bg-white/15 backdrop-blur-md rounded-xl px-5 py-3 border border-white/20">
-              <div className="text-xl font-bold text-white">52</div>
-              <div className="text-xs text-white/70">Semanas/año</div>
+          
+          <div className="flex gap-6 mt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+            <div className="group bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 hover:bg-white/10 transition-all cursor-default">
+              <div className="flex items-center gap-2 mb-1">
+                <Activity className="h-4 w-4 text-primary-foreground" />
+                <span className="text-3xl font-black text-white">52</span>
+              </div>
+              <div className="text-[10px] text-white/50 font-black uppercase tracking-widest leading-none">Semanas anuales</div>
             </div>
-            <div className="bg-white/15 backdrop-blur-md rounded-xl px-5 py-3 border border-white/20">
-              <div className="text-xl font-bold text-white">3</div>
-              <div className="text-xs text-white/70">Roles/guardia</div>
+            <div className="group bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 hover:bg-white/10 transition-all cursor-default">
+              <div className="flex items-center gap-2 mb-1">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <span className="text-3xl font-black text-white">100%</span>
+              </div>
+              <div className="text-[10px] text-white/50 font-black uppercase tracking-widest leading-none">Disponibilidad</div>
             </div>
-            <div className="bg-white/15 backdrop-blur-md rounded-xl px-5 py-3 border border-white/20">
-              <div className="text-xl font-bold text-white">IA</div>
-              <div className="text-xs text-white/70">Generación auto.</div>
+            <div className="group bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 hover:bg-white/10 transition-all cursor-default relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-12 h-12 bg-primary/20 blur-2xl rounded-full" />
+              <div className="flex items-center gap-2 mb-1 relative z-10">
+                <Shield className="h-4 w-4 text-indigo-400" />
+                <span className="text-3xl font-black text-white italic">IA</span>
+              </div>
+              <div className="text-[10px] text-white/50 font-black uppercase tracking-widest leading-none relative z-10">Groq Engine</div>
             </div>
           </div>
         </div>

@@ -121,17 +121,28 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
 
   if (loading || roleLoading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="space-y-8 pb-10">
         <div className="flex items-center justify-between">
-          <Skeleton className="h-10 w-[250px]" />
-          {isHeadmaster && <Skeleton className="h-10 w-[150px]" />}
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-[250px] rounded-lg" />
+            <Skeleton className="h-4 w-[350px] rounded-lg" />
+          </div>
+          <Skeleton className="h-10 w-[150px] rounded-xl" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="p-6">
-              <Skeleton className="h-6 w-3/4 mb-4" />
-              <Skeleton className="h-4 w-1/2 mb-2" />
-              <Skeleton className="h-4 w-2/3" />
+            <Card key={i} className="card-modern p-6 border-none bg-white">
+              <div className="flex items-center gap-4 mb-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-[140px]" />
+                  <Skeleton className="h-4 w-[80px]" />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+              </div>
             </Card>
           ))}
         </div>
@@ -141,31 +152,33 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
 
   if (isHeadmaster) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">Gestión de Personal</h2>
-          <div className="flex items-center space-x-2">
-            <Button onClick={handleCreate}>
-              <Plus className="mr-2 h-4 w-4" /> Nuevo trabajador
-            </Button>
+      <div className="space-y-8 pb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Gestión de Personal</h1>
+            <p className="text-muted-foreground">Administra el personal, sus roles, puestos y estado de acceso.</p>
           </div>
+          <Button onClick={handleCreate} className="rounded-xl bg-primary shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all">
+            <Plus className="mr-2 h-4 w-4" /> Nuevo trabajador
+          </Button>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-6 mt-4">
+        {/* Filtros */}
+        <div className="flex flex-col md:flex-row gap-3 mb-6">
           <div className="relative w-full md:max-w-xs">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Buscar por nombre..." 
-              className="pl-8 bg-card" 
+              className="pl-10 h-10 rounded-xl border-border/50 bg-white" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <Select value={positionFilter} onValueChange={setPositionFilter}>
-            <SelectTrigger className="w-full md:w-[200px] bg-card">
+            <SelectTrigger className="w-full md:w-[200px] h-10 rounded-xl border-border/50 bg-white">
               <SelectValue placeholder="Puesto" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl">
               <SelectItem value="all">Todos los puestos</SelectItem>
               {positions.map(p => (
                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -173,10 +186,10 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full md:w-[150px] bg-card">
+            <SelectTrigger className="w-full md:w-[150px] h-10 rounded-xl border-border/50 bg-white">
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl">
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="active">Activos</SelectItem>
               <SelectItem value="inactive">Inactivos</SelectItem>
@@ -184,33 +197,32 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
           </Select>
         </div>
 
-        <div className="rounded-md border bg-card overflow-hidden">
+        <div className="rounded-2xl border border-border/50 bg-white shadow-sm overflow-hidden">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre Completo</TableHead>
-                <TableHead>Puesto</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Incorporación</TableHead>
-                <TableHead className="w-[80px]"></TableHead>
+            <TableHeader className="bg-accent/30">
+              <TableRow className="hover:bg-transparent border-border/50">
+                <TableHead className="font-bold">Nombre Completo</TableHead>
+                <TableHead className="font-bold">Puesto / Rol</TableHead>
+                <TableHead className="font-bold">Email / Contacto</TableHead>
+                <TableHead className="font-bold">Estado</TableHead>
+                <TableHead className="font-bold">Incorporación</TableHead>
+                <TableHead className="w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-12">
+                  <TableCell colSpan={6} className="py-20">
                     <EmptyState 
                       icon={Search}
                       title="No se han encontrado resultados"
                       description={searchTerm ? `No hay personal que coincida con "${searchTerm}"` : "No hay personal registrado en esta categoría."}
                       action={searchTerm ? (
-                        <Button variant="outline" onClick={() => { setSearchTerm(""); setStatusFilter("all"); setPositionFilter("all"); }}>
+                        <Button variant="outline" onClick={() => { setSearchTerm(""); setStatusFilter("all"); setPositionFilter("all"); }} className="rounded-xl">
                           Limpiar filtros
                         </Button>
                       ) : (
-                        <Button onClick={handleCreate}>
+                        <Button onClick={handleCreate} className="rounded-xl">
                           <Plus className="mr-2 h-4 w-4" /> Nuevo trabajador
                         </Button>
                       )}
@@ -219,54 +231,67 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                 </TableRow>
               ) : (
                 filteredData.map((staff) => (
-                  <TableRow key={staff.id}>
-                    <TableCell className="font-medium">{buildFullName(staff)}</TableCell>
-                    <TableCell>{staff.positions?.name}</TableCell>
+                  <TableRow key={staff.id} className="h-16 hover:bg-accent/5 transition-colors border-border/50">
                     <TableCell>
-                      {staff.role === 'headmaster' ? (
-                        <Badge className="bg-purple-500/15 text-purple-700 hover:bg-purple-500/25 dark:text-purple-400">
-                          👑 Headmaster
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                          👤 Trabajador
-                        </Badge>
-                      )}
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                          {staff.first_name[0]}{staff.last_name[0]}
+                        </div>
+                        <span className="font-bold text-foreground">{buildFullName(staff)}</span>
+                      </div>
                     </TableCell>
-                    <TableCell>{staff.email}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm font-medium">{staff.positions?.name}</span>
+                        {staff.role === 'headmaster' ? (
+                          <Badge variant="purple" className="w-fit">
+                            Headmaster
+                          </Badge>
+                        ) : (
+                          <Badge variant="indigo" className="w-fit">
+                            Trabajador
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {staff.email}</span>
+                        {staff.phone && <span className="flex items-center gap-1 mt-0.5"><Phone className="h-3 w-3" /> {staff.phone}</span>}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       {staff.is_active ? (
-                        <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/25 dark:text-green-400">Activo</Badge>
+                        <Badge variant="success">Activo</Badge>
                       ) : (
-                        <Badge variant="destructive" className="bg-red-500/15 text-red-700 hover:bg-red-500/25 dark:text-red-400">Inactivo</Badge>
+                        <Badge variant="destructive">Inactivo</Badge>
                       )}
                     </TableCell>
-                    <TableCell>{format(new Date(staff.start_date), 'dd MMM yyyy', { locale: es })}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{format(new Date(staff.start_date), 'dd MMM yyyy', { locale: es })}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Abrir menú</span>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => router.push(`/staff/${staff.id}`)}>
+                        <DropdownMenuContent align="end" className="rounded-xl border-border/50 shadow-xl">
+                          <DropdownMenuItem onClick={() => router.push(`/staff/${staff.id}`)} className="rounded-lg">
                             <Eye className="mr-2 h-4 w-4" /> Ver detalle
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEdit(staff)}>
+                          <DropdownMenuItem onClick={() => handleEdit(staff)} className="rounded-lg">
                             <Edit className="mr-2 h-4 w-4" /> Editar
                           </DropdownMenuItem>
                           {staff.is_active ? (
                             <DropdownMenuItem 
-                              className="text-red-600 focus:bg-red-50 dark:focus:bg-red-950" 
+                              className="text-red-600 focus:text-red-600 focus:bg-red-50 rounded-lg" 
                               onClick={() => setConfirmDialog({ open: true, type: 'deactivate', staff })}
                             >
                               <UserX className="mr-2 h-4 w-4" /> Dar de baja
                             </DropdownMenuItem>
                           ) : (
                             <DropdownMenuItem 
-                              className="text-green-600 focus:bg-green-50 dark:focus:bg-green-950"
+                              className="text-green-600 focus:text-green-600 focus:bg-green-50 rounded-lg"
                               onClick={() => setConfirmDialog({ open: true, type: 'reactivate', staff })}
                             >
                               <UserCheck className="mr-2 h-4 w-4" /> Reactivar
@@ -274,11 +299,11 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                           )}
                           <DropdownMenuSeparator />
                           {staff.role === 'worker' ? (
-                            <DropdownMenuItem onClick={() => setRoleDialog({ open: true, staff, newRole: 'headmaster' })}>
+                            <DropdownMenuItem onClick={() => setRoleDialog({ open: true, staff, newRole: 'headmaster' })} className="rounded-lg">
                               <Crown className="mr-2 h-4 w-4 text-purple-600" /> Hacer Headmaster
                             </DropdownMenuItem>
                           ) : (
-                            <DropdownMenuItem onClick={() => setRoleDialog({ open: true, staff, newRole: 'worker' })}>
+                            <DropdownMenuItem onClick={() => setRoleDialog({ open: true, staff, newRole: 'worker' })} className="rounded-lg">
                               <User className="mr-2 h-4 w-4" /> Hacer Trabajador
                             </DropdownMenuItem>
                           )}
@@ -385,43 +410,50 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
   const regularStaff = activeStaff.filter(s => s.is_guard_eligible && s.role !== 'headmaster')
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
-      <div className="space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Directorio del Juzgado</h2>
-        <p className="text-muted-foreground">Personal activo del Juzgado de Tarazona</p>
+    <div className="space-y-8 pb-10">
+      <div className="space-y-1">
+        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Directorio del Juzgado</h1>
+        <p className="text-muted-foreground">Consulta el personal activo y sus datos de contacto.</p>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-12">
         {/* Administrators Section */}
         {administrators.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Crown className="h-5 w-5 text-purple-600" /> Administración
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold flex items-center gap-2 group cursor-pointer px-1">
+              <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600">
+                <Crown className="h-4 w-4" />
+              </div>
+              <span>Administración</span>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {administrators.map((staff) => (
-                <Card key={staff.id} className="p-6 hover:shadow-md transition-shadow">
+                <Card key={staff.id} className="card-modern border-none bg-white p-6 hover:shadow-xl transition-all group">
                   <div className="flex flex-col h-full">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h4 className="font-bold text-lg">{buildFullName(staff)}</h4>
-                        <Badge className="mt-1 bg-purple-500/15 text-purple-700 hover:bg-purple-500/25 border-none">
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="space-y-1">
+                        <h4 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">{buildFullName(staff)}</h4>
+                        <Badge className="bg-purple-50 text-purple-700 border-none rounded-lg text-[10px] uppercase font-bold px-2 py-0">
                           {staff.positions?.name || 'Administrador'}
                         </Badge>
                       </div>
-                      <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
+                      <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-500/10 to-purple-600/20 flex items-center justify-center text-purple-700 font-extrabold text-sm border border-purple-100 group-hover:scale-110 transition-transform shadow-sm">
                         {staff.first_name[0]}{staff.last_name[0]}
                       </div>
                     </div>
                     
-                    <div className="space-y-2 mt-auto">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Mail className="h-4 w-4 mr-2" />
+                    <div className="space-y-3 mt-auto pt-4 border-t border-border/30 border-dashed">
+                      <div className="flex items-center text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                        <div className="h-7 w-7 rounded-lg bg-accent/50 flex items-center justify-center mr-3">
+                          <Mail className="h-3.5 w-3.5" />
+                        </div>
                         <span className="truncate">{staff.email}</span>
                       </div>
                       {staff.phone && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Phone className="h-4 w-4 mr-2" />
+                        <div className="flex items-center text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                          <div className="h-7 w-7 rounded-lg bg-accent/50 flex items-center justify-center mr-3">
+                            <Phone className="h-3.5 w-3.5" />
+                          </div>
                           <span>{staff.phone}</span>
                         </div>
                       )}
@@ -434,35 +466,42 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
         )}
 
         {/* Staff Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <User className="h-5 w-5 text-blue-600" /> Compañeros
+        <div className="space-y-6">
+          <h3 className="text-xl font-bold flex items-center gap-2 group cursor-pointer px-1">
+            <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+              <User className="h-4 w-4" />
+            </div>
+            <span>Compañeros</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {regularStaff.length > 0 ? (
               regularStaff.map((staff) => (
-                <Card key={staff.id} className="p-6 hover:shadow-md transition-shadow border-border/60">
+                <Card key={staff.id} className="card-modern border-none bg-white p-6 hover:shadow-xl transition-all group">
                   <div className="flex flex-col h-full">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h4 className="font-bold text-lg">{buildFullName(staff)}</h4>
-                        <Badge variant="secondary" className="mt-1">
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="space-y-1">
+                        <h4 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">{buildFullName(staff)}</h4>
+                        <Badge className="bg-blue-50 text-blue-700 border-none rounded-lg text-[10px] uppercase font-bold px-2 py-0">
                           {staff.positions?.name}
                         </Badge>
                       </div>
-                      <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold border border-blue-100">
+                      <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500/10 to-blue-600/20 flex items-center justify-center text-blue-700 font-extrabold text-sm border border-blue-100 group-hover:scale-110 transition-transform shadow-sm">
                         {staff.first_name[0]}{staff.last_name[0]}
                       </div>
                     </div>
                     
-                    <div className="space-y-2 mt-auto">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Mail className="h-4 w-4 mr-2" />
+                    <div className="space-y-3 mt-auto pt-4 border-t border-border/30 border-dashed">
+                      <div className="flex items-center text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                        <div className="h-7 w-7 rounded-lg bg-accent/50 flex items-center justify-center mr-3">
+                          <Mail className="h-3.5 w-3.5" />
+                        </div>
                         <span className="truncate">{staff.email}</span>
                       </div>
                       {staff.phone && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Phone className="h-4 w-4 mr-2" />
+                        <div className="flex items-center text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                          <div className="h-7 w-7 rounded-lg bg-accent/50 flex items-center justify-center mr-3">
+                            <Phone className="h-3.5 w-3.5" />
+                          </div>
                           <span>{staff.phone}</span>
                         </div>
                       )}
@@ -471,7 +510,10 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                 </Card>
               ))
             ) : (
-              <p className="text-muted-foreground italic">No hay otros compañeros registrados.</p>
+              <div className="col-span-full py-20 text-center bg-accent/20 rounded-2xl border-2 border-dashed border-border/50">
+                <Users className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                <p className="text-muted-foreground italic">No hay otros compañeros registrados.</p>
+              </div>
             )}
           </div>
         </div>

@@ -8,14 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { 
   Dialog, 
   DialogContent, 
   DialogDescription, 
@@ -40,15 +32,21 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Edit2, Trash2, CalendarIcon, Loader2, Sparkles, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, CalendarIcon, Loader2, Search, ArrowRight, Shield, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useRole } from '@/hooks/use-role';
+import { 
+  DSCard, 
+  DSBadge, 
+  DSIconBox, 
+  DSPageHeader, 
+  DSSectionHeading, 
+  DSButton 
+} from '@/lib/design-system';
 
 export interface Holiday {
   id: string;
@@ -65,12 +63,11 @@ interface HolidaysPageClientProps {
 export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClientProps) {
   const [holidays, setHolidays] = useState<Holiday[]>(initialHolidays);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDelOpen, setIsDelOpen] = useState(false);
   const [editingHoliday, setEditingHoliday] = useState<Holiday | null>(null);
   const [deletingHolidayId, setDeletingHolidayId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   
-  // Form states
   const [formData, setFormData] = useState<{
     date: Date | undefined;
     name: string;
@@ -81,7 +78,6 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
     scope: 'nacional'
   });
 
-  // Filter states
   const [scopeFilter, setScopeFilter] = useState<string>('all');
   const [yearFilter, setYearFilter] = useState<string>(new Date().getFullYear().toString());
 
@@ -92,7 +88,6 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
 
   const years = useMemo(() => {
     const yearsSet = new Set(initialHolidays.map(h => h.year));
-    // Add current and next year if not present
     yearsSet.add(new Date().getFullYear());
     yearsSet.add(new Date().getFullYear() + 1);
     return Array.from(yearsSet).sort((a, b) => b - a);
@@ -127,11 +122,7 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
 
   const handleSave = async () => {
     if (!formData.date || !formData.name) {
-      toast({
-        title: "Error",
-        description: "La fecha y el nombre son obligatorios.",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "La fecha y el nombre son obligatorios.", variant: "destructive" });
       return;
     }
 
@@ -143,43 +134,29 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
       if (editingHoliday) {
         const { data, error } = await supabase
           .from('holidays')
-          .update({
-            date: dateStr,
-            name: formData.name,
-            scope: formData.scope,
-            year: year
-          })
+          .update({ date: dateStr, name: formData.name, scope: formData.scope, year: year })
           .eq('id', editingHoliday.id)
           .select()
           .single();
 
         if (error) throw error;
         setHolidays(prev => prev.map(h => h.id === data.id ? data : h));
-        toast({ title: "Festivo actualizado", description: "El festivo se ha modificado correctamente." });
+        toast({ title: "Festivo actualizado" });
       } else {
         const { data, error } = await supabase
           .from('holidays')
-          .insert({
-            date: dateStr,
-            name: formData.name,
-            scope: formData.scope,
-            year: year
-          })
+          .insert({ date: dateStr, name: formData.name, scope: formData.scope, year: year })
           .select()
           .single();
 
         if (error) throw error;
         setHolidays(prev => [...prev, data]);
-        toast({ title: "Festivo creado", description: "El festivo se ha añadido correctamente." });
+        toast({ title: "Festivo creado" });
       }
       setIsDialogOpen(false);
       router.refresh();
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo guardar el festivo.",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -197,51 +174,47 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
       if (error) throw error;
       setHolidays(prev => prev.filter(h => h.id !== deletingHolidayId));
       toast({ title: "Festivo eliminado" });
-      setIsDeleteDialogOpen(false);
+      setIsDelOpen(false);
       router.refresh();
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo eliminar el festivo.",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
       setDeletingHolidayId(null);
     }
   };
 
-  const getScopeBadge = (scope: Holiday['scope']) => {
+  const getScopeInfo = (scope: Holiday['scope']) => {
     switch (scope) {
-      case 'nacional':
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Nacional</Badge>;
-      case 'aragon':
-        return <Badge className="bg-orange-100 text-orange-800 border-orange-200">Aragón</Badge>;
-      case 'zaragoza_provincia':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">Prov. Zaragoza</Badge>;
-      case 'tarazona':
-        return <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200">Tarazona</Badge>;
-      default:
-        return <Badge>{scope}</Badge>;
+      case 'nacional': return { label: 'España', variant: 'amber' as const };
+      case 'aragon': return { label: 'Aragón', variant: 'orange' as const };
+      case 'zaragoza_provincia': return { label: 'Provincia', variant: 'blue' as const };
+      case 'tarazona': return { label: 'Local', variant: 'indigo' as const };
+      default: return { label: scope, variant: 'neutral' as const };
     }
   };
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Calendario de Festivos</h2>
-        <Button onClick={() => handleOpenDialog()}>
-          <Plus className="mr-2 h-4 w-4" /> Añadir festivo
-        </Button>
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <DSPageHeader 
+          title="Calendario de Festivos" 
+          subtitle="Configuración de días no laborables para el cálculo de guardias y vacaciones."
+        />
+        {isHeadmaster && (
+          <DSButton onClick={() => handleOpenDialog()} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Añadir festivo
+          </DSButton>
+        )}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="flex-1 max-w-sm">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-black/[0.04]">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <Select value={scopeFilter} onValueChange={setScopeFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filtrar por ámbito" />
+            <SelectTrigger className="w-full md:w-[200px] rounded-[12px] h-11 bg-white border-black/[0.08] text-[15px]">
+              <SelectValue placeholder="Ámbito" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
               <SelectItem value="all">Todos los ámbitos</SelectItem>
               <SelectItem value="nacional">Nacional</SelectItem>
               <SelectItem value="aragon">Aragón</SelectItem>
@@ -249,13 +222,12 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
               <SelectItem value="tarazona">Tarazona</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-        <div className="flex-1 max-w-[200px]">
+
           <Select value={yearFilter} onValueChange={setYearFilter}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full md:w-[150px] rounded-[12px] h-11 bg-white border-black/[0.08] text-[15px]">
               <SelectValue placeholder="Año" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
               <SelectItem value="all">Todos los años</SelectItem>
               {years.map(year => (
                 <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
@@ -265,175 +237,157 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
         </div>
       </div>
 
-      <div className="rounded-md border bg-card/60 backdrop-blur-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Nombre del Festivo</TableHead>
-              <TableHead>Ámbito</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredHolidays.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="py-12">
-                  <EmptyState 
-                    icon={holidays.length === 0 ? Sparkles : Search}
-                    title={holidays.length === 0 ? "No hay festivos" : "Sin resultados"}
-                    description={holidays.length === 0 
-                      ? "Parece que aún no se han cargado festivos para este calendario."
-                      : "No hay ningún festivo que coincida con los filtros seleccionados."
-                    }
-                    action={holidays.length === 0 ? (
-                      <Button onClick={() => handleOpenDialog()}>
-                        <Plus className="mr-2 h-4 w-4" /> Añadir festivo
-                      </Button>
-                    ) : (
-                      <Button variant="outline" onClick={() => { setScopeFilter("all"); setYearFilter(new Date().getFullYear().toString()); }}>
-                        Limpiar filtros
-                      </Button>
-                    )}
-                  />
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredHolidays.map((holiday) => (
-                <TableRow key={holiday.id}>
-                  <TableCell className="font-medium">
-                    {format(new Date(holiday.date), 'dd/MM/yyyy')}
-                  </TableCell>
-                  <TableCell>{holiday.name}</TableCell>
-                  <TableCell>{getScopeBadge(holiday.scope)}</TableCell>
-                  <TableCell className="text-right">
-                    {isHeadmaster && (
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleOpenDialog(holiday)}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => {
-                            setDeletingHolidayId(holiday.id);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {filteredHolidays.length === 0 ? (
+          <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4 py-20">
+            <EmptyState 
+              icon={holidays.length === 0 ? Shield : Search}
+              title={holidays.length === 0 ? "No hay festivos" : "Sin resultados"}
+              description="Añade nuevos festivos o cambia los filtros de búsqueda."
+            />
+          </div>
+        ) : (
+          filteredHolidays.map((holiday) => {
+            const scope = getScopeInfo(holiday.scope);
+            return (
+              <DSCard key={holiday.id} className="group hover:scale-[1.02] transition-all duration-300">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="h-10 w-10 flex items-center justify-center rounded-[12px] bg-[#F2F2F7] text-neutral-900 font-bold text-[13px] border border-black/[0.04]">
+                    {format(new Date(holiday.date), 'dd')}
+                  </div>
+                  <DSBadge variant={scope.variant}>{scope.label}</DSBadge>
+                </div>
+                
+                <div className="space-y-1 mb-6">
+                  <p className="text-[17px] font-semibold text-neutral-900 leading-tight min-h-[44px]">{holiday.name}</p>
+                  <p className="text-[13px] text-[#86868B] font-medium capitalize">
+                    {format(new Date(holiday.date), "MMMM 'de' yyyy", { locale: es })}
+                  </p>
+                </div>
+
+                {isHeadmaster && (
+                  <div className="flex items-center gap-2 pt-4 border-t border-black/[0.04]">
+                    <DSButton 
+                      variant="secondary" 
+                      className="flex-1 h-9 text-[12px] rounded-[10px]"
+                      onClick={() => handleOpenDialog(holiday)}
+                    >
+                      <Edit2 className="h-3.5 w-3.5 mr-1.5" /> Editar
+                    </DSButton>
+                    <button 
+                      onClick={() => {
+                        setDeletingHolidayId(holiday.id);
+                        setIsDelOpen(true);
+                      }}
+                      className="h-9 w-9 flex items-center justify-center rounded-[10px] bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </DSCard>
+            )
+          })
+        )}
       </div>
 
       {/* Form Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingHoliday ? 'Editar Festivo' : 'Añadir Nuevo Festivo'}
-            </DialogTitle>
-            <DialogDescription>
-              Introduce los detalles del día festivo.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Fecha</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date ? format(formData.date, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date}
-                    onSelect={(date) => setFormData(prev => ({ ...prev, date }))}
-                    initialFocus
-                    locale={es}
-                  />
-                </PopoverContent>
-              </Popover>
+        <DialogContent className="sm:max-w-[425px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden">
+          <div className="h-2 bg-[#0066CC] w-full" />
+          <div className="p-8">
+            <DialogHeader className="mb-6">
+              <DialogTitle className="text-[24px] font-bold text-neutral-900">
+                {editingHoliday ? 'Editar Festivo' : 'Añadir Nuevo Festivo'}
+              </DialogTitle>
+              <DialogDescription className="text-[15px] text-[#86868B]">
+                Define la fecha y el ámbito del día no laborable.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6 py-2">
+              <div className="space-y-2">
+                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Fecha</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="w-full flex items-center px-4 h-11 rounded-[12px] bg-[#F2F2F7]/50 border border-black/[0.04] text-[15px] text-neutral-900">
+                      <CalendarIcon className="mr-2 h-4 w-4 text-[#0066CC]" />
+                      {formData.date ? format(formData.date, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0 rounded-[24px] border-black/[0.08] shadow-2xl overflow-hidden" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.date}
+                      onSelect={(date) => setFormData(prev => ({ ...prev, date }))}
+                      initialFocus
+                      locale={es}
+                      className="p-4"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Nombre</label>
+                <Input 
+                  value={formData.name} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Ej: Navidad, Todos los Santos..."
+                  className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] focus:bg-white text-[15px] px-4"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Ámbito</label>
+                <Select value={formData.scope} onValueChange={(val: any) => setFormData(prev => ({ ...prev, scope: val }))}>
+                  <SelectTrigger className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]">
+                    <SelectValue placeholder="Seleccionar ámbito" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
+                    <SelectItem value="nacional">Nacional</SelectItem>
+                    <SelectItem value="aragon">Aragón</SelectItem>
+                    <SelectItem value="zaragoza_provincia">Zaragoza Prov.</SelectItem>
+                    <SelectItem value="tarazona">Tarazona</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Nombre</label>
-              <Input 
-                value={formData.name} 
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Nombre del festivo"
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Ámbito</label>
-              <Select 
-                value={formData.scope} 
-                onValueChange={(val: any) => setFormData(prev => ({ ...prev, scope: val }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar ámbito" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nacional">Nacional</SelectItem>
-                  <SelectItem value="aragon">Aragón</SelectItem>
-                  <SelectItem value="zaragoza_provincia">Zaragoza Prov.</SelectItem>
-                  <SelectItem value="tarazona">Tarazona</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
+            <DialogFooter className="mt-10 gap-3">
+              <DSButton variant="secondary" onClick={() => setIsDialogOpen(false)} disabled={loading} className="flex-1">
+                Cancelar
+              </DSButton>
+              <DSButton onClick={handleSave} disabled={loading} className="flex-1">
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {editingHoliday ? 'Actualizar' : 'Guardar'}
+              </DSButton>
+            </DialogFooter>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={loading}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Guardar
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+      <AlertDialog open={isDelOpen} onOpenChange={setIsDelOpen}>
+        <AlertDialogContent className="rounded-[32px] border-none shadow-2xl p-8">
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción eliminará el festivo de forma permanente.
+            <AlertDialogTitle className="text-[22px] font-bold text-neutral-900">¿Eliminar festivo?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[15px] text-[#86868B] mt-2">
+              Esta acción no se puede deshacer. Los cálculos de guardias y vacaciones podrían verse afectados.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={(e) => {
-                e.preventDefault();
-                handleDelete();
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          <AlertDialogFooter className="mt-8 gap-3">
+            <AlertDialogCancel disabled={loading} className="rounded-[14px] h-11 border-none bg-[#F2F2F7] text-neutral-900 font-semibold hover:bg-black/[0.05]">
+              Cancelar
+            </AlertDialogCancel>
+            <DSButton 
+              variant="danger"
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
               disabled={loading}
+              className="h-11 px-8"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Eliminar'}
-            </AlertDialogAction>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Eliminar permanentemente'}
+            </DSButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

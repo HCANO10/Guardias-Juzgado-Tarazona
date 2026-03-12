@@ -5,22 +5,40 @@ import { useState, useMemo } from "react"
 import { buildFullName } from "@/lib/staff/normalize"
 import { useRole } from "@/hooks/use-role"
 import { useToast } from "@/hooks/use-toast"
-import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
-import { format, differenceInDays, isWithinInterval } from "date-fns"
+import { format, differenceInDays } from "date-fns"
 import { es } from "date-fns/locale"
-import { CalendarIcon, Loader2, AlertCircle, CheckCircle2, XCircle, Trash2, Search, Sun, ArrowRight, Shield, Users } from "lucide-react"
+import { 
+  Calendar as CalendarIcon, 
+  Loader2, 
+  AlertCircle, 
+  CheckCircle2, 
+  XCircle, 
+  Trash2, 
+  Search, 
+  Sun, 
+  ArrowRight, 
+  Shield, 
+  Users,
+  Info
+} from "lucide-react"
 import { EmptyState } from "@/components/ui/empty-state"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { 
+  DSCard, 
+  DSBadge, 
+  DSIconBox, 
+  DSPageHeader, 
+  DSSectionHeading, 
+  DSButton 
+} from "@/lib/design-system"
 
 interface VacationsPageClientProps {
   staff: any[]
@@ -50,14 +68,13 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
   const [staffFilter, setStaffFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
 
-  // Resumen lateral del trabajador seleccionado en el FORMULARIO
+  // Resumen lateral
   const selectedStaffStats = useMemo(() => {
     if (!selectedStaffId) return null
     
     const staffMember = staff.find(s => s.id === selectedStaffId)
     const currentYear = new Date().getFullYear()
     
-    // Filtramos vacaciones aprobadas de este año para este trabajador
     const approvedVacations = vacations.filter(v => 
       v.staff_id === selectedStaffId && 
       v.status === 'approved' &&
@@ -69,7 +86,6 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
       return acc + days
     }, 0)
 
-    // Próximas vacaciones
     const today = new Date()
     const nextVac = vacations
       .filter(v => v.staff_id === selectedStaffId && v.status === 'approved' && new Date(v.start_date) >= today)
@@ -85,7 +101,6 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
     }
   }, [selectedStaffId, vacations, staff, currentStaffId, nextGuard])
 
-  // Lógica de filtrado de la tabla
   const filteredVacations = useMemo(() => {
     return vacations.filter(v => {
       if (staffFilter !== "all" && v.staff_id !== staffFilter) return false
@@ -121,7 +136,6 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
         setConflictResult(result)
         toast({ variant: "destructive", title: "Conflicto detectado", description: "No puedes pedir estas fechas." })
       } else {
-        // Proceder a guardar
         handleSave()
       }
     } catch (e: any) {
@@ -147,12 +161,9 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
       if (error) throw error
 
       toast({ title: "Vacaciones registradas", description: "Se han guardado correctamente." })
-      
-      // Reset form
       setDateRange({ from: undefined, to: undefined })
       setNotes("")
       setConflictResult(null)
-      
       router.refresh()
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error al guardar", description: e.message })
@@ -176,40 +187,38 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
     }
   }
 
-  // View state for history
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table')
-
   return (
-    <div className="space-y-8 pb-10">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Gestión de Vacaciones</h1>
-          <p className="text-muted-foreground">Solicita y gestiona tus periodos de descanso ({new Date().getFullYear()}).</p>
-        </div>
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <DSPageHeader 
+          title="Gestión de Vacaciones" 
+          subtitle={`Solicita y gestiona tus periodos de descanso (${new Date().getFullYear()})`}
+        />
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-12">
-        {/* Formulario e Histórico - Columna Principal (Izquierda) */}
-        <div className="lg:col-span-8 space-y-8">
+      <div className="grid gap-10 lg:grid-cols-12">
+        {/* Main Column */}
+        <div className="lg:col-span-8 space-y-10">
           
-          {/* Formulario de Solicitud */}
-          <Card className="card-modern border-none bg-white shadow-sm overflow-hidden">
-            <div className="h-2 bg-primary/20 w-full" />
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-bold flex items-center gap-2">
-                <Sun className="h-5 w-5 text-orange-500" /> Nueva Solicitud
-              </CardTitle>
-              <CardDescription>El sistema validará automáticamente si tienes guardias asignadas en las fechas elegidas.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-2">
-              <div className="grid gap-5 md:grid-cols-2">
+          {/* Form Card */}
+          <DSCard className="overflow-hidden">
+            <div className="flex items-center gap-3 mb-6">
+              <DSIconBox icon={Sun} variant="orange" />
+              <div>
+                <h3 className="text-[20px] font-semibold text-neutral-900">Nueva Solicitud</h3>
+                <p className="text-[13px] text-[#86868B]">Validación automática de conflictos con guardias.</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">Trabajador</label>
+                  <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Trabajador</label>
                   <Select value={selectedStaffId} onValueChange={setSelectedStaffId} disabled={!isHeadmaster}>
-                    <SelectTrigger className="rounded-xl border-border/50 bg-accent/30 h-11">
+                    <SelectTrigger className="rounded-[12px] h-11 bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]">
                       <SelectValue placeholder="Seleccionar..." />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border/50">
+                    <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
                       {(isHeadmaster ? staff : staff.filter(s => s.id === currentStaffId)).map(s => (
                         <SelectItem key={s.id} value={s.id}>{buildFullName(s)}</SelectItem>
                       ))}
@@ -218,31 +227,30 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">Rango de fechas</label>
+                  <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Rango de fechas</label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
+                      <button
                         className={cn(
-                          "w-full justify-start text-left font-normal h-11 rounded-xl border-border/50 bg-accent/30 hover:bg-accent/50 transition-colors",
-                          !dateRange.from && "text-muted-foreground"
+                          "w-full flex items-center px-4 text-left h-11 rounded-[12px] bg-[#F2F2F7]/50 border border-black/[0.04] hover:bg-black/[0.02] transition-colors text-[15px]",
+                          !dateRange.from && "text-neutral-400"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                        <CalendarIcon className="mr-2 h-4 w-4 text-[#0066CC]" />
                         {dateRange.from ? (
                           dateRange.to ? (
-                            <span className="font-medium text-foreground">
+                            <span className="font-medium text-neutral-900">
                               {format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}
                             </span>
                           ) : (
-                            <span className="font-medium text-foreground">{format(dateRange.from, "dd/MM/yyyy")}</span>
+                            <span className="font-medium text-neutral-900">{format(dateRange.from, "dd/MM/yyyy")}</span>
                           )
                         ) : (
                           <span>Seleccionar fechas</span>
                         )}
-                      </Button>
+                      </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 rounded-2xl border-border/50 shadow-xl" align="start">
+                    <PopoverContent className="w-auto p-0 rounded-[24px] border-black/[0.08] shadow-2xl overflow-hidden" align="start">
                       <Calendar
                         initialFocus
                         mode="range"
@@ -251,7 +259,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                         onSelect={(range: any) => setDateRange({ from: range?.from, to: range?.to })}
                         numberOfMonths={2}
                         locale={es}
-                        className="rounded-2xl"
+                        className="p-4"
                       />
                     </PopoverContent>
                   </Popover>
@@ -259,36 +267,36 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">Motivo / Notas (opcional)</label>
+                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Motivo / Notas (opcional)</label>
                 <Textarea 
                   placeholder="Ej: Vacaciones de verano, asuntos propios..." 
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="rounded-xl border-border/50 bg-accent/30 focus:bg-white transition-all min-h-[80px]"
+                  className="rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] focus:bg-white transition-all min-h-[100px] text-[15px] p-4 resize-none"
                 />
               </div>
 
               {conflictResult && !conflictResult.valid && (
-                <Alert variant="destructive" className="bg-red-50 border-red-100 text-red-900 rounded-2xl p-4 shadow-sm animate-in fade-in slide-in-from-top-2">
-                  <XCircle className="h-5 w-5 text-red-600" />
-                  <div className="ml-2">
-                    <AlertTitle className="font-bold">Conflicto con Guardias</AlertTitle>
-                    <AlertDescription className="text-sm mt-1 space-y-1">
+                <div className="bg-red-50 border border-red-100 rounded-[20px] p-5 flex items-start gap-4 animate-in fade-in slide-in-from-top-2">
+                  <XCircle className="h-6 w-6 text-red-600 shrink-0" />
+                  <div>
+                    <p className="text-[15px] font-bold text-red-900">Conflicto con Guardias</p>
+                    <div className="text-[13px] text-red-700/90 mt-1 space-y-1">
                       {conflictResult.conflicts.map((c, i) => (
-                        <div key={i}>
-                          &bull; Tienes guardia la **semana {c.guard_week_number}** ({format(new Date(c.guard_start_date), 'dd/MM')} al {format(new Date(c.guard_end_date), 'dd/MM')}).
-                        </div>
+                        <p key={i}>
+                          &bull; Tienes guardia la week {c.guard_week_number} ({format(new Date(c.guard_start_date), 'dd/MM')} al {format(new Date(c.guard_end_date), 'dd/MM')}).
+                        </p>
                       ))}
-                      <p className="font-semibold text-red-700 mt-2">Reasigna tu guardia antes de pedir estas fechas.</p>
-                    </AlertDescription>
+                      <p className="font-bold text-red-800 mt-2">Reasigna tu guardia antes de pedir estas fechas.</p>
+                    </div>
                   </div>
-                </Alert>
+                </div>
               )}
 
-              <Button 
+              <DSButton 
                 onClick={handleValidateAndSubmit} 
-                disabled={isValidating || isSubmitting || !!(conflictResult && !conflictResult.valid)} 
-                className="w-full h-12 rounded-xl bg-primary text-white shadow-lg shadow-primary/20 hover:scale-[1.01] transition-all font-bold text-base"
+                className="w-full h-12"
+                disabled={isValidating || isSubmitting || !!(conflictResult && !conflictResult.valid)}
               >
                 {isValidating || isSubmitting ? (
                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -296,25 +304,21 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                    <CheckCircle2 className="mr-2 h-5 w-5" />
                 )}
                 {isValidating ? "Validando..." : isSubmitting ? "Registrando..." : "Solicitar Vacaciones"}
-              </Button>
-            </CardContent>
-          </Card>
+              </DSButton>
+            </div>
+          </DSCard>
 
-          {/* Listado de Vacaciones / Histórico */}
-          <div className="space-y-4">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-               <div>
-                  <h3 className="text-lg font-bold flex items-center gap-2 px-1 text-foreground">
-                    Histórico y Planificación
-                  </h3>
-               </div>
+          {/* List Section */}
+          <div className="space-y-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-1">
+               <DSSectionHeading className="mb-0">Histórico y Planificación</DSSectionHeading>
                
-               <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+               <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                   <Select value={staffFilter} onValueChange={setStaffFilter}>
-                    <SelectTrigger className="w-full md:w-[150px] rounded-xl bg-white border-border/50 shadow-sm h-9 text-xs">
+                    <SelectTrigger className="w-full md:w-[150px] rounded-[12px] h-10 bg-white border-black/[0.08] text-[13px]">
                       <SelectValue placeholder="Trabajador" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl">
+                    <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
                       <SelectItem value="all">Todo el personal</SelectItem>
                       {staff.map(s => (
                         <SelectItem key={s.id} value={s.id}>{buildFullName(s)}</SelectItem>
@@ -323,231 +327,154 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                   </Select>
 
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full md:w-[130px] rounded-xl bg-white border-border/50 shadow-sm h-9 text-xs">
+                    <SelectTrigger className="w-full md:w-[140px] rounded-[12px] h-10 bg-white border-black/[0.08] text-[13px]">
                       <SelectValue placeholder="Estado" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="all">Cualquier estado</SelectItem>
+                    <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
+                      <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="approved">Aprobadas</SelectItem>
                       <SelectItem value="cancelled">Canceladas</SelectItem>
                     </SelectContent>
                   </Select>
-
-                  <div className="flex bg-accent/50 p-1 rounded-xl">
-                    <Button 
-                      variant={viewMode === 'table' ? 'secondary' : 'ghost'} 
-                      size="sm" 
-                      className="h-7 rounded-lg px-3"
-                      onClick={() => setViewMode('table')}
-                    >
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Tabla</span>
-                    </Button>
-                    <Button 
-                      variant={viewMode === 'cards' ? 'secondary' : 'ghost'} 
-                      size="sm" 
-                      className="h-7 rounded-lg px-3"
-                      onClick={() => setViewMode('cards')}
-                    >
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Mosaico</span>
-                    </Button>
-                  </div>
                </div>
             </div>
 
-            {viewMode === 'table' ? (
-              <div className="rounded-2xl border border-border/50 bg-white shadow-sm overflow-hidden">
-                <Table>
-                  <TableHeader className="bg-accent/30">
-                    <TableRow className="hover:bg-transparent border-border/50">
-                      <TableHead className="font-bold">Trabajador</TableHead>
-                      <TableHead className="font-bold">Periodo</TableHead>
-                      <TableHead className="text-center font-bold">Días</TableHead>
-                      <TableHead className="font-bold">Estado</TableHead>
-                      <TableHead className="w-[60px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredVacations.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="py-20 text-center">
-                          <EmptyState 
-                            icon={vacations.length === 0 ? Sun : Search}
-                            title={vacations.length === 0 ? "Sin histórico" : "Sin resultados"}
-                            description="Aún no hay registros que coincidan con los filtros."
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredVacations.map((v) => {
-                        const daysNum = differenceInDays(new Date(v.end_date), new Date(v.start_date)) + 1
-                        const staffMem = staff.find(s => s.id === v.staff_id)
-                        const isCan = v.status === 'cancelled'
-                        
-                        return (
-                          <TableRow key={v.id} className={cn("h-16 border-border/50 transition-colors", isCan ? "opacity-60 grayscale-[0.5]" : "hover:bg-accent/5")}>
-                            <TableCell className="font-bold text-foreground">
-                              {staffMem ? buildFullName(staffMem) : "???"}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2 font-medium">
-                                {format(new Date(v.start_date), 'dd MMM', {locale: es})} <ArrowRight className="h-3 w-3 text-muted-foreground" /> {format(new Date(v.end_date), 'dd MMM', {locale: es})}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-center">
-                               <span className="h-7 w-7 rounded-full bg-accent flex items-center justify-center mx-auto text-xs font-bold">{daysNum}</span>
-                            </TableCell>
-                            <TableCell>
-                              {v.status === 'approved' ? (
-                                <Badge className="bg-green-50 text-green-700 border-none rounded-lg font-medium px-2 py-0.5">Aprobada</Badge>
-                              ) : (
-                                <Badge className="bg-accent text-muted-foreground border-none rounded-lg font-medium px-2 py-0.5">Cancelada</Badge>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              {v.status === 'approved' && (isHeadmaster || v.staff_id === myStaffId) && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-9 w-9 text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors"
-                                  onClick={() => handleCancelVacation(v.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {filteredVacations.map((v) => {
+            <div className="grid gap-4 sm:grid-cols-2">
+              {filteredVacations.length === 0 ? (
+                <div className="sm:col-span-2 py-10">
+                  <EmptyState 
+                    icon={vacations.length === 0 ? Sun : Search}
+                    title={vacations.length === 0 ? "Sin histórico" : "Sin resultados"}
+                    description="Aún no hay registros que coincidan con los filtros."
+                  />
+                </div>
+              ) : (
+                filteredVacations.map((v) => {
                   const daysNum = differenceInDays(new Date(v.end_date), new Date(v.start_date)) + 1
                   const staffMem = staff.find(s => s.id === v.staff_id)
                   const isCan = v.status === 'cancelled'
                   
                   return (
-                    <Card key={v.id} className={cn("card-modern border-none bg-white", isCan && "opacity-60")}>
-                      <CardContent className="p-4 space-y-4">
-                        <div className="flex justify-between items-start">
-                          <div className="space-y-0.5">
-                            <p className="text-sm font-bold text-foreground">{staffMem ? buildFullName(staffMem) : "???"}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{v.notes || "Sin observaciones"}</p>
-                          </div>
-                          {isCan ? (
-                             <Badge className="bg-accent text-muted-foreground border-none rounded-lg">Cancelada</Badge>
-                          ) : (
-                             <Badge className="bg-green-50 text-green-700 border-none rounded-lg">Aprobada</Badge>
-                          )}
+                    <DSCard key={v.id} className={cn("group transition-all", isCan && "opacity-60 grayscale-[0.3]")}>
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="space-y-0.5">
+                          <p className="text-[15px] font-bold text-neutral-900">{staffMem ? buildFullName(staffMem) : "???"}</p>
+                          <p className="text-[12px] text-[#86868B] flex items-center gap-1.5">
+                            <Info className="h-3 w-3" />
+                            {v.notes || "Sin observaciones"}
+                          </p>
                         </div>
+                        <DSBadge variant={isCan ? "neutral" : "green"}>
+                          {isCan ? "Cancelada" : "Aprobada"}
+                        </DSBadge>
+                      </div>
 
-                        <div className="flex items-center justify-between py-2 border-y border-border/30 border-dashed">
-                           <div className="flex items-center gap-2 text-sm font-bold">
-                              <CalendarIcon className="h-3 w-3 text-primary" />
-                              {format(new Date(v.start_date), 'd MMM')} &rarr; {format(new Date(v.end_date), 'd MMM')}
-                           </div>
-                           <div className="flex items-center gap-1 text-xs font-bold bg-accent py-0.5 px-2 rounded-full">
-                              {daysNum} días
-                           </div>
-                        </div>
+                      <div className="flex items-center justify-between py-3 border-y border-black/[0.04] border-dashed">
+                         <div className="flex items-center gap-2 text-[14px] font-semibold text-neutral-900">
+                            <CalendarIcon className="h-4 w-4 text-[#0066CC]" />
+                            {format(new Date(v.start_date), 'd MMM')} &rarr; {format(new Date(v.end_date), 'd MMM', {locale: es})}
+                         </div>
+                         <div className="text-[13px] font-bold bg-[#F2F2F7] text-neutral-600 py-1 px-3 rounded-full">
+                            {daysNum} días
+                         </div>
+                      </div>
 
-                        {v.status === 'approved' && (isHeadmaster || v.staff_id === myStaffId) && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full rounded-xl border-red-100 text-red-600 hover:bg-red-600 hover:text-white transition-all scale-95 hover:scale-100"
-                            onClick={() => handleCancelVacation(v.id)}
-                          >
-                             Anular periodo
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
+                      {v.status === 'approved' && (isHeadmaster || v.staff_id === myStaffId) && (
+                        <DSButton 
+                          variant="danger" 
+                          className="w-full mt-4 h-10 text-[13px]"
+                          onClick={() => handleCancelVacation(v.id)}
+                        >
+                           <Trash2 className="h-4 w-4 mr-2" /> Anular periodo
+                        </DSButton>
+                      )}
+                    </DSCard>
                   )
-                })}
-              </div>
-            )}
+                })
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Panel Lateral de Resumen (Derecha) */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="sticky top-24">
-            <Card className="card-modern border-none bg-indigo-600 text-white shadow-lg overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                <CheckCircle2 className="h-20 w-20" />
-              </div>
-              <CardHeader className="pb-3 relative z-10">
-                <CardTitle className="text-lg font-bold flex items-center gap-2">
-                  Estado Actual
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2 space-y-6 relative z-10">
+        {/* Sidebar Column */}
+        <div className="lg:col-span-4 space-y-8">
+          <div className="lg:sticky lg:top-12 space-y-8">
+            <div className="bg-neutral-900 rounded-[32px] p-8 text-white relative overflow-hidden group shadow-2xl">
+              <div className="relative z-10">
+                <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center mb-10 group-hover:bg-white/20 transition-colors">
+                  <Sun className="h-6 w-6 text-orange-400" />
+                </div>
+                
                 {selectedStaffStats ? (
-                  <>
-                    <div className="space-y-1">
-                      <p className="text-[10px] text-indigo-200 uppercase tracking-widest font-black">Colaborador</p>
-                      <p className="text-2xl font-black">{selectedStaffStats.name}</p>
+                  <div className="space-y-8">
+                    <div>
+                      <p className="text-[11px] text-white/40 uppercase tracking-[0.2em] font-black mb-1">Colaborador</p>
+                      <p className="text-[28px] font-bold tracking-tight">{selectedStaffStats.name}</p>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md">
-                        <p className="text-[10px] text-indigo-100 uppercase font-bold mb-1">Días Usados</p>
-                        <p className="text-3xl font-black">{selectedStaffStats.usedDays}</p>
-                        <p className="text-[10px] text-indigo-200 mt-1 italic">Año {new Date().getFullYear()}</p>
+                      <div className="bg-white/5 p-5 rounded-[24px] border border-white/10">
+                        <p className="text-[11px] text-white/40 uppercase font-bold mb-1">Días Usados</p>
+                        <p className="text-[32px] font-bold">{selectedStaffStats.usedDays}</p>
+                        <div className="mt-2 text-[11px] font-bold text-orange-400 uppercase tracking-tighter">Año {new Date().getFullYear()}</div>
                       </div>
-                      <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md">
-                        <p className="text-[10px] text-indigo-100 uppercase font-bold mb-1">Días Restantes</p>
-                        <p className="text-3xl font-black">{Math.max(0, 22 - selectedStaffStats.usedDays)}</p>
-                        <p className="text-[10px] text-indigo-200 mt-1 italic">Estimado (22)</p>
+                      <div className="bg-white/5 p-5 rounded-[24px] border border-white/10">
+                        <p className="text-[11px] text-white/40 uppercase font-bold mb-1">Restantes</p>
+                        <p className="text-[32px] font-bold text-[#34C759]">{Math.max(0, 22 - selectedStaffStats.usedDays)}</p>
+                        <div className="mt-2 h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                           <div 
+                             className="h-full bg-[#34C759]" 
+                             style={{ width: `${Math.min((selectedStaffStats.usedDays / 22) * 100, 100)}%` }} 
+                           />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-4 pt-4 border-t border-white/20">
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center">
-                          <Sun className="h-5 w-5" />
+                    <div className="space-y-5 pt-6 border-t border-white/10">
+                      <div className="flex items-center gap-4 group/item">
+                        <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center group-hover/item:bg-white/10 transition-colors">
+                          <CheckCircle2 className="h-5 w-5 text-[#34C759]" />
                         </div>
                         <div>
-                          <p className="text-[10px] text-indigo-100 uppercase font-bold">Próximo descanso</p>
-                          <p className="text-sm font-bold">{selectedStaffStats.nextVac}</p>
+                          <p className="text-[11px] text-white/40 uppercase font-bold">Próximo descanso</p>
+                          <p className="text-[14px] font-semibold">{selectedStaffStats.nextVac}</p>
                         </div>
                       </div>
                       
                       {selectedStaffId === currentStaffId && (
-                        <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center">
-                            <Shield className="h-5 w-5" />
+                        <div className="flex items-center gap-4 group/item">
+                          <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center group-hover/item:bg-white/10 transition-colors">
+                            <Shield className="h-5 w-5 text-[#0066CC]" />
                           </div>
                           <div>
-                            <p className="text-[10px] text-indigo-100 uppercase font-bold">Próxima guardia</p>
-                            <p className="text-sm font-bold">{selectedStaffStats.nextGuard}</p>
+                            <p className="text-[11px] text-white/40 uppercase font-bold">Próxima guardia</p>
+                            <p className="text-[14px] font-semibold">{selectedStaffStats.nextGuard}</p>
                           </div>
                         </div>
                       )}
                     </div>
-                  </>
+                  </div>
                 ) : (
-                  <div className="py-12 border-2 border-dashed border-white/20 rounded-2xl text-center">
-                     <Users className="h-8 w-8 mx-auto mb-3 opacity-30" />
-                     <p className="text-sm text-indigo-100 italic px-4">Selecciona un trabajador en el formulario para analizar sus vacaciones.</p>
+                  <div className="py-16 border-2 border-dashed border-white/10 rounded-[28px] text-center px-6">
+                     <DSIconBox icon={Users} variant="neutral" className="mx-auto mb-4 bg-white/5 text-white/30" />
+                     <p className="text-[15px] text-white/40 leading-relaxed">Selecciona un trabajador en el formulario para analizar su disponibilidad.</p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-
-            <Alert className="mt-8 border-indigo-100 bg-white shadow-sm rounded-2xl p-4">
-              <AlertCircle className="h-4 w-4 text-indigo-600" />
-              <div className="ml-2">
-                <AlertTitle className="text-xs font-black uppercase text-indigo-700 tracking-tight">Recordatorio</AlertTitle>
-                <AlertDescription className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  El sistema bloquea automáticamente cualquier solicitud que solape con una guardia confirmada.
-                </AlertDescription>
               </div>
-            </Alert>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#0066CC]/20 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none" />
+            </div>
+
+            <div className="bg-white rounded-[28px] p-6 border border-black/[0.04] shadow-sm flex items-start gap-4">
+              <div className="h-10 w-10 rounded-full bg-[#F2F2F7] flex items-center justify-center shrink-0">
+                <AlertCircle className="h-5 w-5 text-[#0066CC]" />
+              </div>
+              <div>
+                <p className="text-[14px] font-bold text-neutral-900 tracking-tight uppercase">Política de Calendario</p>
+                <p className="text-[13px] text-[#86868B] mt-1 leading-relaxed">
+                  Las solicitudes de vacaciones están sujetas a la cobertura mínima del juzgado y no pueden solapar con periodos de guardia asignados.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

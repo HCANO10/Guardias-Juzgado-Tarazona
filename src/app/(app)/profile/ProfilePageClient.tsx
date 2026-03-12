@@ -2,19 +2,26 @@
 "use client"
 
 import { useState, useEffect } from "react"
-
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  User, Shield, Palmtree, Mail, Briefcase, CalendarDays, Edit, Loader2,
-  AlertTriangle, CheckCircle2, XCircle
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { 
+  User, 
+  Shield, 
+  Palmtree, 
+  Mail, 
+  Briefcase, 
+  CalendarDays, 
+  Edit, 
+  Loader2,
+  CheckCircle2, 
+  AlertCircle,
+  Activity,
+  ChevronRight,
+  Lock,
+  Globe
 } from "lucide-react"
 import { format, differenceInDays } from "date-fns"
 import { es } from "date-fns/locale"
@@ -22,7 +29,14 @@ import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { GoogleButton } from "@/components/auth/GoogleButton"
-
+import { 
+  DSCard, 
+  DSBadge, 
+  DSPageHeader, 
+  DSSectionHeading, 
+  DSButton 
+} from "@/lib/design-system"
+import { cn } from "@/lib/utils"
 
 interface ProfilePageClientProps {
   staffData: any
@@ -47,7 +61,7 @@ export function ProfilePageClient({
   const router = useRouter()
   const supabase = createClient()
 
-  // Estado para edición de datos personales
+  // Personal data edit
   const [editOpen, setEditOpen] = useState(false)
   const [editForm, setEditForm] = useState({
     first_name: staffData.first_name,
@@ -56,18 +70,17 @@ export function ProfilePageClient({
   })
   const [savingEdit, setSavingEdit] = useState(false)
 
-  // Estado para cambiar contraseña
-  const [currentPwd, setCurrentPwd] = useState("")
+  // Password change
   const [newPwd, setNewPwd] = useState("")
   const [confirmPwd, setConfirmPwd] = useState("")
   const [changingPwd, setChangingPwd] = useState(false)
 
-  // Estado para cambio de email
+  // Email change
   const [newEmail, setNewEmail] = useState("")
   const [confirmEmail, setConfirmEmail] = useState("")
   const [updatingEmail, setUpdatingEmail] = useState(false)
 
-  // Estado para vinculación de Google
+  // Google link state
   const [userIdentities, setUserIdentities] = useState<any[]>([])
   const [hasPassword, setHasPassword] = useState(true)
 
@@ -76,10 +89,6 @@ export function ProfilePageClient({
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setUserIdentities(user.identities || [])
-        // Simplificación: asumimos que tiene contraseña si no es solo identidades externas
-        // En una app real, podrías chequear si user.factors o similar indica contraseña.
-        // Supabase no da un flag directo "hasPassword" fácilmente sin admin,
-        // pero podemos chequear si existe una identidad 'email'.
         setHasPassword(user.identities?.some(i => i.provider === 'email') || false)
       }
     }
@@ -87,7 +96,6 @@ export function ProfilePageClient({
   }, [supabase.auth])
 
   const googleIdentity = userIdentities.find(i => i.provider === 'google')
-
 
   const handleSaveProfile = async () => {
     setSavingEdit(true)
@@ -102,7 +110,7 @@ export function ProfilePageClient({
         .eq('id', staffData.id)
 
       if (error) throw error
-      toast({ title: "✅ Perfil actualizado correctamente" })
+      toast({ title: "Perfil actualizado correctamente" })
       setEditOpen(false)
       router.refresh()
     } catch (err: any) {
@@ -114,7 +122,7 @@ export function ProfilePageClient({
 
   const handleChangePassword = async () => {
     if (newPwd.length < 8) {
-      toast({ variant: "destructive", title: "La contraseña debe tener al menos 8 caracteres" })
+      toast({ variant: "destructive", title: "Mínimo 8 caracteres" })
       return
     }
     if (newPwd !== confirmPwd) {
@@ -125,8 +133,8 @@ export function ProfilePageClient({
     try {
       const { error } = await supabase.auth.updateUser({ password: newPwd })
       if (error) throw error
-      toast({ title: "✅ Contraseña actualizada correctamente" })
-      setCurrentPwd(""); setNewPwd(""); setConfirmPwd("")
+      toast({ title: "Contraseña actualizada" })
+      setNewPwd(""); setConfirmPwd("")
     } catch (err: any) {
       toast({ variant: "destructive", title: "Error", description: err.message })
     } finally {
@@ -135,26 +143,18 @@ export function ProfilePageClient({
   }
 
   const handleUpdateEmail = async () => {
-    if (!newEmail) return
-    if (newEmail !== confirmEmail) {
-      toast({ variant: "destructive", title: "Los emails no coinciden" })
-      return
-    }
-
+    if (!newEmail || newEmail !== confirmEmail) return
     setUpdatingEmail(true)
     try {
-      const response = await fetch('/api/auth/update-email', {
+      const resp = await fetch('/api/auth/update-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newEmail })
       })
-      const result = await response.json()
-
-      if (!response.ok) throw new Error(result.error)
-
-      toast({ title: "✅ Email actualizado correctamente" })
-      setNewEmail("")
-      setConfirmEmail("")
+      const result = await resp.json()
+      if (!resp.ok) throw new Error(result.error)
+      toast({ title: "Email actualizado" })
+      setNewEmail(""); setConfirmEmail("")
       router.refresh()
     } catch (err: any) {
       toast({ variant: "destructive", title: "Error", description: err.message })
@@ -167,7 +167,6 @@ export function ProfilePageClient({
     try {
       const { error } = await supabase.auth.linkIdentity({ provider: 'google' })
       if (error) throw error
-      // toast se ejecutará después del callback si es exitoso
     } catch (err: any) {
       toast({ variant: "destructive", title: "Error al vincular", description: err.message })
     }
@@ -175,490 +174,335 @@ export function ProfilePageClient({
 
   const handleUnlinkGoogle = async () => {
     if (!hasPassword && userIdentities.length === 1) {
-      toast({ 
-        variant: "destructive", 
-        title: "No puedes desvincular Google", 
-        description: "Debes establecer una contraseña primero para no perder el acceso." 
-      })
+      toast({ variant: "destructive", title: "Acción bloqueada", description: "Establece una contraseña primero." })
       return
     }
-
     if (!googleIdentity) return
-
     try {
       const { error } = await supabase.auth.unlinkIdentity(googleIdentity)
       if (error) throw error
-      toast({ title: "✅ Cuenta de Google desvinculada" })
+      toast({ title: "Cuenta desvinculada" })
       setUserIdentities(prev => prev.filter(i => i.provider !== 'google'))
     } catch (err: any) {
       toast({ variant: "destructive", title: "Error al desvincular", description: err.message })
     }
   }
 
-
   const handleCancelVacation = async (vacationId: string) => {
     const { error } = await supabase.from('vacations').delete().eq('id', vacationId)
     if (error) {
-      toast({ variant: "destructive", title: "Error al cancelar las vacaciones" })
+      toast({ variant: "destructive", title: "Error al cancelar" })
     } else {
-      toast({ title: "Vacaciones canceladas" })
+      toast({ title: "Periodo cancelado" })
       router.refresh()
     }
-  }
-
-  const getStatusBadge = (status: string) => {
-    if (status === 'approved') return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">✅ Aprobada</Badge>
-    if (status === 'pending') return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">⌛ Pendiente</Badge>
-    return <Badge variant="destructive">❌ Denegada</Badge>
   }
 
   const today = new Date().toISOString().split('T')[0]
 
   return (
-    <div className="space-y-8 pb-10">
-      <div className="space-y-1">
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Mi Perfil</h1>
-        <p className="text-muted-foreground">Gestiona tus datos personales, seguridad y consulta tus estadísticas anuales.</p>
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <DSPageHeader 
+          title="Configuración de Perfil" 
+          subtitle="Gestiona tu identidad, credenciales de acceso y preferencias del sistema."
+        />
       </div>
 
-      {/* DATOS PERSONALES */}
-      {/* DATOS PERSONALES */}
-      <Card className="card-modern border-none bg-white p-2">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/50">
-          <div className="flex items-center gap-5">
-            <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center text-primary border border-primary/10 shadow-sm transition-transform hover:scale-105 duration-300">
-              <User className="h-10 w-10" />
-            </div>
-            <div className="space-y-1">
-              <CardTitle className="text-2xl font-black tracking-tight">{staffData.first_name} {staffData.last_name}</CardTitle>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className="bg-primary/10 text-primary border-none font-bold rounded-lg px-2 py-0 text-xs flex items-center gap-1">
-                  <Briefcase className="h-3 w-3" />
-                  {staffData.positions?.name || 'Sin puesto'}
-                </Badge>
-                {staffData.is_active ? (
-                  <Badge className="bg-green-50 text-green-700 border-none font-bold rounded-lg px-2 py-0 text-xs">
-                    Activo
-                  </Badge>
-                ) : (
-                  <Badge variant="destructive" className="border-none font-bold rounded-lg px-2 py-0 text-xs">
-                    Inactivo
-                  </Badge>
+      <div className="grid gap-10 lg:grid-cols-12">
+        {/* Left Column: Data & Stats */}
+        <div className="lg:col-span-8 space-y-10">
+          
+          {/* Main Info Card */}
+          <DSCard className="overflow-hidden p-0">
+             <div className="bg-gradient-to-r from-[#0066CC] to-[#004C99] p-8 text-white relative">
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-8">
+                  <div className="h-24 w-24 rounded-[32px] bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-[32px] font-black shadow-2xl">
+                    {staffData.first_name[0]}{staffData.last_name[0]}
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-[28px] font-extrabold tracking-tight">{staffData.first_name} {staffData.last_name}</h2>
+                      <DSBadge variant="blue" className="bg-white/10 text-white border-white/20">Activo</DSBadge>
+                    </div>
+                    <p className="text-white/70 text-[16px] font-medium flex items-center gap-2">
+                      <Briefcase className="h-4 w-4" /> {staffData.positions?.name || 'Personal'}
+                    </p>
+                  </div>
+                  <DSButton 
+                    variant="secondary" 
+                    onClick={() => setEditOpen(true)}
+                    className="md:ml-auto h-11 px-6 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  >
+                    <Edit className="mr-2 h-4 w-4" /> Editar Perfil
+                  </DSButton>
+                </div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-32 -mt-32 pointer-events-none" />
+             </div>
+             
+             <div className="p-8 grid md:grid-cols-2 gap-8">
+                <div className="space-y-1.5 pt-1">
+                   <p className="text-[11px] font-black uppercase tracking-widest text-[#86868B]">Correo Institucional</p>
+                   <p className="text-[17px] font-bold text-neutral-900 flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-[#0066CC]" /> {staffData.email}
+                   </p>
+                </div>
+                <div className="space-y-1.5 pt-1 border-black/[0.04] md:border-l md:pl-8">
+                   <p className="text-[11px] font-black uppercase tracking-widest text-[#86868B]">Fecha de Alta</p>
+                   <p className="text-[17px] font-bold text-neutral-900 flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4 text-[#34C759]" /> 
+                      {staffData.start_date ? format(new Date(staffData.start_date), "dd 'de' MMMM, yyyy", { locale: es }) : '—'}
+                   </p>
+                </div>
+                {staffData.notes && (
+                  <div className="md:col-span-2 p-5 bg-[#F2F2F7]/50 rounded-[20px] border border-black/[0.04] italic text-[14px] text-neutral-600">
+                     "{staffData.notes}"
+                  </div>
                 )}
-              </div>
-            </div>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => setEditOpen(true)} className="rounded-xl border-border/50 hover:bg-accent/50 h-10 w-full sm:w-auto">
-            <Edit className="mr-2 h-4 w-4" /> Editar perfil
-          </Button>
-        </CardHeader>
-        <CardContent className="pt-6 grid gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="flex items-center gap-3 group">
-              <div className="h-9 w-9 rounded-xl bg-accent/50 flex items-center justify-center border border-border/30 group-hover:bg-primary/5 transition-colors">
-                <Mail className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Email de contacto</span>
-                <span className="text-sm font-medium text-foreground">{staffData.email}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 group">
-              <div className="h-9 w-9 rounded-xl bg-accent/50 flex items-center justify-center border border-border/30 group-hover:bg-primary/5 transition-colors">
-                <CalendarDays className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Fecha de alta</span>
-                <span className="text-sm font-medium text-foreground">
-                  {staffData.start_date
-                    ? format(new Date(staffData.start_date + 'T00:00:00'), "dd 'de' MMMM 'de' yyyy", { locale: es })
-                    : "—"}
-                </span>
-              </div>
-            </div>
-            {staffData.notes && (
-              <div className="md:col-span-2 lg:col-span-1">
-                <div className="p-3 rounded-xl bg-accent/20 border border-dashed border-border/50 text-xs text-muted-foreground italic h-full flex items-center">
-                  "{staffData.notes}"
+             </div>
+          </DSCard>
+
+          {/* Grid for forms */}
+          <div className="grid gap-10 md:grid-cols-2">
+             {/* Security Card */}
+             <DSCard>
+                <div className="flex items-center gap-3 mb-8">
+                   <DSIconBox icon={Lock} variant="blue" />
+                   <div>
+                      <h3 className="text-[18px] font-bold text-neutral-900">Seguridad</h3>
+                      <p className="text-[12px] text-[#86868B]">Actualiza tu contraseña de acceso.</p>
+                   </div>
                 </div>
-              </div>
-            )}
+                
+                <div className="space-y-5">
+                   <div className="space-y-2">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-[#86868B] px-1">Nueva Contraseña</label>
+                      <Input 
+                        type="password" 
+                        value={newPwd}
+                        onChange={e => setNewPwd(e.target.value)}
+                        placeholder="Mínimo 8 caracteres"
+                        className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                      />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-[#86868B] px-1">Confirmar Contraseña</label>
+                      <Input 
+                        type="password"
+                        value={confirmPwd}
+                        onChange={e => setConfirmPwd(e.target.value)}
+                        placeholder="Repite la contraseña"
+                        className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                      />
+                   </div>
+                   {newPwd && confirmPwd && newPwd !== confirmPwd && (
+                     <div className="flex items-center gap-2 text-red-600 text-[12px] font-bold px-1">
+                        <AlertCircle className="h-3 w-3" /> No coinciden
+                     </div>
+                   )}
+                   <DSButton 
+                     onClick={handleChangePassword} 
+                     disabled={changingPwd || !newPwd}
+                     className="w-full h-11 mt-4"
+                   >
+                     {changingPwd ? <Loader2 className="h-4 w-4 animate-spin" /> : "Actualizar Contraseña"}
+                   </DSButton>
+                </div>
+             </DSCard>
+
+             {/* Email Card */}
+             <DSCard>
+                <div className="flex items-center gap-3 mb-8">
+                   <DSIconBox icon={Globe} variant="indigo" />
+                   <div>
+                      <h3 className="text-[18px] font-bold text-neutral-900">Correo Electrónico</h3>
+                      <p className="text-[12px] text-[#86868B]">Cambia tu dirección institucional.</p>
+                   </div>
+                </div>
+                
+                <div className="space-y-5">
+                   <div className="space-y-2">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-[#86868B] px-1">Nuevo Email</label>
+                      <Input 
+                        type="email" 
+                        value={newEmail}
+                        onChange={e => setNewEmail(e.target.value)}
+                        placeholder="nuevo@juzgado.local"
+                        className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                      />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-[#86868B] px-1">Confirmar Email</label>
+                      <Input 
+                        type="email"
+                        value={confirmEmail}
+                        onChange={e => setConfirmEmail(e.target.value)}
+                        className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                      />
+                   </div>
+                   <DSButton 
+                     onClick={handleUpdateEmail} 
+                     disabled={updatingEmail || !newEmail || newEmail !== confirmEmail}
+                     className="w-full h-11 mt-4"
+                   >
+                     {updatingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cambiar Correo"}
+                   </DSButton>
+                </div>
+             </DSCard>
           </div>
-        </CardContent>
-      </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* CORREO ELECTRÓNICO */}
-        <Card className="card-modern border-none bg-white p-2">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-bold flex items-center">
-              <Mail className="mr-2 h-4 w-4 text-primary" /> Correo electrónico
-            </CardTitle>
-            <CardDescription className="text-xs">Email actual: <span className="font-bold text-foreground">{staffData.email}</span></CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Nuevo email</Label>
-              <Input 
-                type="email" 
-                value={newEmail} 
-                onChange={e => setNewEmail(e.target.value)} 
-                placeholder="nuevo@ejemplo.com" 
-                className="rounded-xl border-border/50 h-10"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Confirmar nuevo email</Label>
-              <Input 
-                type="email" 
-                value={confirmEmail} 
-                onChange={e => setConfirmEmail(e.target.value)} 
-                placeholder="Repetir email" 
-                className="rounded-xl border-border/50 h-10"
-              />
-            </div>
-            {newEmail && confirmEmail && newEmail !== confirmEmail && (
-              <Alert variant="destructive" className="py-2 px-3 rounded-xl border-none bg-red-50 text-red-800">
-                <AlertCircle className="h-3 w-3" />
-                <AlertDescription className="text-[11px] font-bold">Los emails no coinciden</AlertDescription>
-              </Alert>
-            )}
-            <Button 
-              onClick={handleUpdateEmail} 
-              disabled={updatingEmail || !newEmail || !confirmEmail} 
-              className="w-full rounded-xl bg-primary h-11 shadow-sm hover:scale-[1.01] transition-all"
-            >
-              {updatingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Actualizar email
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* CUENTA DE GOOGLE */}
-        <Card className="card-modern border-none bg-white p-2">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-bold flex items-center">
-              <svg className="mr-2 h-4 w-4" width="18" height="18" viewBox="0 0 18 18">
-                <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
-                <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
-                <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
-                <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 2.58 9 2.58Z" fill="#EA4335"/>
-              </svg>
-              Cuenta de Google
-            </CardTitle>
-            <CardDescription className="text-xs">Usa Google para un acceso más seguro y rápido</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-2">
-            {googleIdentity ? (
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-green-50 to-green-100/50 border border-green-200 shadow-sm flex items-center justify-between">
+          {/* Connected Accounts */}
+          <DSCard>
+             <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                   <DSIconBox icon={CheckCircle2} variant="green" />
+                   <div>
+                      <h3 className="text-[18px] font-bold text-neutral-900">Cuentas Vinculadas</h3>
+                      <p className="text-[12px] text-[#86868B]">Gestiona tus métodos de inicio de sesión social.</p>
+                   </div>
+                </div>
+             </div>
+             
+             <div className="p-6 rounded-[24px] bg-[#F2F2F7]/50 border border-black/[0.04] flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center border border-green-200 shadow-sm">
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-green-900">Vinculado</span>
-                    <span className="text-[10px] font-medium text-green-700 uppercase tracking-wider">Listo para usar</span>
-                  </div>
+                   <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-sm border border-black/[0.04]">
+                      <svg width="20" height="20" viewBox="0 0 18 18">
+                        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+                        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+                        <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+                        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 2.58 9 2.58Z" fill="#EA4335"/>
+                      </svg>
+                   </div>
+                   <div>
+                      <p className="font-bold text-neutral-900 text-[16px]">Google Account</p>
+                      <p className="text-[13px] text-[#86868B]">{googleIdentity ? "Vinculada correctamente" : "No vinculada"}</p>
+                   </div>
                 </div>
-                <Button variant="ghost" size="sm" onClick={handleUnlinkGoogle} className="h-9 rounded-xl hover:bg-red-50 text-red-600 font-bold text-xs uppercase tracking-tight">
-                  Desvincular
-                </Button>
+                {googleIdentity ? (
+                  <DSButton variant="secondary" className="bg-red-50 text-red-600 border-none hover:bg-red-600 hover:text-white" onClick={handleUnlinkGoogle}>
+                     Desvincular
+                  </DSButton>
+                ) : (
+                  <div onClick={handleLinkGoogle}>
+                    <GoogleButton label="Vincular con Google" />
+                  </div>
+                )}
+             </div>
+          </DSCard>
+        </div>
+
+        {/* Right Column: Summaries & History */}
+        <div className="lg:col-span-4 space-y-10">
+           <div className="lg:sticky lg:top-12 space-y-10">
+              
+              {/* Annual Stats */}
+              <div className="bg-neutral-900 rounded-[32px] p-8 text-white relative overflow-hidden group shadow-2xl">
+                 <div className="relative z-10 space-y-8">
+                    <div className="flex items-center justify-between">
+                       <DSIconBox icon={Activity} variant="indigo" className="bg-white/10 text-indigo-400" />
+                       <p className="text-[11px] text-white/40 uppercase font-black tracking-widest">Global {new Date().getFullYear()}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="bg-white/5 p-5 rounded-[24px] border border-white/10">
+                          <p className="text-[11px] text-white/40 uppercase font-bold mb-1">Guardias</p>
+                          <p className="text-[32px] font-bold">{totalGuards}</p>
+                       </div>
+                       <div className="bg-white/5 p-5 rounded-[24px] border border-white/10">
+                          <p className="text-[11px] text-white/40 uppercase font-bold mb-1">Vacaciones</p>
+                          <p className="text-[32px] font-bold text-[#34C759]">{totalVacationDays}</p>
+                       </div>
+                    </div>
+
+                    <div className="space-y-4 pt-4">
+                       <div className="flex items-center justify-between text-[14px]">
+                          <span className="text-white/40 font-bold uppercase text-[10px] tracking-wider">Próxima Guardia</span>
+                          <span className="font-black text-blue-400">{nextGuard ? `Sem. ${nextGuard.guard_periods?.week_number}` : '—'}</span>
+                       </div>
+                       <div className="flex items-center justify-between text-[14px]">
+                          <span className="text-white/40 font-bold uppercase text-[10px] tracking-wider">Siguiente Salida</span>
+                          <span className="font-black text-green-400">
+                             {nextVacation ? format(new Date(nextVacation.start_date), 'dd/MM') : '—'}
+                          </span>
+                       </div>
+                    </div>
+                 </div>
+                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-500/10 to-transparent pointer-events-none" />
               </div>
-            ) : (
+
+              {/* Quick History List */}
               <div className="space-y-4">
-                <p className="text-sm text-muted-foreground leading-relaxed px-1">
-                  Al vincular tu cuenta, podrás iniciar sesión al instante sin usar contraseña.
-                </p>
-                <div onClick={handleLinkGoogle}>
-                  <GoogleButton label="Vincular con Google" />
-                </div>
+                 <DSSectionHeading className="px-2">Guardias Futuras</DSSectionHeading>
+                 {futureGuards.length === 0 ? (
+                   <p className="text-[14px] text-[#86868B] px-2 italic">Sin asignaciones próximas.</p>
+                 ) : (
+                   <div className="space-y-3">
+                      {futureGuards.slice(0, 3).map((g, i) => (
+                        <div key={i} className="bg-white rounded-[20px] p-4 border border-black/[0.04] flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+                           <div className="flex items-center gap-3">
+                              <div className="h-9 w-9 bg-[#F2F2F7] rounded-[10px] flex items-center justify-center text-[12px] font-black text-[#0066CC]">
+                                 {g.guard_periods?.week_number}
+                              </div>
+                              <p className="text-[14px] font-bold text-neutral-900">
+                                 {format(new Date(g.guard_periods?.start_date), 'dd MMM', { locale: es })}
+                              </p>
+                           </div>
+                           <ChevronRight className="h-4 w-4 text-black/10" />
+                        </div>
+                      ))}
+                   </div>
+                 )}
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* CAMBIAR CONTRASEÑA */}
-        <Card className="card-modern border-none bg-white p-2">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-bold flex items-center text-foreground">
-              <Shield className="mr-2 h-4 w-4 text-primary" /> Cambiar contraseña
-            </CardTitle>
-            <CardDescription className="text-xs">Seguridad reforzada (mínimo 8 caracteres)</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Nueva contraseña</Label>
-              <Input 
-                type="password" 
-                value={newPwd} 
-                onChange={e => setNewPwd(e.target.value)} 
-                placeholder="Introducir nueva contraseña" 
-                className="rounded-xl border-border/50 h-10"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Confirmar contraseña</Label>
-              <Input 
-                type="password" 
-                value={confirmPwd} 
-                onChange={e => setConfirmPwd(e.target.value)} 
-                placeholder="Repetir para confirmar" 
-                className="rounded-xl border-border/50 h-10"
-              />
-            </div>
-            {newPwd && confirmPwd && newPwd !== confirmPwd && (
-              <Alert variant="destructive" className="py-2 px-3 rounded-xl border-none bg-red-50 text-red-800">
-                <AlertTriangle className="h-3 w-3" />
-                <AlertDescription className="text-[11px] font-bold">Las contraseñas no coinciden</AlertDescription>
-              </Alert>
-            )}
-            <Button 
-              onClick={handleChangePassword} 
-              disabled={changingPwd || !newPwd || !confirmPwd} 
-              className="w-full rounded-xl bg-primary h-11 shadow-sm hover:scale-[1.01] transition-all"
-            >
-              {changingPwd && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Actualizar seguridad
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* ESTADÍSTICAS */}
-        <Card className="card-modern border-none bg-white p-2">
-          <CardHeader className="pb-6">
-            <CardTitle className="text-base font-bold flex items-center">
-              <Activity className="mr-2 h-4 w-4 text-indigo-500" /> Resumen Anual {new Date().getFullYear()}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-accent/30 border border-border/50 group hover:bg-white transition-all hover:shadow-md">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm">
-                  <Shield className="h-4 w-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-foreground leading-tight">Total Guardias</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black opacity-60">Asignadas</span>
-                </div>
-              </div>
-              <span className="text-2xl font-black text-primary">{totalGuards}</span>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-accent/30 border border-border/50 group hover:bg-white transition-all hover:shadow-md">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform shadow-sm">
-                  <CalendarDays className="h-4 w-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-foreground leading-tight">Próxima Guardia</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black opacity-60">Cronograma</span>
-                </div>
-              </div>
-              <span className="font-black text-sm text-purple-700">
-                {nextGuard
-                  ? `Sem. ${nextGuard.guard_periods?.week_number}`
-                  : <span className="opacity-40">—</span>}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-accent/30 border border-border/50 group hover:bg-white transition-all hover:shadow-md">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-green-100 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform shadow-sm">
-                  <Palmtree className="h-4 w-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-foreground leading-tight">Días Consumidos</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black opacity-60">Vacaciones</span>
-                </div>
-              </div>
-              <span className="text-2xl font-black text-green-700">{totalVacationDays}</span>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-accent/30 border border-border/50 group hover:bg-white transition-all hover:shadow-md">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform shadow-sm">
-                  <CalendarDays className="h-4 w-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-foreground leading-tight">Siguiente Salida</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black opacity-60">Vacaciones</span>
-                </div>
-              </div>
-              <span className="font-black text-xs text-indigo-700">
-                {nextVacation
-                  ? `${format(new Date(nextVacation.start_date + 'T00:00:00'), 'dd/MM')} - ${format(new Date(nextVacation.end_date + 'T00:00:00'), 'dd/MM')}`
-                  : <span className="opacity-40">—</span>}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+           </div>
+        </div>
       </div>
 
-
-      {/* MIS GUARDIAS */}
-      <Card className="card-modern border-none bg-white p-2">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-base font-bold flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <Shield className="h-4 w-4" />
-            </div>
-            Mis próximas guardias ({futureGuards.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {futureGuards.length === 0 ? (
-            <div className="py-12 text-center bg-accent/20 rounded-2xl border-2 border-dashed border-border/50">
-              < Shield className="h-10 w-10 mx-auto mb-3 opacity-20 text-indigo-400" />
-              <p className="text-sm text-muted-foreground font-medium">No tienes guardias asignadas próximamente.</p>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-border/50 overflow-hidden bg-white shadow-sm">
-              <Table>
-                <TableHeader className="bg-accent/30">
-                  <TableRow className="hover:bg-transparent border-border/50">
-                    <TableHead className="font-bold text-xs uppercase tracking-wider h-11">Semana</TableHead>
-                    <TableHead className="font-bold text-xs uppercase tracking-wider h-11">Inicio</TableHead>
-                    <TableHead className="font-bold text-xs uppercase tracking-wider h-11">Fin</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {futureGuards.map((g: any) => (
-                    <TableRow key={g.guard_period_id} className="h-12 border-border/50 hover:bg-accent/5 transition-colors">
-                      <TableCell className="font-bold text-primary">Semana {g.guard_periods?.week_number}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{g.guard_periods?.start_date ? format(new Date(g.guard_periods.start_date + 'T00:00:00'), 'dd MMM yyyy', { locale: es }) : '—'}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{g.guard_periods?.end_date ? format(new Date(g.guard_periods.end_date + 'T00:00:00'), 'dd MMM yyyy', { locale: es }) : '—'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* MIS VACACIONES */}
-      <Card className="card-modern border-none bg-white p-2">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-base font-bold flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
-              <Palmtree className="h-4 w-4" />
-            </div>
-            Mis vacaciones {new Date().getFullYear()} ({vacations.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {vacations.length === 0 ? (
-            <div className="py-12 text-center bg-accent/20 rounded-2xl border-2 border-dashed border-border/50">
-              <Palmtree className="h-10 w-10 mx-auto mb-3 opacity-20 text-green-400" />
-              <p className="text-sm text-muted-foreground font-medium">No tienes vacaciones registradas este año.</p>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-border/50 overflow-hidden bg-white shadow-sm">
-              <Table>
-                <TableHeader className="bg-accent/30">
-                  <TableRow className="hover:bg-transparent border-border/50">
-                    <TableHead className="font-bold text-xs uppercase tracking-wider h-11">Desde</TableHead>
-                    <TableHead className="font-bold text-xs uppercase tracking-wider h-11">Hasta</TableHead>
-                    <TableHead className="font-bold text-xs uppercase tracking-wider h-11">Días</TableHead>
-                    <TableHead className="font-bold text-xs uppercase tracking-wider h-11">Estado</TableHead>
-                    <TableHead className="text-right h-11"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {vacations.map((v: any) => {
-                    const days = differenceInDays(new Date(v.end_date), new Date(v.start_date)) + 1
-                    const canCancel = v.end_date >= today
-                    return (
-                      <TableRow key={v.id} className="h-14 border-border/50 hover:bg-accent/5 transition-colors">
-                        <TableCell className="font-bold text-foreground">{format(new Date(v.start_date + 'T00:00:00'), 'dd MMM yyyy', { locale: es })}</TableCell>
-                        <TableCell className="text-muted-foreground font-medium">{format(new Date(v.end_date + 'T00:00:00'), 'dd MMM yyyy', { locale: es })}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="rounded-lg border-border/50 text-foreground/70 bg-white font-bold px-2">
-                            {days} días
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(v.status)}</TableCell>
-                        <TableCell className="text-right pr-4">
-                          {canCancel && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 font-bold text-xs uppercase tracking-tight"
-                              onClick={() => handleCancelVacation(v.id)}
-                            >
-                              Cancelar
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* DIALOG EDITAR PERFIL */}
+      {/* Edit Modal */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="rounded-2xl border-none shadow-2xl p-0 overflow-hidden sm:max-w-[440px]">
-          <div className="bg-primary/5 p-6 flex items-center gap-4 border-b border-primary/10">
-            <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center text-primary shadow-sm">
-              <User className="h-6 w-6" />
-            </div>
-            <div>
-              <DialogTitle className="text-foreground font-black tracking-tight">Editar Perfil</DialogTitle>
-              <DialogDescription className="text-muted-foreground font-medium text-xs">Actualiza tus datos públicos</DialogDescription>
-            </div>
-          </div>
-          <div className="p-6 space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Nombre</Label>
-                <Input 
-                  value={editForm.first_name} 
-                  onChange={e => setEditForm({ ...editForm, first_name: e.target.value })} 
-                  className="rounded-xl border-border/50 h-10 focus-visible:ring-primary/20"
-                />
+        <DialogContent className="rounded-[32px] border-none shadow-2xl p-0 overflow-hidden max-w-md">
+           <div className="bg-[#F2F2F7] p-8 border-b border-black/[0.04]">
+              <DialogHeader>
+                <DialogTitle className="text-[24px] font-extrabold text-neutral-900 tracking-tight">Editar Perfil</DialogTitle>
+                <DialogDescription className="text-[15px] text-[#86868B] font-medium">Modifica tus datos personales públicos.</DialogDescription>
+              </DialogHeader>
+           </div>
+           
+           <div className="p-8 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-2">
+                    <label className="text-[11px] font-black uppercase text-[#86868B] px-1">Nombre</label>
+                    <Input 
+                      value={editForm.first_name}
+                      onChange={e => setEditForm(prev => ({...prev, first_name: e.target.value}))}
+                      className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                    />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="text-[11px] font-black uppercase text-[#86868B] px-1">Apellidos</label>
+                    <Input 
+                      value={editForm.last_name}
+                      onChange={e => setEditForm(prev => ({...prev, last_name: e.target.value}))}
+                      className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                    />
+                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Apellidos</Label>
-                <Input 
-                  value={editForm.last_name} 
-                  onChange={e => setEditForm({ ...editForm, last_name: e.target.value })} 
-                  className="rounded-xl border-border/50 h-10 focus-visible:ring-primary/20"
-                />
+                 <label className="text-[11px] font-black uppercase text-[#86868B] px-1">Notas / Bio</label>
+                 <Textarea 
+                   value={editForm.notes}
+                   onChange={e => setEditForm(prev => ({...prev, notes: e.target.value}))}
+                   className="rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] p-4 text-[15px] min-h-[100px] resize-none" 
+                   placeholder="Escribe algo sobre ti..."
+                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Notas Personales</Label>
-              <Textarea 
-                value={editForm.notes} 
-                onChange={e => setEditForm({ ...editForm, notes: e.target.value })} 
-                placeholder="Ej: Disponibilidad limitada, puesto específico..." 
-                className="rounded-xl border-border/50 min-h-[100px] resize-none focus-visible:ring-primary/20"
-              />
-            </div>
-            <div className="flex flex-col gap-2 pt-2">
-              <Button 
-                onClick={handleSaveProfile} 
-                disabled={savingEdit}
-                className="h-11 rounded-xl bg-primary font-bold shadow-lg shadow-primary/20 hover:scale-[1.01] transition-transform"
-              >
-                {savingEdit ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Guardar cambios
-              </Button>
-              <Button 
-                variant="ghost" 
-                onClick={() => setEditOpen(false)} 
-                disabled={savingEdit}
-                className="h-11 rounded-xl text-muted-foreground font-bold"
-              >
-                Cancelar
-              </Button>
-            </div>
-          </div>
+           </div>
+
+           <DialogFooter className="p-8 pt-0 gap-3">
+              <DSButton variant="secondary" onClick={() => setEditOpen(false)} className="flex-1 h-12">Cancelar</DSButton>
+              <DSButton onClick={handleSaveProfile} disabled={savingEdit} className="flex-1 h-12">
+                 {savingEdit ? <Loader2 className="h-5 w-5 animate-spin" /> : "Guardar Cambios"}
+              </DSButton>
+           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

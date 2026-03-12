@@ -3,86 +3,37 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
 @layer base {
   :root {
-    /* Backgrounds */
-    --background: 210 20% 98%;        /* Very light blue-gray (#f8fafc) */
-    --foreground: 222 47% 11%;        /* Near black for text (#0f172a) */
+    --background: 242 242 247; /* #F2F2F7 - Apple system gray */
+    --foreground: 22 22 23;    /* #171717 - Near black */
     
-    /* Cards and surfaces */
-    --card: 0 0% 100%;                /* Pure white */
-    --card-foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 22 22 23;
     
-    /* Primary accent — Indigo blue */
-    --primary: 226 70% 55%;           /* Vibrant indigo (#4f6de5) */
-    --primary-foreground: 0 0% 100%;  /* White text on primary */
+    --popover: 0 0% 100%;
+    --popover-foreground: 22 22 23;
     
-    /* Secondary — Soft gray */
-    --secondary: 214 20% 94%;         /* Light gray-blue (#eef2f6) */
-    --secondary-foreground: 222 47% 20%;
-    
-    /* Muted elements */
-    --muted: 214 20% 96%;
-    --muted-foreground: 215 16% 47%;  /* Medium gray for secondary text */
-    
-    /* Accent — Light indigo tint */
-    --accent: 226 76% 96%;            /* Very light indigo (#eef0ff) */
-    --accent-foreground: 226 70% 45%;
-    
-    /* Destructive — Soft red */
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    
-    /* Borders and inputs */
-    --border: 214 20% 90%;            /* Subtle border */
-    --input: 214 20% 90%;
-    --ring: 226 70% 55%;              /* Focus ring matches primary */
-    
-    /* Sidebar */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 226 70% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 226 76% 96%;
-    --sidebar-accent-foreground: 226 70% 45%;
-    --sidebar-border: 214 20% 92%;
-    
-    /* Chart colors */
-    --chart-1: 226 70% 55%;           /* Indigo */
-    --chart-2: 173 58% 39%;           /* Teal */
-    --chart-3: 43 96% 56%;            /* Amber */
-    --chart-4: 280 67% 60%;           /* Purple */
-    --chart-5: 12 76% 61%;            /* Orange */
-    
-    --radius: 0.75rem;                /* More rounded corners */
-  }
-
-  .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 20% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 20% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 226 70% 55%;
+    --primary: 210 100% 40%;  /* #0066CC - Apple blue */
     --primary-foreground: 0 0% 100%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 226 70% 55%;
+    
+    --secondary: 242 242 247;
+    --secondary-foreground: 140 3% 54%; /* #86868B - Apple gray */
+    
+    --muted: 242 242 247;
+    --muted-foreground: 140 3% 54%;
+    
+    --accent: 210 100% 96%;   /* #EBF4FF - Apple light blue */
+    --accent-foreground: 210 100% 40%;
+    
+    --destructive: 0 100% 97%; /* Apple light red tint */
+    --destructive-foreground: 0 72% 51%; /* #ef4444 */
+    
+    --border: 0 0% 0% / 0.08;
+    --input: 0 0% 0% / 0.08;
+    --ring: 210 100% 40%;
+    
+    --radius: 0.75rem;
   }
 
   * {
@@ -94,6 +45,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #F2F2F7;
   }
 
   html {
@@ -102,27 +54,15 @@
   }
 }
 
-/* Modern card style */
-.card-modern {
-  @apply bg-white rounded-2xl border border-slate-100 shadow-sm 
-         hover:shadow-md transition-shadow duration-200;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }
-
-/* Glass effect for special elements */
-.glass {
-  @apply bg-white/70 backdrop-blur-xl border border-white/20;
-}
-
-/* Gradient header backgrounds */
-.gradient-header {
-  @apply bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-700;
-}
-
-/* Smooth page transitions */
-.page-container {
-  @apply animate-in fade-in duration-300;
-}
-
-/* Hide scrollbar but keep scroll functionality */
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

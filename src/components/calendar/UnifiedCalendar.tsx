@@ -6,12 +6,16 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
-import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { 
+  DSCard, 
+  DSIconBox, 
+  DSBadge 
+} from '@/lib/design-system';
+import { Calendar as CalendarIcon, Filter, Layers, Users } from 'lucide-react';
 
 interface UnifiedCalendarProps {
   guards: any[];
@@ -32,7 +36,6 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
     // 1. Guardias (Rojo)
     if (showGuards) {
       guards.forEach(g => {
-        // Filter by person if needed
         if (personFilter !== 'all') {
           const hasPerson = g.auxilio?.id === personFilter || 
                             g.tramitador?.id === personFilter || 
@@ -51,15 +54,12 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
           id: `guard-${g.id}`,
           title: isUncovered ? "🛡️ SIN CUBRIR" : `🛡️ ${titleParts.join(' | ')}`,
           start: g.start_date,
-          end: addDays(new Date(g.end_date), 1).toISOString().split('T')[0], // Exclusive end
+          end: addDays(new Date(g.end_date), 1).toISOString().split('T')[0], 
           allDay: true,
           backgroundColor: isUncovered ? '#991B1B' : '#DC2626',
-          borderColor: isUncovered ? '#7F1D1D' : '#991B1B',
-          extendedProps: {
-            type: 'guard',
-            week: g.week_number,
-            details: g
-          }
+          borderColor: 'transparent',
+          textColor: '#ffffff',
+          extendedProps: { type: 'guard' }
         });
       });
     }
@@ -75,22 +75,20 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
           start: v.start_date,
           end: addDays(new Date(v.end_date), 1).toISOString().split('T')[0],
           allDay: true,
-          backgroundColor: '#16A34A',
-          borderColor: '#15803D',
-          extendedProps: {
-            type: 'vacation',
-            details: v
-          }
+          backgroundColor: '#34C759',
+          borderColor: 'transparent',
+          textColor: '#ffffff',
+          extendedProps: { type: 'vacation' }
         });
       });
     }
 
-    // 3. Festivos (Background)
+    // 3. Festivos (Ambar/Azul/Naranja)
     if (showHolidays) {
       holidays.forEach(h => {
-        let color = '#2563EB'; // Local
-        if (h.scope === 'nacional') color = '#EAB308';
-        if (h.scope === 'aragon') color = '#F97316';
+        let color = '#0066CC'; // Local
+        if (h.scope === 'nacional') color = '#FF9500';
+        if (h.scope === 'aragon') color = '#FF3B30';
 
         allEvents.push({
           id: `holiday-${h.id}`,
@@ -98,11 +96,8 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
           start: h.date,
           allDay: true,
           display: 'background',
-          backgroundColor: color,
-          extendedProps: {
-            type: 'holiday',
-            details: h
-          }
+          backgroundColor: `${color}15`, // Very light background
+          extendedProps: { type: 'holiday', scopeColor: color }
         });
       });
     }
@@ -110,126 +105,179 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
     return allEvents;
   }, [guards, vacations, holidays, personFilter, showGuards, showVacations, showHolidays]);
 
-  const handleEventClick = (info: any) => {
-    // We'll use a popover-like behavior if possible or just log for now
-    // Actually FullCalendar eventClick is better handled by a state that opens a Dialog
-  };
-
   return (
-    <div className="space-y-6">
-      <Card className="border-border/50 bg-card/60 backdrop-blur-md">
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="w-[200px]">
-                <Label className="text-xs mb-1.5 block">Filtrar por persona</Label>
-                <Select value={personFilter} onValueChange={setPersonFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Cualquier persona" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Cualquier persona</SelectItem>
-                    {staff.map(s => (
-                      <SelectItem key={s.id} value={s.id}>{s.first_name} {s.last_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+    <div className="space-y-8">
+      <DSCard className="p-6 md:p-8">
+        <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
+          <div className="flex flex-wrap gap-6 items-center">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">
+                <Users className="h-3.5 w-3.5" /> Filtrar Personal
               </div>
-
-              <div className="flex items-center gap-4 pt-5">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="guards" checked={showGuards} onCheckedChange={(v) => setShowGuards(!!v)} />
-                  <Label htmlFor="guards" className="text-sm cursor-pointer">Guardias</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="vacations" checked={showVacations} onCheckedChange={(v) => setShowVacations(!!v)} />
-                  <Label htmlFor="vacations" className="text-sm cursor-pointer">Vacaciones</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="holidays" checked={showHolidays} onCheckedChange={(v) => setShowHolidays(!!v)} />
-                  <Label htmlFor="holidays" className="text-sm cursor-pointer">Festivos</Label>
-                </div>
-              </div>
+              <Select value={personFilter} onValueChange={setPersonFilter}>
+                <SelectTrigger className="w-[220px] h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]">
+                  <SelectValue placeholder="Cualquier persona" />
+                </SelectTrigger>
+                <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
+                  <SelectItem value="all">Todo el personal</SelectItem>
+                  {staff.map(s => (
+                    <SelectItem key={s.id} value={s.id}>{s.first_name} {s.last_name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="flex flex-wrap gap-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground bg-muted/30 p-2 rounded-lg">
-              <div className="flex items-center"><div className="w-2 h-2 rounded-full bg-[#DC2626] mr-1" /> Guardias</div>
-              <div className="flex items-center"><div className="w-2 h-2 rounded-full bg-[#16A34A] mr-1" /> Vacaciones</div>
-              <div className="flex items-center"><div className="w-2 h-2 rounded-full bg-[#EAB308] mr-1" /> Nacional</div>
-              <div className="flex items-center"><div className="w-2 h-2 rounded-full bg-[#F97316] mr-1" /> Aragón</div>
-              <div className="flex items-center"><div className="w-2 h-2 rounded-full bg-[#2563EB] mr-1" /> Local</div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">
+                <Layers className="h-3.5 w-3.5" /> Capas Visibles
+              </div>
+              <div className="flex items-center gap-4 h-11 px-4 rounded-[12px] bg-[#F2F2F7]/50 border border-black/[0.04]">
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="guards" 
+                    checked={showGuards} 
+                    onCheckedChange={(v) => setShowGuards(!!v)}
+                    className="rounded-[4px] border-black/20 data-[state=checked]:bg-[#DC2626] data-[state=checked]:border-[#DC2626]"
+                  />
+                  <label htmlFor="guards" className="text-[14px] font-medium text-neutral-900 cursor-pointer">Guardias</label>
+                </div>
+                <div className="w-[1px] h-4 bg-black/[0.08]" />
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="vacations" 
+                    checked={showVacations} 
+                    onCheckedChange={(v) => setShowVacations(!!v)}
+                    className="rounded-[4px] border-black/20 data-[state=checked]:bg-[#34C759] data-[state=checked]:border-[#34C759]"
+                  />
+                  <label htmlFor="vacations" className="text-[14px] font-medium text-neutral-900 cursor-pointer">Vacaciones</label>
+                </div>
+                <div className="w-[1px] h-4 bg-black/[0.08]" />
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="holidays" 
+                    checked={showHolidays} 
+                    onCheckedChange={(v) => setShowHolidays(!!v)}
+                    className="rounded-[4px] border-black/20 data-[state=checked]:bg-[#0066CC] data-[state=checked]:border-[#0066CC]"
+                  />
+                  <label htmlFor="holidays" className="text-[14px] font-medium text-neutral-900 cursor-pointer">Festivos</label>
+                </div>
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      <div className="calendar-container bg-card/60 backdrop-blur-md rounded-xl border p-4 shadow-sm overflow-hidden">
-        <FullCalendar
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          locale={esLocale}
-          events={events}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,dayGridWeek'
-          }}
-          buttonText={{
-            today: 'Hoy',
-            month: 'Mes',
-            week: 'Semana'
-          }}
-          firstDay={1}
-          height="auto"
-          eventClick={handleEventClick}
-          dayMaxEvents={true}
-          eventContent={(arg) => {
-            if (arg.event.display === 'background') return null;
-            return (
-              <div className="px-1 py-0.5 text-[10px] overflow-hidden text-ellipsis whitespace-nowrap font-medium text-white flex items-center gap-1">
-                {arg.event.title}
-              </div>
-            )
-          }}
-        />
-      </div>
+          <div className="flex flex-wrap gap-2 p-2 bg-[#F2F2F7]/50 rounded-[14px] border border-black/[0.02]">
+            <DSBadge variant="red" className="text-[10px] uppercase font-black tracking-tight px-2 py-0.5">Guardias</DSBadge>
+            <DSBadge variant="green" className="text-[10px] uppercase font-black tracking-tight px-2 py-0.5">vacaciones</DSBadge>
+            <DSBadge variant="amber" className="text-[10px] uppercase font-black tracking-tight px-2 py-0.5">Nacional</DSBadge>
+            <DSBadge variant="orange" className="text-[10px] uppercase font-black tracking-tight px-2 py-0.5">Regional</DSBadge>
+            <DSBadge variant="blue" className="text-[10px] uppercase font-black tracking-tight px-2 py-0.5">Local</DSBadge>
+          </div>
+        </div>
+      </DSCard>
+
+      <DSCard className="p-4 md:p-6 overflow-hidden">
+        <div className="calendar-container">
+          <FullCalendar
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            locale={esLocale}
+            events={events}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,dayGridWeek'
+            }}
+            buttonText={{
+              today: 'Hoy',
+              month: 'Mes',
+              week: 'Semana'
+            }}
+            firstDay={1}
+            height="auto"
+            dayMaxEvents={true}
+            eventContent={(arg) => {
+              if (arg.event.display === 'background') return null;
+              return (
+                <div className="px-2 py-1 text-[11px] rounded-[6px] shadow-sm transform hover:scale-[1.02] transition-transform overflow-hidden text-ellipsis whitespace-nowrap font-bold flex items-center gap-1.5 border-none">
+                  {arg.event.title}
+                </div>
+              )
+            }}
+          />
+        </div>
+      </DSCard>
 
       <style jsx global>{`
         .fc {
-          --fc-border-color: rgba(0, 0, 0, 0.05);
-          --fc-today-bg-color: rgba(var(--primary), 0.05);
+          --fc-border-color: rgba(0, 0, 0, 0.04);
+          --fc-today-bg-color: rgba(0, 102, 204, 0.04);
+          --fc-neutral-bg-color: transparent;
           font-family: inherit;
-        }
-        .dark .fc {
-          --fc-border-color: rgba(255, 255, 255, 0.05);
         }
         .fc .fc-toolbar-title {
           font-size: 1.25rem;
-          font-weight: 700;
+          font-weight: 800;
+          color: #1d1d1f;
+          letter-spacing: -0.02em;
         }
         .fc .fc-button {
-          background-color: transparent;
-          border-color: rgba(0, 0, 0, 0.1);
-          color: inherit;
-          font-size: 0.875rem;
-          text-transform: capitalize;
+          background: #F2F2F7 !important;
+          border: none !important;
+          color: #1d1d1f !important;
+          font-size: 0.85rem !important;
+          font-weight: 700 !important;
+          border-radius: 10px !important;
+          padding: 8px 16px !important;
+          box-shadow: none !important;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          margin-left: 4px !important;
         }
-        .fc .fc-button-primary:not(:disabled):active, 
-        .fc .fc-button-primary:not(:disabled).fc-button-active {
-          background-color: hsl(var(--primary));
-          border-color: hsl(var(--primary));
+        .fc .fc-button:hover {
+          background: #e5e5ea !important;
+        }
+        .fc .fc-button-active {
+          background: #1d1d1f !important;
+          color: white !important;
+        }
+        .fc th {
+          padding: 12px 0 !important;
+          font-size: 12px !important;
+          font-weight: 800 !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.05em !important;
+          color: #86868b !important;
+          border: none !important;
+        }
+        .fc td {
+          border-color: rgba(0, 0, 0, 0.04) !important;
+        }
+        .fc-day-today {
+          background-color: rgba(0, 102, 204, 0.05) !important;
+        }
+        .fc-day-today .fc-daygrid-day-number {
+          background: #0066CC;
           color: white;
+          width: 24px;
+          height: 24px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 4px;
+          font-weight: 800;
         }
-        .fc .fc-button:focus {
-          box-shadow: none;
+        .fc-daygrid-day-number {
+          font-size: 0.8rem;
+          font-weight: 700;
+          opacity: 0.9;
+          padding: 8px !important;
         }
-        .fc .fc-daygrid-day-number {
-          font-size: 0.75rem;
-          padding: 8px;
-          opacity: 0.7;
+        .fc-event {
+          border-radius: 6px !important;
+          border: none !important;
         }
-        .fc-theme-standard td, .fc-theme-standard th {
-          border-color: var(--fc-border-color);
+        .fc-dayGridMonth-view .fc-event {
+          margin: 2px 4px !important;
         }
       `}</style>
     </div>

@@ -1,33 +1,28 @@
 import { AppSidebar } from "@/components/layout/AppSidebar"
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { createClient } from "@/lib/supabase/server"
-import { UserAvatar } from "@/components/layout/UserAvatar"
+import MobileNav from "@/components/layout/MobileNav"
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const userInitials = user?.email ? user.email.substring(0, 2).toUpperCase() : "??"
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
+    <div className="min-h-screen bg-[#F2F2F7] font-sans selection:bg-[#0066CC]/10">
+      {/* Mobile top bar */}
+      <MobileNav userEmail={user?.email} userInitials={userInitials} />
+      
+      {/* Desktop sidebar */}
+      <aside className="hidden md:fixed md:flex md:w-[260px] md:h-screen md:flex-col md:border-r md:border-black/[0.06] md:bg-[#F2F2F7]/80 md:backdrop-blur-xl z-30">
         <AppSidebar userEmail={user?.email} />
-        
-        <div className="flex flex-1 flex-col">
-          {/* Mobile top bar - only visible on small screens */}
-          <header className="md:hidden sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-white/80 px-4 backdrop-blur-lg">
-            <SidebarTrigger />
-            <span className="text-sm font-semibold text-foreground tracking-tight">Guardias Juzgado</span>
-            <UserAvatar email={user?.email} />
-          </header>
-
-          {/* Main content area */}
-          <main className="flex-1 overflow-y-auto">
-            <div className="mx-auto max-w-7xl p-4 md:p-8 page-container">
-              {children}
-            </div>
-          </main>
+      </aside>
+      
+      {/* Main content */}
+      <main className="md:ml-[260px] pt-14 md:pt-0 min-h-screen">
+        <div className="p-4 md:p-8 lg:p-12 max-w-[1400px] mx-auto animate-in fade-in duration-500">
+          {children}
         </div>
-      </div>
-    </SidebarProvider>
+      </main>
+    </div>
   )
 }

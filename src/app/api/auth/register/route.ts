@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { normalizeStaffData } from '@/lib/staff/normalize';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,16 +12,10 @@ const supabaseAdmin = createClient(
 export async function POST(request: NextRequest) {
   try {
     const {
-      first_name,
-      last_name,
-      second_last_name,
-      email,
-      phone,
-      password,
-      position_id,
+      first_name, last_name, second_last_name,
+      email, phone, password, position_id,
     } = await request.json();
 
-    // Validaciones servidor
     if (!first_name || !last_name || !email || !password || !position_id) {
       return NextResponse.json(
         { error: 'Los campos nombre, primer apellido, email, contraseña y puesto son obligatorios' },
@@ -29,21 +24,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (password.length < 8) {
-      return NextResponse.json(
-        { error: 'La contraseña debe tener al menos 8 caracteres' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'La contraseña debe tener al menos 8 caracteres' }, { status: 400 });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'El formato del email no es válido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El formato del email no es válido' }, { status: 400 });
     }
 
-    // Verificar que el puesto existe
     const { data: position, error: posError } = await supabaseAdmin
       .from('positions')
       .select('id, name, guard_role')
@@ -51,13 +39,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (posError || !position) {
-      return NextResponse.json(
-        { error: 'Debes seleccionar un puesto de trabajo válido de la lista' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Debes seleccionar un puesto de trabajo válido' }, { status: 400 });
     }
 
-    // Verificar que el email no existe ya
     const { data: existingStaff } = await supabaseAdmin
       .from('staff')
       .select('id')
@@ -65,20 +49,15 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existingStaff) {
-      return NextResponse.json(
-        { error: 'Ya existe un usuario registrado con ese email' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'Ya existe un usuario registrado con ese email' }, { status: 409 });
     }
 
-    // 1. Crear usuario en Supabase Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: email.toLowerCase().trim(),
       password,
       email_confirm: true,
       user_metadata: {
-        first_name,
-        last_name,
+        first_name, last_name,
         second_last_name: second_last_name || null,
         phone: phone || null,
         profile_completed: true,
@@ -87,33 +66,25 @@ export async function POST(request: NextRequest) {
 
     if (authError) {
       if (authError.message?.includes('already') || authError.message?.includes('exists')) {
-        return NextResponse.json(
-          { error: 'Ya existe un usuario con ese email en el sistema' },
-          { status: 409 }
-        );
+        return NextResponse.json({ error: 'Ya existe un usuario con ese email en el sistema' }, { status: 409 });
       }
       throw authError;
     }
 
     if (!authData.user) throw new Error('No se pudo crear el usuario');
 
-    // 2. Crear registro en tabla staff
+    // Usar normalizeStaffData para insertar datos coherentes
+    const staffData = normalizeStaffData({
+      auth_user_id: authData.user.id,
+      first_name, last_name, second_last_name,
+      email, phone, position_id, notes: null,
+    });
+
     const { error: staffError } = await supabaseAdmin
       .from('staff')
-      .insert({
-        auth_user_id: authData.user.id,
-        first_name: first_name.trim(),
-        last_name: last_name.trim(),
-        second_last_name: second_last_name?.trim() || null,
-        email: email.toLowerCase().trim(),
-        phone: phone?.trim() || null,
-        position_id,
-        is_active: true,
-        start_date: new Date().toISOString().split('T')[0],
-      });
+      .insert(staffData);
 
     if (staffError) {
-      // Rollback: eliminar usuario Auth
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       throw staffError;
     }
@@ -127,12 +98,8 @@ export async function POST(request: NextRequest) {
         email: email.toLowerCase().trim(),
       },
     });
-
   } catch (error: any) {
     console.error('Error en registro:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al crear la cuenta' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al crear la cuenta' }, { status: 500 });
   }
 }

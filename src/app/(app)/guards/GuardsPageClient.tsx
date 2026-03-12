@@ -4,6 +4,8 @@
 import { useState, useMemo } from "react"
 import { GuardWeekView } from "@/types/guards"
 import { StaffByCategory } from "@/lib/guards/staff-by-category"
+import { buildFullName } from "@/lib/staff/normalize"
+import { useRole } from "@/hooks/use-role"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,6 +28,7 @@ interface GuardsPageClientProps {
 
 export default function GuardsPageClient({ initialGuards, staffByCategory, activeYear }: GuardsPageClientProps) {
   const router = useRouter()
+  const { isHeadmaster } = useRole()
   // Data states
   const [guards] = useState<GuardWeekView[]>(initialGuards)
   
@@ -111,11 +114,13 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
     <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Gestión de Guardias {activeYear}</h2>
-        <div className="flex items-center space-x-2">
-          <Button onClick={() => setAiReviewOpen(true)} className="bg-primary shadow-sm hover:shadow-md transition-shadow">
-            <Bot className="mr-2 h-4 w-4" /> Generar guardias con IA
-          </Button>
-        </div>
+        {isHeadmaster && (
+          <div className="flex items-center space-x-2">
+            <Button onClick={() => setAiReviewOpen(true)} className="bg-primary shadow-sm hover:shadow-md transition-shadow">
+              <Bot className="mr-2 h-4 w-4" /> Generar guardias con IA
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Panel de Equidad */}
@@ -200,7 +205,7 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
             <SelectContent>
               <SelectItem value="all">Todo el personal</SelectItem>
               {allStaff.map(p => (
-                <SelectItem key={p.id} value={p.id}>{p.first_name} {p.last_name}</SelectItem>
+                <SelectItem key={p.id} value={p.id}>{buildFullName(p)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -287,9 +292,11 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
                       </TableCell>
 
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(g)}>
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
+                        {isHeadmaster && (
+                          <Button variant="ghost" size="icon" onClick={() => handleEditClick(g)}>
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   )

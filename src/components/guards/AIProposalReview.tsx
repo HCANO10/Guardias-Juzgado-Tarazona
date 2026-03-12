@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { fullName } from "@/lib/utils/full-name"
+import { buildFullName } from "@/lib/staff/normalize"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -129,7 +129,7 @@ export function AIProposalReview({ open, onOpenChange, activeYear, onSuccess, st
      if (!staffByCategory) return "Desconocido"
      const lst = staffByCategory[cat as keyof typeof staffByCategory]
      const p = lst?.find((x:any) => x.id === id)
-     return p ? fullName(p) : id
+     return p ? buildFullName(p) : id
   }
 
   return (

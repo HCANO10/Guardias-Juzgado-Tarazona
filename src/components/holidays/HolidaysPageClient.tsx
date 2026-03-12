@@ -48,6 +48,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Plus, Edit2, Trash2, CalendarIcon, Loader2, Sparkles, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EmptyState } from '@/components/ui/empty-state';
+import { useRole } from '@/hooks/use-role';
 
 export interface Holiday {
   id: string;
@@ -87,6 +88,7 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
   const { toast } = useToast();
   const router = useRouter();
   const supabase = createClient();
+  const { isHeadmaster } = useRole();
 
   const years = useMemo(() => {
     const yearsSet = new Set(initialHolidays.map(h => h.year));
@@ -228,9 +230,11 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
     <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Calendario de Festivos</h2>
-        <Button onClick={() => handleOpenDialog()}>
-          <Plus className="mr-2 h-4 w-4" /> Añadir festivo
-        </Button>
+        {isHeadmaster && (
+          <Button onClick={() => handleOpenDialog()}>
+            <Plus className="mr-2 h-4 w-4" /> Añadir festivo
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -305,26 +309,28 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
                   <TableCell>{holiday.name}</TableCell>
                   <TableCell>{getScopeBadge(holiday.scope)}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => handleOpenDialog(holiday)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => {
-                          setDeletingHolidayId(holiday.id);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    {isHeadmaster && (
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleOpenDialog(holiday)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => {
+                            setDeletingHolidayId(holiday.id);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

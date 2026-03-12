@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { FileDown, Loader2 } from "lucide-react"
 import { format, getDaysInMonth } from "date-fns"
 import { es } from "date-fns/locale"
-import { fullName } from "@/lib/utils/full-name"
+import { buildFullName } from "@/lib/staff/normalize"
 
 interface ExportPDFButtonProps {
   guards: any[]
@@ -52,7 +52,7 @@ export function ExportPDFButton({ guards, vacations, holidays, staff, currentDat
         const period = g.guard_periods
         const assignedStaff = g.assignments?.map((a: any) => {
           const s = staff.find((p: any) => p.id === a.staff_id)
-          return s ? fullName(s) : '—'
+          return s ? buildFullName(s) : '—'
         }).join('\n') || '—'
         return [
           `Sem. ${period?.week_number || '?'}`,

@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { fullName } from "@/lib/utils/full-name"
+import { buildFullName } from "@/lib/staff/normalize"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,8 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Plus, Search, Eye, Edit, UserX, UserCheck } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { MoreHorizontal, Plus, Search, Eye, Edit, UserX, UserCheck, Crown, User } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { useRouter } from "next/navigation"
@@ -41,6 +41,12 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
     open: false, type: 'deactivate', staff: null
   })
   const [actionLoading, setActionLoading] = useState(false)
+  
+  // Dialog de cambio de rol
+  const [roleDialog, setRoleDialog] = useState<{ open: boolean, staff: any | null, newRole: string }>({
+    open: false, staff: null, newRole: 'worker'
+  })
+  const [roleLoading, setRoleLoading] = useState(false)
 
   const supabase = createClient()
   const router = useRouter()
@@ -103,7 +109,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
 
   // Filtrado
   const filteredData = data.filter((item) => {
-    const matchesSearch = fullName(item).toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = buildFullName(item).toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' ? true : statusFilter === 'active' ? item.is_active : !item.is_active
     const matchesPosition = positionFilter === 'all' ? true : item.position_id === positionFilter
 
@@ -160,6 +166,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
             <TableRow>
               <TableHead>Nombre Completo</TableHead>
               <TableHead>Puesto</TableHead>
+              <TableHead>Rol</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Incorporación</TableHead>
@@ -172,6 +179,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                 <TableRow key={i}>
                   <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-[80px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-[80px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
@@ -180,7 +188,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
               ))
             ) : filteredData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-12">
+                <TableCell colSpan={7} className="py-12">
                   <EmptyState 
                     icon={Search}
                     title="No se han encontrado resultados"
@@ -200,8 +208,19 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
             ) : (
               filteredData.map((staff) => (
                 <TableRow key={staff.id}>
-                  <TableCell className="font-medium">{staff.first_name} {staff.last_name}</TableCell>
+                  <TableCell className="font-medium">{buildFullName(staff)}</TableCell>
                   <TableCell>{staff.positions?.name}</TableCell>
+                  <TableCell>
+                    {staff.role === 'headmaster' ? (
+                      <Badge className="bg-purple-500/15 text-purple-700 hover:bg-purple-500/25 dark:text-purple-400">
+                        👑 Headmaster
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                        👤 Trabajador
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell>{staff.email}</TableCell>
                   <TableCell>
                     {staff.is_active ? (
@@ -239,6 +258,16 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                             onClick={() => setConfirmDialog({ open: true, type: 'reactivate', staff })}
                           >
                             <UserCheck className="mr-2 h-4 w-4" /> Reactivar
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuSeparator />
+                        {staff.role === 'worker' ? (
+                          <DropdownMenuItem onClick={() => setRoleDialog({ open: true, staff, newRole: 'headmaster' })}>
+                            <Crown className="mr-2 h-4 w-4 text-purple-600" /> Hacer Headmaster
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem onClick={() => setRoleDialog({ open: true, staff, newRole: 'worker' })}>
+                            <User className="mr-2 h-4 w-4" /> Hacer Trabajador
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
@@ -284,6 +313,52 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
               disabled={actionLoading}
             >
               {actionLoading ? "Procesando..." : "Confirmar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialogo de cambio de rol */}
+      <Dialog open={roleDialog.open} onOpenChange={(open) => !open && setRoleDialog({ ...roleDialog, open: false })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {roleDialog.newRole === 'headmaster' ? '👑 ¿Hacer Headmaster?' : '👤 ¿Hacer Trabajador?'}
+            </DialogTitle>
+            <DialogDescription>
+              {roleDialog.newRole === 'headmaster'
+                ? `¿Estás seguro de dar permisos de Headmaster a ${roleDialog.staff ? buildFullName(roleDialog.staff) : ''}? Tendrá acceso total a la gestión.`
+                : `¿Estás seguro de quitar permisos de Headmaster a ${roleDialog.staff ? buildFullName(roleDialog.staff) : ''}? Solo podrá consultar sus propios datos.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setRoleDialog({ ...roleDialog, open: false })} disabled={roleLoading}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={async () => {
+                setRoleLoading(true)
+                try {
+                  const res = await fetch('/api/staff/change-role', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ staff_id: roleDialog.staff?.id, new_role: roleDialog.newRole }),
+                  })
+                  const result = await res.json()
+                  if (!res.ok) throw new Error(result.error)
+                  toast({ title: '✅ Rol actualizado', description: result.message })
+                  fetchStaff()
+                } catch (error: any) {
+                  toast({ variant: 'destructive', title: 'Error', description: error.message })
+                } finally {
+                  setRoleLoading(false)
+                  setRoleDialog({ open: false, staff: null, newRole: 'worker' })
+                }
+              }}
+              disabled={roleLoading}
+              className={roleDialog.newRole === 'headmaster' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+            >
+              {roleLoading ? 'Procesando...' : 'Confirmar'}
             </Button>
           </DialogFooter>
         </DialogContent>

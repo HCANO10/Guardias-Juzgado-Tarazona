@@ -2,7 +2,8 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { fullName } from "@/lib/utils/full-name"
+import { buildFullName } from "@/lib/staff/normalize"
+import { useRole } from "@/hooks/use-role"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -32,6 +33,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
   const { toast } = useToast()
   const router = useRouter()
   const supabase = createClient()
+  const { isHeadmaster, staffId: myStaffId } = useRole()
 
   // Form states
   const [selectedStaffId, setSelectedStaffId] = useState<string>(currentStaffId || "")
@@ -74,7 +76,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
       .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())[0]
 
     return {
-      name: staffMember ? fullName(staffMember) : "",
+      name: staffMember ? buildFullName(staffMember) : "",
       usedDays,
       nextVac: nextVac ? `${format(new Date(nextVac.start_date), 'dd/MM')} al ${format(new Date(nextVac.end_date), 'dd/MM')}` : "Ninguna",
       nextGuard: selectedStaffId === currentStaffId && nextGuard 
@@ -192,13 +194,13 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Trabajador</label>
-                  <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
+                  <Select value={selectedStaffId} onValueChange={setSelectedStaffId} disabled={!isHeadmaster}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {staff.map(s => (
-                        <SelectItem key={s.id} value={s.id}>{s.first_name} {s.last_name}</SelectItem>
+                      {(isHeadmaster ? staff : staff.filter(s => s.id === currentStaffId)).map(s => (
+                        <SelectItem key={s.id} value={s.id}>{buildFullName(s)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -298,7 +300,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                   <SelectContent>
                     <SelectItem value="all">Cualquier persona</SelectItem>
                     {staff.map(s => (
-                      <SelectItem key={s.id} value={s.id}>{s.first_name}</SelectItem>
+                      <SelectItem key={s.id} value={s.id}>{buildFullName(s)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -348,11 +350,12 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                     ) : (
                       filteredVacations.map((v) => {
                         const days = differenceInDays(new Date(v.end_date), new Date(v.start_date)) + 1
-                        const staffName = staff.find(s => s.id === v.staff_id)?.first_name || "???"
+                        const staffMember = staff.find(s => s.id === v.staff_id)
+                        const staffDispName = staffMember ? buildFullName(staffMember) : "???"
                         
                         return (
                           <TableRow key={v.id}>
-                            <TableCell className="font-medium">{staffName}</TableCell>
+                            <TableCell className="font-medium">{staffDispName}</TableCell>
                             <TableCell className="text-sm">
                               {format(new Date(v.start_date), 'dd/MM')} &rarr; {format(new Date(v.end_date), 'dd/MM')}
                             </TableCell>
@@ -365,7 +368,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                               )}
                             </TableCell>
                             <TableCell>
-                              {v.status === 'approved' && (
+                              {v.status === 'approved' && (isHeadmaster || v.staff_id === myStaffId) && (
                                 <Button 
                                   variant="ghost" 
                                   size="icon" 

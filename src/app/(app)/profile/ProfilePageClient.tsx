@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,8 @@ import { es } from "date-fns/locale"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import { GoogleButton } from "@/components/auth/GoogleButton"
+
 
 interface ProfilePageClientProps {
   staffData: any
@@ -58,6 +61,33 @@ export function ProfilePageClient({
   const [newPwd, setNewPwd] = useState("")
   const [confirmPwd, setConfirmPwd] = useState("")
   const [changingPwd, setChangingPwd] = useState(false)
+
+  // Estado para cambio de email
+  const [newEmail, setNewEmail] = useState("")
+  const [confirmEmail, setConfirmEmail] = useState("")
+  const [updatingEmail, setUpdatingEmail] = useState(false)
+
+  // Estado para vinculación de Google
+  const [userIdentities, setUserIdentities] = useState<any[]>([])
+  const [hasPassword, setHasPassword] = useState(true)
+
+  useEffect(() => {
+    const fetchIdentities = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserIdentities(user.identities || [])
+        // Simplificación: asumimos que tiene contraseña si no es solo identidades externas
+        // En una app real, podrías chequear si user.factors o similar indica contraseña.
+        // Supabase no da un flag directo "hasPassword" fácilmente sin admin,
+        // pero podemos chequear si existe una identidad 'email'.
+        setHasPassword(user.identities?.some(i => i.provider === 'email') || false)
+      }
+    }
+    fetchIdentities()
+  }, [supabase.auth])
+
+  const googleIdentity = userIdentities.find(i => i.provider === 'google')
+
 
   const handleSaveProfile = async () => {
     setSavingEdit(true)
@@ -103,6 +133,68 @@ export function ProfilePageClient({
       setChangingPwd(false)
     }
   }
+
+  const handleUpdateEmail = async () => {
+    if (!newEmail) return
+    if (newEmail !== confirmEmail) {
+      toast({ variant: "destructive", title: "Los emails no coinciden" })
+      return
+    }
+
+    setUpdatingEmail(true)
+    try {
+      const response = await fetch('/api/auth/update-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newEmail })
+      })
+      const result = await response.json()
+
+      if (!response.ok) throw new Error(result.error)
+
+      toast({ title: "✅ Email actualizado correctamente" })
+      setNewEmail("")
+      setConfirmEmail("")
+      router.refresh()
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Error", description: err.message })
+    } finally {
+      setUpdatingEmail(false)
+    }
+  }
+
+  const handleLinkGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.linkIdentity({ provider: 'google' })
+      if (error) throw error
+      // toast se ejecutará después del callback si es exitoso
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Error al vincular", description: err.message })
+    }
+  }
+
+  const handleUnlinkGoogle = async () => {
+    if (!hasPassword && userIdentities.length === 1) {
+      toast({ 
+        variant: "destructive", 
+        title: "No puedes desvincular Google", 
+        description: "Debes establecer una contraseña primero para no perder el acceso." 
+      })
+      return
+    }
+
+    if (!googleIdentity) return
+
+    try {
+      const { error } = await supabase.auth.unlinkIdentity(googleIdentity)
+      if (error) throw error
+      toast({ title: "✅ Cuenta de Google desvinculada" })
+      setUserIdentities(prev => prev.filter(i => i.provider !== 'google'))
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Error al desvincular", description: err.message })
+    }
+  }
+
 
   const handleCancelVacation = async (vacationId: string) => {
     const { error } = await supabase.from('vacations').delete().eq('id', vacationId)
@@ -168,6 +260,73 @@ export function ProfilePageClient({
       </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
+        {/* CORREO ELECTRÓNICO */}
+        <Card className="border-border/50 bg-card/60 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-base">Correo electrónico</CardTitle>
+            <CardDescription>Email actual: {staffData.email}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-1">
+              <Label>Nuevo email</Label>
+              <Input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="nuevo@ejemplo.com" />
+            </div>
+            <div className="space-y-1">
+              <Label>Confirmar nuevo email</Label>
+              <Input type="email" value={confirmEmail} onChange={e => setConfirmEmail(e.target.value)} placeholder="Repetir email" />
+            </div>
+            {newEmail && confirmEmail && newEmail !== confirmEmail && (
+              <Alert variant="destructive" className="py-2">
+                <AlertDescription className="text-xs">Los emails no coinciden</AlertDescription>
+              </Alert>
+            )}
+            <Button onClick={handleUpdateEmail} disabled={updatingEmail || !newEmail || !confirmEmail} className="w-full">
+              {updatingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Actualizar email
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* CUENTA DE GOOGLE */}
+        <Card className="border-border/50 bg-card/60 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-base">Cuenta de Google</CardTitle>
+            <CardDescription>Acceso rápido con tu cuenta de Google</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {googleIdentity ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-green-500/5 border-green-500/20">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center border shadow-sm">
+                      <svg width="18" height="18" viewBox="0 0 18 18">
+                        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+                        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+                        <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+                        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 2.58 9 2.58Z" fill="#EA4335"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Vinculado como Google</p>
+                      <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 text-[10px] h-4">Activo</Badge>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={handleUnlinkGoogle} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                    Desvincular
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">Vincula tu cuenta para iniciar sesión con un clic.</p>
+                <div onClick={handleLinkGoogle}>
+                  <GoogleButton label="Vincular cuenta de Google" />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* CAMBIAR CONTRASEÑA */}
         <Card className="border-border/50 bg-card/60 backdrop-blur-sm">
           <CardHeader>
@@ -240,6 +399,7 @@ export function ProfilePageClient({
           </CardContent>
         </Card>
       </div>
+
 
       {/* MIS GUARDIAS */}
       <Card className="border-border/50 bg-card/60 backdrop-blur-sm">

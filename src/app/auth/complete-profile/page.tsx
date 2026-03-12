@@ -62,12 +62,6 @@ export default function CompleteProfilePage() {
       const posData = await res.json()
       if (posData.positions) setPositions(posData.positions)
 
-      // Check existing staff record using admin
-      if (meta?.profile_completed) {
-        router.push('/dashboard')
-        return
-      }
-
       // Check DB for existing staff record (safety net)
       const { data: staff } = await supabase
         .from('staff')
@@ -76,6 +70,7 @@ export default function CompleteProfilePage() {
         .single()
       
       if (staff) {
+        document.cookie = 'staff-profile-status=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
         router.push('/dashboard')
         return
       }

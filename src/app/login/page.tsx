@@ -48,8 +48,10 @@ export default function LoginPage() {
   const { toast } = useToast()
   const supabase = createClient()
 
-  // Show error if redirected from failed OAuth
+  // Clear stale cookies on mount
   useEffect(() => {
+    document.cookie = 'staff-profile-status=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+    
     if (searchParams.get('error') === 'auth') {
       toast({
         variant: 'destructive',

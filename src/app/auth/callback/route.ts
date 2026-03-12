@@ -30,15 +30,11 @@ export async function GET(request: NextRequest) {
 
       if (!existingStaff) {
         // Usuario nuevo de Google → completar perfil
-        const response = NextResponse.redirect(`${origin}/auth/complete-profile`)
-        response.cookies.set('staff-profile-status', 'false', { path: '/' })
-        return response
+        return NextResponse.redirect(`${origin}/auth/complete-profile`)
       }
 
       // Usuario existente → dashboard
-      const response = NextResponse.redirect(`${origin}/dashboard`)
-      response.cookies.set('staff-profile-status', 'true', { path: '/', maxAge: 60 * 60 * 24 * 7 })
-      return response
+      return NextResponse.redirect(`${origin}/dashboard`)
     }
   }
 

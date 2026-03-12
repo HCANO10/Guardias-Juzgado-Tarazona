@@ -1,27 +1,9 @@
-import { createServerClient } from "@supabase/ssr"
-import { NextResponse, type NextRequest } from "next/server"
-
-// 1. PÚBLICAS — sin autenticación
-const publicRoutes = ['/login', '/api/auth/register', '/api/auth/positions', '/auth/callback']
-
-// 2. SEMI-PÚBLICAS — requieren auth pero NO perfil en staff
-const semiPublicRoutes = ['/auth/complete-profile', '/api/auth/complete-profile']
-
-// 3. SOLO HEADMASTER — rutas de gestión
-const headmasterOnlyRoutes = ['/staff', '/settings', '/activity']
-const headmasterOnlyApiRoutes = [
-  '/api/staff/create', '/api/staff/deactivate', '/api/staff/reactivate',
-  '/api/staff/change-role', '/api/staff/audit',
-  '/api/groq/generate-guards', '/api/guards/generate-periods',
-]
-
-function matchesRoute(pathname: string, routes: string[]): boolean {
-  return routes.some(r => pathname.startsWith(r))
-}
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
-
+  const response = NextResponse.next()
+  
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -29,87 +11,70 @@ export async function middleware(request: NextRequest) {
       cookies: {
         getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options)
+          })
         },
       },
     }
   )
 
+  const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
 
-  // Rutas públicas
-  if (matchesRoute(pathname, publicRoutes)) {
-    const { data: { user } } = await supabase.auth.getUser()
+  // Public routes — always allow
+  const publicRoutes = ['/login', '/auth/callback', '/api/']
+  if (publicRoutes.some(route => pathname.startsWith(route))) {
+    // But if user is authenticated and going to /login, redirect to dashboard
     if (user && pathname === '/login') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
-    return supabaseResponse
+    return response
   }
 
-  // Verificar autenticación
-  const { data: { user } } = await supabase.auth.getUser()
+  // Not authenticated → go to login
   if (!user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Rutas semi-públicas (auth pero sin perfil)
-  if (matchesRoute(pathname, semiPublicRoutes)) {
-    return supabaseResponse
-  }
+  // Check if user has a staff profile
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('id, role')
+    .eq('auth_user_id', user.id)
+    .single()
 
-  // Verificar profile_completed y role (Prioridad: Cookie > Metadata > DB)
-  const profileStatusCookie = request.cookies.get('staff-profile-status')?.value
-  let profileCompleted = profileStatusCookie?.startsWith('true') === true
-  let userRole = profileStatusCookie?.split(':')[1] as 'headmaster' | 'worker' | undefined
-
-  if (!profileStatusCookie || !userRole) {
-    // Si no hay cookie o no tiene el rol, intentamos metadata
-    profileCompleted = user.user_metadata?.profile_completed === true
-    userRole = user.user_metadata?.role || 'worker'
-    
-    // Si no tenemos certeza total, consultamos DB (último recurso)
-    if (!profileStatusCookie) {
-      const { data: staff } = await supabase
-        .from('staff')
-        .select('id, role')
-        .eq('auth_user_id', user.id)
-        .single()
-      
-      profileCompleted = !!staff
-      userRole = staff?.role as 'headmaster' | 'worker' || 'worker'
+  // No staff record → complete profile (but don't redirect if already there)
+  if (!staff) {
+    if (pathname === '/auth/complete-profile') {
+      return response // Allow access to complete-profile
     }
-
-    // Guardar en cookie para futuras peticiones
-    supabaseResponse.cookies.set('staff-profile-status', `${profileCompleted ? 'true' : 'false'}:${userRole}`, {
-      maxAge: 60 * 60 * 24 * 7, // 1 semana
-      path: '/',
-    })
-  }
-
-  if (!profileCompleted) {
     return NextResponse.redirect(new URL('/auth/complete-profile', request.url))
   }
 
-  // Verificar rutas de Headmaster
-  const isHeadmasterRoute = matchesRoute(pathname, headmasterOnlyRoutes)
-  const isHeadmasterApi = matchesRoute(pathname, headmasterOnlyApiRoutes)
-
-  if (isHeadmasterRoute || isHeadmasterApi) {
-    if (userRole !== 'headmaster') {
-      if (isHeadmasterApi) {
-        return NextResponse.json({ error: 'Acceso denegado. Se requiere rol headmaster.' }, { status: 403 })
-      }
-      return NextResponse.redirect(new URL('/dashboard?error=unauthorized', request.url))
-    }
+  // Has staff record but is on complete-profile → go to dashboard
+  if (pathname === '/auth/complete-profile') {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  return supabaseResponse
+  // Headmaster-only routes
+  const headmasterRoutes = ['/staff', '/settings', '/activity']
+  const isHeadmasterRoute = headmasterRoutes.some(route => 
+    pathname === route || pathname.startsWith(route + '/')
+  )
+  
+  if (isHeadmasterRoute && staff.role !== 'headmaster') {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // Root path → dashboard
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  return response
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

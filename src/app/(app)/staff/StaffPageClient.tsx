@@ -49,7 +49,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
   const [roleDialog, setRoleDialog] = useState<{ open: boolean, staff: any | null, newRole: string }>({
     open: false, staff: null, newRole: 'worker'
   })
-  const [roleLoading, setRoleLoading] = useState(false)
+  const [roleChangeLoading, setRoleChangeLoading] = useState(false)
 
   const supabase = createClient()
   const router = useRouter()
@@ -344,34 +344,34 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => setRoleDialog({ ...roleDialog, open: false })} disabled={roleLoading}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={async () => {
-                  setRoleLoading(true)
-                  try {
-                    const res = await fetch('/api/staff/change-role', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ staff_id: roleDialog.staff?.id, new_role: roleDialog.newRole }),
-                    })
-                    const result = await res.json()
-                    if (!res.ok) throw new Error(result.error)
-                    toast({ title: '✅ Rol actualizado', description: result.message })
-                    fetchStaff()
-                  } catch (error: any) {
-                    toast({ variant: 'destructive', title: 'Error', description: error.message })
-                  } finally {
-                    setRoleLoading(false)
-                    setRoleDialog({ open: false, staff: null, newRole: 'worker' })
-                  }
-                }}
-                disabled={roleLoading}
-                className={roleDialog.newRole === 'headmaster' ? 'bg-purple-600 hover:bg-purple-700' : ''}
-              >
-                {roleLoading ? 'Procesando...' : 'Confirmar'}
-              </Button>
+            <Button variant="outline" onClick={() => setRoleDialog({ ...roleDialog, open: false })} disabled={roleChangeLoading}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={async () => {
+                setRoleChangeLoading(true)
+                try {
+                  const res = await fetch('/api/staff/change-role', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ staff_id: roleDialog.staff?.id, new_role: roleDialog.newRole }),
+                  })
+                  const result = await res.json()
+                  if (!res.ok) throw new Error(result.error)
+                  toast({ title: '✅ Rol actualizado', description: result.message })
+                  fetchStaff()
+                } catch (error: any) {
+                  toast({ variant: 'destructive', title: 'Error', description: error.message })
+                } finally {
+                  setRoleChangeLoading(false)
+                  setRoleDialog({ open: false, staff: null, newRole: 'worker' })
+                }
+              }}
+              disabled={roleChangeLoading}
+              className={roleDialog.newRole === 'headmaster' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+            >
+              {roleChangeLoading ? 'Procesando...' : 'Confirmar'}
+            </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

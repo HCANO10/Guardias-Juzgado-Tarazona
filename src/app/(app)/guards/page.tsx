@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { getActiveStaffByCategory } from "@/lib/guards/staff-by-category"
 import { GuardWeekView } from "@/types/guards"
 import GuardsPageClient from "./GuardsPageClient"
+import { fullName } from "@/lib/utils/full-name"
 
 export default async function GuardsPage() {
   const supabase = createClient()
@@ -48,7 +49,7 @@ export default async function GuardsPage() {
     for (const a of periodAssignments) {
         const pInfo: any = a.staff
         const role = pInfo?.positions?.guard_role
-        const formatted = { id: pInfo.id, name: `${pInfo.first_name} ${pInfo.last_name}` }
+        const formatted = { id: pInfo.id, name: fullName(pInfo) }
         
         if (role === 'auxilio') {
             auxilio = formatted

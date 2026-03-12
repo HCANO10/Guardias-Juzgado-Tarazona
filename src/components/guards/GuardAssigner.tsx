@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react"
 import { StaffByCategory } from "@/lib/guards/staff-by-category"
+import { fullName } from "@/lib/utils/full-name"
 import { GuardWeekView } from "@/types/guards"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -81,7 +81,7 @@ export function GuardAssigner({ open, onOpenChange, week, staffByCategory, onSuc
           const person: any = v.staff
           const startFormat = format(new Date(v.start_date), 'dd/MM', { locale: es })
           const endFormat = format(new Date(v.end_date), 'dd/MM', { locale: es })
-          newWarnings.push(`⚠️ ${person.first_name} ${person.last_name} tiene vacaciones del ${startFormat} al ${endFormat}`)
+          newWarnings.push(`⚠️ ${fullName(person)} tiene vacaciones del ${startFormat} al ${endFormat}`)
         })
       }
       
@@ -148,7 +148,7 @@ export function GuardAssigner({ open, onOpenChange, week, staffByCategory, onSuc
               <SelectContent>
                 <SelectItem value="none">— Sin asignar —</SelectItem>
                 {staffByCategory.auxilio.map(person => (
-                  <SelectItem key={person.id} value={person.id}>{person.first_name} {person.last_name}</SelectItem>
+                  <SelectItem key={person.id} value={person.id}>{fullName(person)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -164,7 +164,7 @@ export function GuardAssigner({ open, onOpenChange, week, staffByCategory, onSuc
               <SelectContent>
                 <SelectItem value="none">— Sin asignar —</SelectItem>
                 {staffByCategory.tramitador.map(person => (
-                  <SelectItem key={person.id} value={person.id}>{person.first_name} {person.last_name}</SelectItem>
+                  <SelectItem key={person.id} value={person.id}>{fullName(person)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -180,7 +180,7 @@ export function GuardAssigner({ open, onOpenChange, week, staffByCategory, onSuc
               <SelectContent>
                 <SelectItem value="none">— Sin asignar —</SelectItem>
                 {staffByCategory.gestor.map(person => (
-                  <SelectItem key={person.id} value={person.id}>{person.first_name} {person.last_name}</SelectItem>
+                  <SelectItem key={person.id} value={person.id}>{fullName(person)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

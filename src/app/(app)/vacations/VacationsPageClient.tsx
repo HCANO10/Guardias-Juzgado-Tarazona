@@ -2,6 +2,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { fullName } from "@/lib/utils/full-name"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -73,7 +74,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
       .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())[0]
 
     return {
-      name: staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : "",
+      name: staffMember ? fullName(staffMember) : "",
       usedDays,
       nextVac: nextVac ? `${format(new Date(nextVac.start_date), 'dd/MM')} al ${format(new Date(nextVac.end_date), 'dd/MM')}` : "Ninguna",
       nextGuard: selectedStaffId === currentStaffId && nextGuard 

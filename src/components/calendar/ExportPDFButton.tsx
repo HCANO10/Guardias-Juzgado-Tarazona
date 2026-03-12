@@ -4,8 +4,9 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { FileDown, Loader2 } from "lucide-react"
-import { format, getDaysInMonth, startOfMonth } from "date-fns"
+import { format, getDaysInMonth } from "date-fns"
 import { es } from "date-fns/locale"
+import { fullName } from "@/lib/utils/full-name"
 
 interface ExportPDFButtonProps {
   guards: any[]
@@ -51,7 +52,7 @@ export function ExportPDFButton({ guards, vacations, holidays, staff, currentDat
         const period = g.guard_periods
         const assignedStaff = g.assignments?.map((a: any) => {
           const s = staff.find((p: any) => p.id === a.staff_id)
-          return s ? `${s.first_name} ${s.last_name}` : '—'
+          return s ? fullName(s) : '—'
         }).join('\n') || '—'
         return [
           `Sem. ${period?.week_number || '?'}`,

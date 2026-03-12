@@ -2,6 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { fullName } from "@/lib/utils/full-name"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -102,7 +103,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
 
   // Filtrado
   const filteredData = data.filter((item) => {
-    const matchesSearch = `${item.first_name} ${item.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = fullName(item).toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' ? true : statusFilter === 'active' ? item.is_active : !item.is_active
     const matchesPosition = positionFilter === 'all' ? true : item.position_id === positionFilter
 

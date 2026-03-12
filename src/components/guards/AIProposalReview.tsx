@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from "react"
+import { fullName } from "@/lib/utils/full-name"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -129,7 +129,7 @@ export function AIProposalReview({ open, onOpenChange, activeYear, onSuccess, st
      if (!staffByCategory) return "Desconocido"
      const lst = staffByCategory[cat as keyof typeof staffByCategory]
      const p = lst?.find((x:any) => x.id === id)
-     return p ? `${p.first_name} ${p.last_name}` : id
+     return p ? fullName(p) : id
   }
 
   return (

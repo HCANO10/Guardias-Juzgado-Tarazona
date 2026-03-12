@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { callGroq } from '@/lib/groq/client';
 import { buildSystemPrompt, buildUserPrompt, PromptData } from '@/lib/groq/prompts';
 import { validateProposal, ProposalAssignment } from '@/lib/groq/validator';
+import { fullName } from '@/lib/utils/full-name';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const promptStaff = (staffData || []).map(s => ({
       id: s.id,
-      name: `${s.first_name} ${s.last_name}`,
+      name: fullName(s),
       category: (s.positions as any).guard_role
     }));
 
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     const promptVacations = (vacationsData || []).map(v => ({
       staff_id: v.staff_id,
-      staff_name: `${(v.staff as any).first_name} ${(v.staff as any).last_name}`,
+      staff_name: fullName(v.staff as any),
       start_date: v.start_date,
       end_date: v.end_date
     }));
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
         guard_period_id: e.guard_period_id,
         week_number: (e.guard_periods as any).week_number,
         staff_id: e.staff_id,
-        staff_name: `${(e.staff as any).first_name} ${(e.staff as any).last_name}`,
+        staff_name: fullName(e.staff as any),
         category: ((e.staff as any).positions as any).guard_role
       }));
     }

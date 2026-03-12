@@ -7,10 +7,20 @@ export async function POST(request: Request) {
   try {
     const supabase = createClient()
     
-    // Verificar sesión (solo usuarios autenticados pueden desactivar staff)
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    if (sessionError || !session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    // Verificar sesión y rol
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+    }
+
+    const { data: requester } = await supabase
+      .from('staff')
+      .select('role')
+      .eq('auth_user_id', user.id)
+      .single()
+
+    if (requester?.role !== 'headmaster') {
+      return NextResponse.json({ error: 'No autorizado. Se requiere rol headmaster.' }, { status: 403 })
     }
 
     const body = await request.json()

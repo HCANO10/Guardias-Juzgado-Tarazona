@@ -230,11 +230,9 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
     <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Calendario de Festivos</h2>
-        {isHeadmaster && (
-          <Button onClick={() => handleOpenDialog()}>
-            <Plus className="mr-2 h-4 w-4" /> Añadir festivo
-          </Button>
-        )}
+        <Button onClick={() => handleOpenDialog()}>
+          <Plus className="mr-2 h-4 w-4" /> Añadir festivo
+        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-6">

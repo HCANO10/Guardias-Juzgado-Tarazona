@@ -8,7 +8,26 @@ const supabaseAdmin = createSupabaseAdmin(
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
+import { createClient } from '@/lib/supabase/server';
+
 export async function POST(request: NextRequest) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+  }
+
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('role')
+    .eq('auth_user_id', user.id)
+    .single();
+
+  if (staff?.role !== 'headmaster') {
+    return NextResponse.json({ error: 'No autorizado. Se requiere rol headmaster.' }, { status: 403 });
+  }
+
   try {
     const body = await request.json();
     const { first_name, last_name, email, position_id, start_date, notes, password } = body;

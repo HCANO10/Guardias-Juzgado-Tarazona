@@ -59,27 +59,30 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Verificar profile_completed (Prioridad: Cookie > Metadata > DB)
+  // Verificar profile_completed y role (Prioridad: Cookie > Metadata > DB)
   const profileStatusCookie = request.cookies.get('staff-profile-status')?.value
-  let profileCompleted = profileStatusCookie === 'true'
+  let profileCompleted = profileStatusCookie?.startsWith('true') === true
+  let userRole = profileStatusCookie?.split(':')[1] as 'headmaster' | 'worker' | undefined
 
-  if (!profileStatusCookie) {
-    // Si no hay cookie, intentamos metadata
+  if (!profileStatusCookie || !userRole) {
+    // Si no hay cookie o no tiene el rol, intentamos metadata
     profileCompleted = user.user_metadata?.profile_completed === true
+    userRole = user.user_metadata?.role || 'worker'
     
-    // Si tampoco está en metadata, consultamos DB (último recurso)
-    if (!profileCompleted) {
+    // Si no tenemos certeza total, consultamos DB (último recurso)
+    if (!profileStatusCookie) {
       const { data: staff } = await supabase
         .from('staff')
-        .select('id')
+        .select('id, role')
         .eq('auth_user_id', user.id)
         .single()
       
       profileCompleted = !!staff
+      userRole = staff?.role as 'headmaster' | 'worker' || 'worker'
     }
 
     // Guardar en cookie para futuras peticiones
-    supabaseResponse.cookies.set('staff-profile-status', profileCompleted ? 'true' : 'false', {
+    supabaseResponse.cookies.set('staff-profile-status', `${profileCompleted ? 'true' : 'false'}:${userRole}`, {
       maxAge: 60 * 60 * 24 * 7, // 1 semana
       path: '/',
     })
@@ -94,17 +97,11 @@ export async function middleware(request: NextRequest) {
   const isHeadmasterApi = matchesRoute(pathname, headmasterOnlyApiRoutes)
 
   if (isHeadmasterRoute || isHeadmasterApi) {
-    const { data: staff } = await supabase
-      .from('staff')
-      .select('role')
-      .eq('auth_user_id', user.id)
-      .single()
-
-    if (staff?.role !== 'headmaster') {
+    if (userRole !== 'headmaster') {
       if (isHeadmasterApi) {
-        return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
+        return NextResponse.json({ error: 'Acceso denegado. Se requiere rol headmaster.' }, { status: 403 })
       }
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      return NextResponse.redirect(new URL('/dashboard?error=unauthorized', request.url))
     }
   }
 

@@ -47,17 +47,24 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
   // Build menu items based on role
   const items = isHeadmaster
     ? [
-        commonItems[0], // Dashboard
-        commonItems[1], // Calendario
+        { title: "Dashboard", url: "/dashboard", icon: Home },
         { title: "Personal", url: "/staff", icon: Users },
-        commonItems[2], // Guardias
-        commonItems[3], // Vacaciones
-        commonItems[4], // Festivos
+        { title: "Guardias", url: "/guards", icon: Shield },
+        { title: "Vacaciones", url: "/vacations", icon: Palmtree },
+        { title: "Festivos", url: "/holidays", icon: Star },
+        { title: "Calendario", url: "/calendar", icon: Calendar },
         { title: "Actividad", url: "/activity", icon: ClipboardList },
         { title: "Configuración", url: "/settings", icon: Settings },
-        commonItems[5], // Mi Perfil
+        { title: "Mi Perfil", url: "/profile", icon: UserCircle },
       ]
-    : commonItems
+    : [
+        { title: "Dashboard", url: "/dashboard", icon: Home },
+        { title: "Guardias", url: "/guards", icon: Shield },
+        { title: "Vacaciones", url: "/vacations", icon: Palmtree },
+        { title: "Festivos", url: "/holidays", icon: Star },
+        { title: "Calendario", url: "/calendar", icon: Calendar },
+        { title: "Mi Perfil", url: "/profile", icon: UserCircle },
+      ]
 
   return (
     <Sidebar>

@@ -4,6 +4,23 @@ import { createClient } from '@/lib/supabase/server';
 import { generateGuardPeriods } from '@/lib/guards/period-generator';
 
 export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+  }
+
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('role')
+    .eq('auth_user_id', user.id)
+    .single();
+
+  if (staff?.role !== 'headmaster') {
+    return NextResponse.json({ error: 'No autorizado. Se requiere rol headmaster.' }, { status: 403 });
+  }
+
   try {
     const { year, force } = await request.json();
 

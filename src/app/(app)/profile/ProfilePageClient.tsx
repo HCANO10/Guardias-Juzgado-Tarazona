@@ -32,6 +32,7 @@ import { GoogleButton } from "@/components/auth/GoogleButton"
 import { 
   DSCard, 
   DSBadge, 
+  DSIconBox,
   DSPageHeader, 
   DSSectionHeading, 
   DSButton 

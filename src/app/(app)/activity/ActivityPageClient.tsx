@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useState, useEffect, useRef } from "react"
 import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
-import { ClipboardList, RefreshCw, Filter, User, Shield, Calendar, Sun, Settings, Users, Loader2 } from "lucide-react"
+import { ClipboardList, RefreshCw, Filter, User, Shield, Calendar, Sun, Settings, Users, Loader2, ChevronDown } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DSPageHeader, DSCard, DSBadge } from "@/lib/design-system"
 
@@ -18,6 +17,8 @@ interface ActivityEntry {
   created_at: string
   staff: { first_name: string; last_name: string } | null
 }
+
+const PAGE_SIZE = 25
 
 const ENTITY_ICONS: Record<string, typeof ClipboardList> = {
   staff: Users,
@@ -60,31 +61,67 @@ function getActionVariant(action: string): "green" | "blue" | "orange" | "red" |
   return "neutral"
 }
 
+async function loadPage(typeFilter: string, offsetVal: number): Promise<ActivityEntry[]> {
+  const params = new URLSearchParams({ limit: String(PAGE_SIZE + 1), offset: String(offsetVal) })
+  if (typeFilter !== "all") params.set("type", typeFilter)
+  const res = await fetch(`/api/activity?${params}`)
+  const result = await res.json()
+  return res.ok ? (result.data || []) : []
+}
+
 export default function ActivityPageClient() {
   const [entries, setEntries] = useState<ActivityEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
   const [typeFilter, setTypeFilter] = useState("all")
-  const supabase = createClient()
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [expandedDetails, setExpandedDetails] = useState<Set<string>>(new Set())
+  const offsetRef = useRef(0)
 
-  const fetchActivity = useCallback(async () => {
+  const fetchFirst = async (filter: string) => {
     setLoading(true)
+    offsetRef.current = 0
     try {
-      const params = new URLSearchParams({ limit: "50" })
-      if (typeFilter !== "all") params.set("type", typeFilter)
-
-      const res = await fetch(`/api/activity?${params}`)
-      const result = await res.json()
-      if (res.ok) {
-        setEntries(result.data || [])
-      }
+      const data = await loadPage(filter, 0)
+      const hasNext = data.length > PAGE_SIZE
+      const pageData = hasNext ? data.slice(0, PAGE_SIZE) : data
+      setEntries(pageData)
+      setHasMore(hasNext)
+      offsetRef.current = pageData.length
+      setLastUpdated(new Date())
     } finally {
       setLoading(false)
     }
-  }, [typeFilter])
+  }
+
+  const handleLoadMore = async () => {
+    setLoadingMore(true)
+    try {
+      const data = await loadPage(typeFilter, offsetRef.current)
+      const hasNext = data.length > PAGE_SIZE
+      const pageData = hasNext ? data.slice(0, PAGE_SIZE) : data
+      setEntries(prev => [...prev, ...pageData])
+      setHasMore(hasNext)
+      offsetRef.current += pageData.length
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   useEffect(() => {
-    fetchActivity()
-  }, [fetchActivity])
+    fetchFirst(typeFilter)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typeFilter])
+
+  const toggleDetails = (id: string) => {
+    setExpandedDetails(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const entityTypes = Array.from(new Set(entries.map(e => e.entity_type))).sort()
 
@@ -95,14 +132,21 @@ export default function ActivityPageClient() {
           title="Registro de Actividad"
           subtitle="Historial de acciones realizadas en el sistema."
         />
-        <button
-          onClick={fetchActivity}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#86868B] hover:bg-black/[0.04] transition-colors"
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          Actualizar
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={() => fetchFirst(typeFilter)}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#86868B] hover:bg-black/[0.04] transition-colors"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Actualizar
+          </button>
+          {lastUpdated && (
+            <span className="text-[11px] text-[#86868B]">
+              Actualizado {format(lastUpdated, "HH:mm:ss", { locale: es })}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
@@ -119,6 +163,9 @@ export default function ActivityPageClient() {
             ))}
           </SelectContent>
         </Select>
+        {entries.length > 0 && !loading && (
+          <span className="text-[13px] text-[#86868B]">{entries.length} registros</span>
+        )}
       </div>
 
       {/* Activity List */}
@@ -141,6 +188,8 @@ export default function ActivityPageClient() {
             const staffName = entry.staff
               ? `${entry.staff.first_name} ${entry.staff.last_name}`
               : "Sistema"
+            const hasDetails = entry.details && Object.keys(entry.details).length > 0
+            const isExpanded = expandedDetails.has(entry.id)
 
             return (
               <DSCard key={entry.id} className="flex items-start gap-4 py-4">
@@ -169,15 +218,43 @@ export default function ActivityPageClient() {
                       {format(parseISO(entry.created_at), "dd MMM yyyy, HH:mm", { locale: es })}
                     </span>
                   </div>
-                  {entry.details && Object.keys(entry.details).length > 0 && (
-                    <div className="mt-2 text-xs text-[#86868B] bg-[#F2F2F7]/50 rounded-lg px-3 py-2 font-mono break-all">
-                      {JSON.stringify(entry.details, null, 0)}
+                  {hasDetails && (
+                    <div className="mt-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleDetails(entry.id)}
+                        className="flex items-center gap-1 text-[12px] text-[#86868B] hover:text-neutral-900 transition-colors"
+                      >
+                        <ChevronDown className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                        {isExpanded ? "Ocultar detalles" : "Ver detalles"}
+                      </button>
+                      {isExpanded && (
+                        <pre className="mt-2 text-[11px] text-[#86868B] bg-[#F2F2F7]/70 rounded-lg px-3 py-2 font-mono overflow-x-auto whitespace-pre-wrap break-all">
+                          {JSON.stringify(entry.details, null, 2)}
+                        </pre>
+                      )}
                     </div>
                   )}
                 </div>
               </DSCard>
             )
           })}
+
+          {/* Load More */}
+          {hasMore && (
+            <div className="flex justify-center pt-2">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-[14px] font-medium text-[#0066CC] border border-[#0066CC]/20 hover:bg-[#0066CC]/[0.06] transition-colors disabled:opacity-50"
+              >
+                {loadingMore
+                  ? <><Loader2 className="h-4 w-4 animate-spin" />Cargando...</>
+                  : <><ChevronDown className="h-4 w-4" />Cargar más</>
+                }
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

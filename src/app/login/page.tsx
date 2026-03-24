@@ -40,6 +40,10 @@ function LoginContent() {
   const [loginPassword, setLoginPassword] = useState("")
   const [showLoginPassword, setShowLoginPassword] = useState(false)
   const [isLoginLoading, setIsLoginLoading] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState("")
+  const [isForgotLoading, setIsForgotLoading] = useState(false)
+  const [forgotSent, setForgotSent] = useState(false)
 
   // Register state
   const [firstName, setFirstName] = useState("")
@@ -47,6 +51,8 @@ function LoginContent() {
   const [regEmail, setRegEmail] = useState("")
   const [regPassword, setRegPassword] = useState("")
   const [regPasswordConfirm, setRegPasswordConfirm] = useState("")
+  const [showRegPassword, setShowRegPassword] = useState(false)
+  const [showRegPasswordConfirm, setShowRegPasswordConfirm] = useState(false)
   const [positionId, setPositionId] = useState("")
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [isRegLoading, setIsRegLoading] = useState(false)
@@ -77,6 +83,24 @@ function LoginContent() {
     }
     loadPositions()
   }, [])
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!forgotEmail) {
+      toast({ variant: "destructive", title: "Introduce tu email" })
+      return
+    }
+    setIsForgotLoading(true)
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    })
+    setIsForgotLoading(false)
+    if (error) {
+      toast({ variant: "destructive", title: "Error", description: "No se pudo enviar el email de recuperación." })
+      return
+    }
+    setForgotSent(true)
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -202,74 +226,82 @@ function LoginContent() {
 
             {/* LOGIN FORM */}
             <TabsContent value="login" className="mt-0 space-y-6">
-              <div className="space-y-2">
-                <h2
-                  className="text-[28px] font-medium text-gray-900 tracking-tight"
-                  style={{ fontFamily: tokens.fonts.heading }}
-                >
-                  Bienvenido de vuelta
-                </h2>
-                <p className="text-sm text-gray-500">
-                  Introduce tus credenciales para acceder al sistema
-                </p>
-              </div>
-
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-medium text-gray-700">
-                    Correo electrónico
-                  </label>
-                  <Input
-                    type="email"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    placeholder="nombre@juzgado.es"
-                    className={inputClasses}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-medium text-gray-700">
-                    Contraseña
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showLoginPassword ? "text" : "password"}
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className={`${inputClasses} pr-11`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowLoginPassword(!showLoginPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      {showLoginPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
+              {!showForgotPassword ? (
+                <>
+                  <div className="space-y-2">
+                    <h2 className="text-[28px] font-medium text-gray-900 tracking-tight" style={{ fontFamily: tokens.fonts.heading }}>
+                      Bienvenido de vuelta
+                    </h2>
+                    <p className="text-sm text-gray-500">Introduce tus credenciales para acceder al sistema</p>
                   </div>
-                </div>
-                <DSButton
-                  type="submit"
-                  disabled={isLoginLoading}
-                  className="w-full h-12 mt-2"
-                >
-                  {isLoginLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <>
-                      Acceder
-                      <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
-                </DSButton>
-              </form>
 
-              <AuthDivider />
-              <GoogleButton label="Continuar con Google" />
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[13px] font-medium text-gray-700">Correo electrónico</label>
+                      <Input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}
+                        placeholder="nombre@juzgado.es" className={inputClasses} autoComplete="email" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[13px] font-medium text-gray-700">Contraseña</label>
+                        <button type="button" onClick={() => { setForgotEmail(loginEmail); setShowForgotPassword(true) }}
+                          className="text-[12px] text-[#0066CC] hover:underline font-medium">
+                          ¿Olvidaste tu contraseña?
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <Input type={showLoginPassword ? "text" : "password"} value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)} placeholder="••••••••"
+                          className={`${inputClasses} pr-11`} autoComplete="current-password" />
+                        <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" aria-label="Mostrar contraseña">
+                          {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <DSButton type="submit" disabled={isLoginLoading} className="w-full h-12 mt-2">
+                      {isLoginLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <><span>Acceder</span><ArrowRight className="h-4 w-4" /></>}
+                    </DSButton>
+                  </form>
+
+                  <AuthDivider />
+                  <GoogleButton label="Continuar con Google" />
+                </>
+              ) : (
+                /* ── Panel recuperación de contraseña ── */
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <h2 className="text-[26px] font-medium text-gray-900 tracking-tight" style={{ fontFamily: tokens.fonts.heading }}>
+                      Recuperar contraseña
+                    </h2>
+                    <p className="text-sm text-gray-500">Te enviaremos un enlace para restablecer tu contraseña.</p>
+                  </div>
+
+                  {forgotSent ? (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-5 text-center space-y-2">
+                      <div className="text-2xl">📬</div>
+                      <p className="text-[14px] font-semibold text-green-800">Email enviado</p>
+                      <p className="text-[13px] text-green-700">Revisa tu bandeja de entrada y sigue las instrucciones.</p>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleForgotPassword} className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[13px] font-medium text-gray-700">Tu correo electrónico</label>
+                        <Input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)}
+                          placeholder="nombre@juzgado.es" className={inputClasses} autoFocus autoComplete="email" />
+                      </div>
+                      <DSButton type="submit" disabled={isForgotLoading} className="w-full h-12">
+                        {isForgotLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Enviar enlace de recuperación"}
+                      </DSButton>
+                    </form>
+                  )}
+
+                  <button type="button" onClick={() => { setShowForgotPassword(false); setForgotSent(false) }}
+                    className="w-full text-[13px] text-gray-500 hover:text-gray-900 transition-colors">
+                    ← Volver al inicio de sesión
+                  </button>
+                </div>
+              )}
             </TabsContent>
 
             {/* REGISTER FORM */}
@@ -344,23 +376,45 @@ function LoginContent() {
                     <label className="text-[13px] font-medium text-gray-700">
                       Contraseña
                     </label>
-                    <Input
-                      type="password"
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      className={inputClasses}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showRegPassword ? "text" : "password"}
+                        value={regPassword}
+                        onChange={(e) => setRegPassword(e.target.value)}
+                        className={`${inputClasses} pr-11`}
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPassword(!showRegPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        aria-label="Mostrar contraseña"
+                      >
+                        {showRegPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[13px] font-medium text-gray-700">
                       Confirmar
                     </label>
-                    <Input
-                      type="password"
-                      value={regPasswordConfirm}
-                      onChange={(e) => setRegPasswordConfirm(e.target.value)}
-                      className={inputClasses}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showRegPasswordConfirm ? "text" : "password"}
+                        value={regPasswordConfirm}
+                        onChange={(e) => setRegPasswordConfirm(e.target.value)}
+                        className={`${inputClasses} pr-11`}
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPasswordConfirm(!showRegPasswordConfirm)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        aria-label="Mostrar contraseña"
+                      >
+                        {showRegPasswordConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 py-1">

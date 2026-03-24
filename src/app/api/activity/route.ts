@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   const queryValidation = validateQuery(searchParams, activityQuerySchema)
   if (!queryValidation.success) return queryValidation.response
 
-  const { limit, type, from, to } = queryValidation.data
+  const { limit, offset, type, from, to } = queryValidation.data
 
   try {
     const adminClient = createAdminClient()
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         staff:performed_by(first_name, last_name)
       `)
       .order('created_at', { ascending: false })
-      .limit(limit)
+      .range(offset, offset + limit - 1)
 
     if (type) query = query.eq('entity_type', type)
     if (from) query = query.gte('created_at', from)

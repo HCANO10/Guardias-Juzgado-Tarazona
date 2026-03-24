@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { buildFullName } from "@/lib/staff/normalize"
 import { createClient } from "@/lib/supabase/client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -65,6 +65,18 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [positionFilter, setPositionFilter] = useState("all")
+
+  // Debounce search: raw input updates immediately, debouncedSearch filters after 300ms
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(value)
+    }, 300)
+  }
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null)
@@ -140,7 +152,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
   }
 
   const filteredData = data.filter((item) => {
-    const matchesSearch = buildFullName(item).toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = buildFullName(item).toLowerCase().includes(debouncedSearch.toLowerCase())
     const matchesStatus = statusFilter === 'all' ? true : statusFilter === 'active' ? item.is_active : !item.is_active
     const matchesPosition = positionFilter === 'all' ? true : item.position_id === positionFilter
 
@@ -183,7 +195,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
               placeholder="Buscar por nombre..." 
               className="pl-10 h-11 rounded-[12px] bg-white border-black/[0.08] text-[15px] focus:ring-[#0066CC]/20" 
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
           <Select value={positionFilter} onValueChange={setPositionFilter}>

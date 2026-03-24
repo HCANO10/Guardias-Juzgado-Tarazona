@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef } from "react"
 import { buildFullName } from "@/lib/staff/normalize"
 import { useRole } from "@/hooks/use-role"
 import { useToast } from "@/hooks/use-toast"
@@ -26,6 +26,16 @@ import {
   Info
 } from "lucide-react"
 import { EmptyState } from "@/components/ui/empty-state"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { 
@@ -92,6 +102,10 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [conflictResult, setConflictResult] = useState<{ valid: boolean; conflicts: ConflictInfo[] } | null>(null)
 
+  // Confirmation dialog for cancellation
+  const [cancelConfirm, setCancelConfirm] = useState<{ open: boolean; id: string | null }>({ open: false, id: null })
+  const cancellingRef = useRef(false)
+
   // Filter states
   const [staffFilter, setStaffFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -140,6 +154,10 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
   const handleValidateAndSubmit = async () => {
     if (!selectedStaffId || !dateRange.from || !dateRange.to) {
       toast({ variant: "destructive", title: "Campos incompletos", description: "Selecciona trabajador y rango de fechas." })
+      return
+    }
+    if (dateRange.to < dateRange.from) {
+      toast({ variant: "destructive", title: "Fechas incorrectas", description: "La fecha de fin debe ser igual o posterior a la de inicio." })
       return
     }
 
@@ -204,19 +222,24 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
     }
   }
 
-  const handleCancelVacation = async (id: string) => {
+  const confirmCancelVacation = async () => {
+    if (!cancelConfirm.id || cancellingRef.current) return
+    cancellingRef.current = true
     try {
       const { error } = await supabase
         .from('vacations')
         .update({ status: 'cancelled' })
-        .eq('id', id)
+        .eq('id', cancelConfirm.id)
 
       if (error) throw error
-      toast({ title: "Vacaciones canceladas" })
+      toast({ title: "Vacaciones anuladas", description: "El periodo ha sido cancelado correctamente." })
       router.refresh()
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Error desconocido"
       toast({ variant: "destructive", title: "Error", description: message })
+    } finally {
+      cancellingRef.current = false
+      setCancelConfirm({ open: false, id: null })
     }
   }
 
@@ -461,10 +484,10 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                       </div>
 
                       {v.status === 'approved' && (isHeadmaster || v.staff_id === myStaffId) && (
-                        <DSButton 
-                          variant="danger" 
+                        <DSButton
+                          variant="danger"
                           className="w-full mt-4 h-10 text-[13px]"
-                          onClick={() => handleCancelVacation(v.id)}
+                          onClick={() => setCancelConfirm({ open: true, id: v.id })}
                         >
                            <Trash2 className="h-4 w-4 mr-2" /> Anular periodo
                         </DSButton>
@@ -559,6 +582,31 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
           </div>
         </div>
       </div>
+
+      {/* Cancel confirmation dialog */}
+      <AlertDialog open={cancelConfirm.open} onOpenChange={(open) => !open && setCancelConfirm({ open: false, id: null })}>
+        <AlertDialogContent className="rounded-[20px] border-black/[0.08] shadow-2xl max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[17px] font-semibold">
+              ¿Anular este periodo?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[14px] text-[#86868B]">
+              El periodo de vacaciones quedará marcado como cancelado y ya no se mostrará como vigente. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="rounded-xl h-10 text-[14px]">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCancelVacation}
+              className="rounded-xl h-10 text-[14px] bg-red-500 hover:bg-red-600 text-white"
+            >
+              Sí, anular
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

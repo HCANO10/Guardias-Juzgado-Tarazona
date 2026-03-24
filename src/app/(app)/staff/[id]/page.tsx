@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
 import Link from "next/link"
-import { ArrowLeft, CalendarDays, Mail, Briefcase, FileText, Shield, Sun } from "lucide-react"
+import { ArrowLeft, CalendarDays, Mail, Briefcase, FileText, Shield, Sun, Phone, ChevronRight } from "lucide-react"
 import {
   DSCard,
   DSBadge,
@@ -84,13 +84,18 @@ export default async function StaffDetailPage({ params }: { params: { id: string
 
   return (
     <div className="space-y-10 pb-20">
-      {/* Back + Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/staff">
-          <div className="h-10 w-10 rounded-xl bg-white border border-gray-200/60 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm">
-            <ArrowLeft className="h-4 w-4 text-gray-600" />
-          </div>
-        </Link>
+      {/* Breadcrumb + Header */}
+      <div className="space-y-3">
+        <nav className="flex items-center gap-1.5 text-[13px] text-[#86868B]">
+          <Link href="/staff" className="flex items-center gap-1.5 hover:text-[#0066CC] transition-colors">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Personal
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <span className="text-neutral-900 font-medium">
+            {typedStaff.first_name} {typedStaff.last_name}
+          </span>
+        </nav>
         <DSPageHeader
           title={`${typedStaff.first_name} ${typedStaff.last_name}`}
           subtitle="Ficha detallada del trabajador"
@@ -133,6 +138,18 @@ export default async function StaffDetailPage({ params }: { params: { id: string
                   <p className="text-gray-900 font-medium truncate">{typedStaff.email}</p>
                 </div>
               </div>
+
+              {typedStaff.phone && (
+                <div className="flex items-center gap-3 text-sm">
+                  <DSIconBox icon={Phone} variant="green" size="sm" />
+                  <div>
+                    <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wider">Teléfono</p>
+                    <a href={`tel:${typedStaff.phone}`} className="text-gray-900 font-medium hover:text-[#0066CC] transition-colors">
+                      {typedStaff.phone}
+                    </a>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center gap-3 text-sm">
                 <DSIconBox icon={Briefcase} variant="indigo" size="sm" />

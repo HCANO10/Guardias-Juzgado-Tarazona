@@ -75,6 +75,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  // Los administradores del sistema (sin registro de staff) acceden libremente
+  const isSystemAdmin = user.app_metadata?.is_system_admin === true
+  if (isSystemAdmin) {
+    if (pathname === '/') return NextResponse.redirect(new URL('/dashboard', request.url))
+    return response
+  }
+
   // Check if user has a staff profile
   const { data: staff } = await supabase
     .from('staff')

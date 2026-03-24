@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import { DSButton } from "@/lib/design-system"
-import { FileDown, Loader2 } from "lucide-react"
-import { format, getDaysInMonth } from "date-fns"
+import { FileDown, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
+import { format, getDaysInMonth, addMonths, subMonths } from "date-fns"
 import { es } from "date-fns/locale"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 interface PDFStaffMember {
   id: string
@@ -45,14 +46,21 @@ interface ExportPDFButtonProps {
   vacations: PDFVacation[]
   holidays: PDFHoliday[]
   staff: PDFStaffMember[]
-  currentDate?: Date
 }
 
-export function ExportPDFButton({ guards, vacations, holidays, currentDate = new Date() }: ExportPDFButtonProps) {
+export function ExportPDFButton({ guards, vacations, holidays }: ExportPDFButtonProps) {
   const [exporting, setExporting] = useState(false)
+  const [popoverOpen, setPopoverOpen] = useState(false)
+  // Mes seleccionado para el PDF (por defecto el mes actual)
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const d = new Date()
+    return new Date(d.getFullYear(), d.getMonth(), 1)
+  })
 
   const handleExport = async () => {
+    setPopoverOpen(false)
     setExporting(true)
+    const currentDate = selectedDate
     try {
       const { jsPDF } = await import('jspdf')
       const autoTable = (await import('jspdf-autotable')).default
@@ -222,10 +230,97 @@ export function ExportPDFButton({ guards, vacations, holidays, currentDate = new
     }
   }
 
+  const monthLabel = format(selectedDate, 'MMMM yyyy', { locale: es })
+    .replace(/^\w/, (c) => c.toUpperCase())
+
   return (
-    <DSButton variant="secondary" size="sm" onClick={handleExport} disabled={exporting}>
-      {exporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
-      Exportar PDF
-    </DSButton>
+    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+      <PopoverTrigger asChild>
+        <DSButton variant="secondary" size="sm" disabled={exporting}>
+          {exporting
+            ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            : <FileDown className="mr-2 h-4 w-4" />}
+          Exportar PDF
+        </DSButton>
+      </PopoverTrigger>
+
+      <PopoverContent className="w-72 p-4 rounded-[16px] shadow-xl border-black/[0.08]" align="end">
+        <p className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] mb-3">
+          Selecciona el mes
+        </p>
+
+        {/* Navegador mes/año */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            type="button"
+            onClick={() => setSelectedDate(d => subMonths(d, 1))}
+            className="h-8 w-8 flex items-center justify-center rounded-[8px] hover:bg-[#F2F2F7] transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4 text-neutral-700" />
+          </button>
+
+          <span className="text-[15px] font-semibold text-neutral-900 capitalize">
+            {monthLabel}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setSelectedDate(d => addMonths(d, 1))}
+            className="h-8 w-8 flex items-center justify-center rounded-[8px] hover:bg-[#F2F2F7] transition-colors"
+          >
+            <ChevronRight className="h-4 w-4 text-neutral-700" />
+          </button>
+        </div>
+
+        {/* Acceso rápido a los meses del año actual */}
+        <div className="grid grid-cols-4 gap-1 mb-4">
+          {Array.from({ length: 12 }, (_, i) => {
+            const d = new Date(selectedDate.getFullYear(), i, 1)
+            const isSelected = d.getMonth() === selectedDate.getMonth() &&
+                               d.getFullYear() === selectedDate.getFullYear()
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setSelectedDate(d)}
+                className={`h-8 rounded-[8px] text-[12px] font-semibold transition-colors capitalize
+                  ${isSelected
+                    ? 'bg-[#0066CC] text-white'
+                    : 'hover:bg-[#F2F2F7] text-neutral-700'
+                  }`}
+              >
+                {format(d, 'MMM', { locale: es })}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Selector de año rápido */}
+        <div className="flex items-center justify-between mb-4 bg-[#F2F2F7]/60 rounded-[10px] px-3 py-2">
+          <button
+            type="button"
+            onClick={() => setSelectedDate(d => new Date(d.getFullYear() - 1, d.getMonth(), 1))}
+            className="text-[13px] text-neutral-500 hover:text-neutral-900 font-bold transition-colors"
+          >
+            ‹ {selectedDate.getFullYear() - 1}
+          </button>
+          <span className="text-[14px] font-bold text-neutral-900">{selectedDate.getFullYear()}</span>
+          <button
+            type="button"
+            onClick={() => setSelectedDate(d => new Date(d.getFullYear() + 1, d.getMonth(), 1))}
+            className="text-[13px] text-neutral-500 hover:text-neutral-900 font-bold transition-colors"
+          >
+            {selectedDate.getFullYear() + 1} ›
+          </button>
+        </div>
+
+        <DSButton className="w-full h-10 text-[14px] font-semibold gap-2" onClick={handleExport} disabled={exporting}>
+          {exporting
+            ? <><Loader2 className="h-4 w-4 animate-spin" />Generando…</>
+            : <><FileDown className="h-4 w-4" />Generar PDF — {monthLabel}</>
+          }
+        </DSButton>
+      </PopoverContent>
+    </Popover>
   )
 }

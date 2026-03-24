@@ -1,6 +1,7 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import {
   Shield,
   Sun,
@@ -85,6 +86,16 @@ export default function DashboardPageClient({
   calendarData,
   currentUserStaffId,
 }: DashboardPageClientProps) {
+  const router = useRouter()
+
+  // Auto-refresh each 5 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh()
+    }, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [router])
+
   const coveragePercent =
     stats.coverage.total > 0
       ? Math.round((stats.coverage.complete / stats.coverage.total) * 100)

@@ -5,7 +5,6 @@ import { DSButton } from "@/lib/design-system"
 import { FileDown, Loader2 } from "lucide-react"
 import { format, getDaysInMonth } from "date-fns"
 import { es } from "date-fns/locale"
-import { buildFullName } from "@/lib/staff/normalize"
 
 interface PDFStaffMember {
   id: string
@@ -14,20 +13,15 @@ interface PDFStaffMember {
   second_last_name?: string | null
 }
 
-interface PDFGuardPeriod {
+// Guard data shape as produced by formattedGuards in calendar/page.tsx
+interface PDFGuard {
+  id: string
   week_number: number
   start_date: string
   end_date: string
-}
-
-interface PDFGuardAssignment {
-  staff_id: string
-}
-
-interface PDFGuard {
-  id: string
-  guard_periods?: PDFGuardPeriod | null
-  assignments?: PDFGuardAssignment[]
+  auxilio: { id: string; first_name: string; last_name: string } | null
+  tramitador: { id: string; first_name: string; last_name: string } | null
+  gestor: { id: string; first_name: string; last_name: string } | null
 }
 
 interface PDFVacation {
@@ -35,6 +29,8 @@ interface PDFVacation {
   staff_id: string
   start_date: string
   end_date: string
+  tipo?: string | null
+  staff?: { id: string; first_name: string; last_name: string } | null
 }
 
 interface PDFHoliday {
@@ -52,7 +48,7 @@ interface ExportPDFButtonProps {
   currentDate?: Date
 }
 
-export function ExportPDFButton({ guards, vacations, holidays, staff, currentDate = new Date() }: ExportPDFButtonProps) {
+export function ExportPDFButton({ guards, vacations, holidays, currentDate = new Date() }: ExportPDFButtonProps) {
   const [exporting, setExporting] = useState(false)
 
   const handleExport = async () => {
@@ -61,79 +57,163 @@ export function ExportPDFButton({ guards, vacations, holidays, staff, currentDat
       const { jsPDF } = await import('jspdf')
       const autoTable = (await import('jspdf-autotable')).default
 
-      const doc = new (jsPDF as unknown as new (opts: Record<string, string>) => InstanceType<typeof jsPDF>)({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+      const doc = new (jsPDF as unknown as new (opts: Record<string, string>) => InstanceType<typeof jsPDF>)({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4',
+      })
 
       const monthName = format(currentDate, 'MMMM yyyy', { locale: es }).toUpperCase()
       const year = currentDate.getFullYear()
       const month = currentDate.getMonth()
-      const daysInMonth = getDaysInMonth(currentDate)
+      const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`
 
-      // Título
+      // ── Cabecera ──────────────────────────────────────────────────────────
       doc.setFontSize(16)
       doc.setFont('helvetica', 'bold')
-      doc.text(`CUADRANTE DE GUARDIAS - ${monthName}`, 148, 15, { align: 'center' })
+      doc.text(`CALENDARIO UNIFICADO - ${monthName}`, 148, 15, { align: 'center' })
       doc.setFontSize(10)
       doc.setFont('helvetica', 'normal')
       doc.text('Juzgado de Tarazona', 148, 22, { align: 'center' })
 
-      // Obtener guardias del mes
-      const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`
+      // ── 1. GUARDIAS del mes ───────────────────────────────────────────────
+      // Filtra por semanas cuyo inicio o fin caiga en el mes visualizado
       const monthGuards = guards.filter((g) => {
-        const gMonth = g.guard_periods?.start_date?.slice(0, 7)
-        return gMonth === monthStr
+        const startMonth = g.start_date?.slice(0, 7)
+        const endMonth   = g.end_date?.slice(0, 7)
+        return startMonth === monthStr || endMonth === monthStr
       })
 
-      // Tabla de guardias
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text('GUARDIAS', 10, 30)
+
       const guardRows = monthGuards.map((g) => {
-        const period = g.guard_periods
-        const assignedStaff = g.assignments?.map((a) => {
-          const s = staff.find((p) => p.id === a.staff_id)
-          return s ? buildFullName(s) : '—'
-        }).join('\n') || '—'
+        const formatDate = (d: string) =>
+          d ? format(new Date(d + 'T00:00:00'), 'dd/MM/yyyy') : '—'
         return [
-          `Sem. ${period?.week_number || '?'}`,
-          period?.start_date ? format(new Date(period.start_date + 'T00:00:00'), 'dd/MM/yyyy') : '—',
-          period?.end_date ? format(new Date(period.end_date + 'T00:00:00'), 'dd/MM/yyyy') : '—',
-          assignedStaff,
+          `Sem. ${g.week_number ?? '?'}`,
+          formatDate(g.start_date),
+          formatDate(g.end_date),
+          g.gestor    ? `${g.gestor.first_name} ${g.gestor.last_name}`       : '—',
+          g.tramitador ? `${g.tramitador.first_name} ${g.tramitador.last_name}` : '—',
+          g.auxilio   ? `${g.auxilio.first_name} ${g.auxilio.last_name}`     : '—',
         ]
       })
 
       autoTable(doc, {
-        startY: 28,
-        head: [['Semana', 'Inicio (Viernes)', 'Fin (Jueves)', 'Personal asignado']],
-        body: guardRows.length > 0 ? guardRows : [['—', '—', '—', 'Sin guardias en este mes']],
-        headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [240, 248, 255] },
+        startY: 33,
+        head: [['Semana', 'Inicio (Vie)', 'Fin (Jue)', 'Gestor/a', 'Tramitador/a', 'Auxilio']],
+        body: guardRows.length > 0
+          ? guardRows
+          : [['—', '—', '—', '—', '—', 'Sin guardias en este mes']],
+        headStyles: { fillColor: [220, 38, 38], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+        bodyStyles: { fontSize: 9 },
+        alternateRowStyles: { fillColor: [254, 242, 242] },
+        columnStyles: {
+          0: { cellWidth: 18 },
+          1: { cellWidth: 26 },
+          2: { cellWidth: 26 },
+          3: { cellWidth: 50 },
+          4: { cellWidth: 50 },
+          5: { cellWidth: 50 },
+        },
         margin: { left: 10, right: 10 },
       })
 
-      // Festivos del mes
+      // ── 2. VACACIONES Y ASUNTOS PROPIOS del mes ───────────────────────────
+      // Incluye cualquier vacación que solape con el mes actual
+      const monthStart = new Date(year, month, 1)
+      const monthEnd   = new Date(year, month, getDaysInMonth(currentDate))
+
+      const monthVacations = vacations.filter((v) => {
+        if (!v.start_date || !v.end_date) return false
+        const vStart = new Date(v.start_date + 'T00:00:00')
+        const vEnd   = new Date(v.end_date   + 'T00:00:00')
+        return vStart <= monthEnd && vEnd >= monthStart
+      })
+
+      const lastGuardY = ((doc as unknown as Record<string, { finalY?: number }>).lastAutoTable?.finalY ?? 50) + 8
+
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text('VACACIONES Y ASUNTOS PROPIOS', 10, lastGuardY)
+
+      const tipoLabel = (tipo?: string | null) => {
+        if (tipo === 'asuntos_propios') return 'Asuntos propios'
+        return 'Vacaciones'
+      }
+
+      const vacRows = monthVacations.map((v) => {
+        const staffName = v.staff
+          ? `${v.staff.first_name} ${v.staff.last_name}`
+          : '—'
+        const formatDate = (d: string) =>
+          d ? format(new Date(d + 'T00:00:00'), 'dd/MM/yyyy') : '—'
+        return [
+          staffName,
+          tipoLabel(v.tipo),
+          formatDate(v.start_date),
+          formatDate(v.end_date),
+        ]
+      })
+
+      autoTable(doc, {
+        startY: lastGuardY + 4,
+        head: [['Personal', 'Tipo', 'Inicio', 'Fin']],
+        body: vacRows.length > 0
+          ? vacRows
+          : [['—', '—', '—', 'Sin ausencias registradas en este mes']],
+        headStyles: { fillColor: [52, 199, 89], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+        bodyStyles: { fontSize: 9 },
+        alternateRowStyles: { fillColor: [240, 253, 244] },
+        columnStyles: {
+          0: { cellWidth: 70 },
+          1: { cellWidth: 40 },
+          2: { cellWidth: 30 },
+          3: { cellWidth: 30 },
+        },
+        margin: { left: 10, right: 10 },
+      })
+
+      // ── 3. FESTIVOS del mes ───────────────────────────────────────────────
       const monthHolidays = holidays.filter((h) => h.date?.slice(0, 7) === monthStr)
+
       if (monthHolidays.length > 0) {
-        const lastY = ((doc as unknown as Record<string, { finalY?: number }>).lastAutoTable?.finalY ?? 42) + 8
+        const lastVacY = ((doc as unknown as Record<string, { finalY?: number }>).lastAutoTable?.finalY ?? 100) + 8
+
         doc.setFontSize(12)
         doc.setFont('helvetica', 'bold')
-        doc.text('FESTIVOS DEL MES', 10, lastY)
+        doc.text('FESTIVOS DEL MES', 10, lastVacY)
+
         autoTable(doc, {
-          startY: lastY + 4,
+          startY: lastVacY + 4,
           head: [['Fecha', 'Festivo', 'Ámbito']],
           body: monthHolidays.map((h: PDFHoliday) => [
             h.date ? format(new Date(h.date + 'T00:00:00'), 'dd/MM/yyyy') : '—',
             h.name || '—',
-            h.scope || '—',
+            h.scope ? h.scope.charAt(0).toUpperCase() + h.scope.slice(1) : '—',
           ]),
-          headStyles: { fillColor: [251, 191, 36], textColor: 0 },
+          headStyles: { fillColor: [251, 191, 36], textColor: 0, fontStyle: 'bold', fontSize: 9 },
+          bodyStyles: { fontSize: 9 },
+          alternateRowStyles: { fillColor: [255, 251, 235] },
           margin: { left: 10, right: 10 },
         })
       }
 
-      // Nota final
-      const finalY = ((doc as unknown as Record<string, { finalY?: number }>).lastAutoTable?.finalY ?? 114) + 6
+      // ── Pie de página ─────────────────────────────────────────────────────
+      const finalY = ((doc as unknown as Record<string, { finalY?: number }>).lastAutoTable?.finalY ?? 150) + 8
       doc.setFontSize(8)
       doc.setFont('helvetica', 'italic')
-      doc.text(`Generado el ${format(new Date(), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}`, 148, finalY, { align: 'center' })
+      doc.setTextColor(130, 130, 130)
+      doc.text(
+        `Generado el ${format(new Date(), "dd/MM/yyyy 'a las' HH:mm", { locale: es })} · Juzgado de Tarazona`,
+        148,
+        finalY,
+        { align: 'center' },
+      )
 
-      doc.save(`cuadrante_guardias_${monthStr}.pdf`)
+      doc.save(`calendario_unificado_${monthStr}.pdf`)
     } catch (err) {
       console.error('Error exportando PDF:', err)
       alert('Error al generar el PDF. Inténtalo de nuevo.')

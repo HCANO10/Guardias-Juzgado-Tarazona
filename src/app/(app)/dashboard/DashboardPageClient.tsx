@@ -228,17 +228,17 @@ export default function DashboardPageClient({
                 padding="px-4 py-3.5"
                 className="flex items-center gap-3 group cursor-pointer"
               >
-                <div className="h-9 w-9 rounded-[10px] bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <div className="h-9 w-9 rounded-[10px] bg-blue-500/[0.15] flex items-center justify-center flex-shrink-0">
                   <Sparkles
                     className="h-4 w-4 text-[#0066CC]"
                     strokeWidth={2}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-slate-200">
                     Generar con IA
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-slate-500">
                     Asignación automática
                   </p>
                 </div>
@@ -251,17 +251,17 @@ export default function DashboardPageClient({
                 padding="px-4 py-3.5"
                 className="flex items-center gap-3 group cursor-pointer"
               >
-                <div className="h-9 w-9 rounded-[10px] bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <div className="h-9 w-9 rounded-[10px] bg-emerald-500/[0.15] flex items-center justify-center flex-shrink-0">
                   <UserPlus
                     className="h-4 w-4 text-emerald-600"
                     strokeWidth={2}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-slate-200">
                     Nuevo Personal
                   </p>
-                  <p className="text-xs text-gray-500">Añadir trabajador</p>
+                  <p className="text-xs text-slate-500">Añadir trabajador</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-emerald-600 transition-colors" />
               </DSCard>
@@ -272,17 +272,17 @@ export default function DashboardPageClient({
                 padding="px-4 py-3.5"
                 className="flex items-center gap-3 group cursor-pointer"
               >
-                <div className="h-9 w-9 rounded-[10px] bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <div className="h-9 w-9 rounded-[10px] bg-amber-500/[0.15] flex items-center justify-center flex-shrink-0">
                   <Sun
                     className="h-4 w-4 text-amber-600"
                     strokeWidth={2}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-slate-200">
                     Vacaciones
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-slate-500">
                     Solicitar o revisar
                   </p>
                 </div>
@@ -318,11 +318,11 @@ export default function DashboardPageClient({
                 ].map((cat) => (
                   <div key={cat.label} className="flex items-center gap-3">
                     <span className={`h-2 w-2 rounded-full ${cat.color}`} />
-                    <span className="text-sm text-gray-600 flex-1">
+                    <span className="text-sm text-slate-400 flex-1">
                       {cat.label}
                     </span>
                     <span
-                      className="text-sm font-semibold text-gray-900"
+                      className="text-sm font-semibold text-slate-200"
                       style={{ fontFamily: tokens.fonts.heading }}
                     >
                       {cat.count}
@@ -343,21 +343,32 @@ export default function DashboardPageClient({
           border: none !important;
         }
         .dashboard-calendar .fc-view-harness {
-          background: white;
+          background: transparent;
         }
         .dashboard-calendar .fc-col-header-cell {
-          background: #f7f8fa;
+          background: rgba(255,255,255,0.03);
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           padding: 8px 0;
-          color: #6b7280;
+          color: #64748b;
+          border-color: rgba(255,255,255,0.06) !important;
         }
         .dashboard-calendar .fc-daygrid-day-number {
           font-size: 13px;
           font-weight: 500;
-          color: #0d0d0d;
+          color: #cbd5e1;
           border: none;
+        }
+        .dashboard-calendar .fc-daygrid-day {
+          background: transparent !important;
+        }
+        .dashboard-calendar .fc-scrollgrid-sync-table td,
+        .dashboard-calendar .fc-scrollgrid-sync-table th {
+          border-color: rgba(255,255,255,0.05) !important;
+        }
+        .dashboard-calendar .fc-daygrid-day.fc-day-today {
+          background: rgba(0,102,204,0.08) !important;
         }
       `}</style>
     </div>

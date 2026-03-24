@@ -261,20 +261,20 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
             <div className="flex items-center gap-3 mb-6">
               <DSIconBox icon={Sun} variant="orange" />
               <div>
-                <h3 className="text-[20px] font-semibold text-neutral-900">Nueva Solicitud</h3>
-                <p className="text-[13px] text-[#86868B]">Validación automática de conflictos con guardias.</p>
+                <h3 className="text-[20px] font-semibold text-white">Nueva Solicitud</h3>
+                <p className="text-[13px] text-slate-400">Validación automática de conflictos con guardias.</p>
               </div>
             </div>
 
             <div className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Trabajador</label>
+                  <label className="text-[12px] font-bold uppercase tracking-wider text-slate-400 px-1">Trabajador</label>
                   <Select value={selectedStaffId} onValueChange={setSelectedStaffId} disabled={!isHeadmaster}>
-                    <SelectTrigger className="rounded-[12px] h-11 bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]">
+                    <SelectTrigger className="rounded-[12px] h-11 bg-white/[0.05] border-white/[0.09] text-slate-300 text-[15px]">
                       <SelectValue placeholder="Seleccionar..." />
                     </SelectTrigger>
-                    <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
+                    <SelectContent className="rounded-[16px] border-white/[0.09] shadow-xl">
                       {(isHeadmaster ? staff : staff.filter(s => s.id === currentStaffId)).map(s => (
                         <SelectItem key={s.id} value={s.id}>{buildFullName(s)}</SelectItem>
                       ))}
@@ -283,30 +283,30 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Rango de fechas</label>
+                  <label className="text-[12px] font-bold uppercase tracking-wider text-slate-400 px-1">Rango de fechas</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <button
                         className={cn(
-                          "w-full flex items-center px-4 text-left h-11 rounded-[12px] bg-[#F2F2F7]/50 border border-black/[0.04] hover:bg-black/[0.02] transition-colors text-[15px]",
-                          !dateRange.from && "text-neutral-400"
+                          "w-full flex items-center px-4 text-left h-11 rounded-[12px] bg-white/[0.05] border border-white/[0.09] hover:bg-white/[0.08] transition-colors text-[15px]",
+                          !dateRange.from && "text-slate-500"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-[#0066CC]" />
+                        <CalendarIcon className="mr-2 h-4 w-4 text-[#60A5FA]" />
                         {dateRange.from ? (
                           dateRange.to ? (
-                            <span className="font-medium text-neutral-900">
+                            <span className="font-medium text-slate-200">
                               {format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}
                             </span>
                           ) : (
-                            <span className="font-medium text-neutral-900">{format(dateRange.from, "dd/MM/yyyy")}</span>
+                            <span className="font-medium text-slate-200">{format(dateRange.from, "dd/MM/yyyy")}</span>
                           )
                         ) : (
                           <span>Seleccionar fechas</span>
                         )}
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 rounded-[24px] border-black/[0.08] shadow-2xl overflow-hidden" align="start">
+                    <PopoverContent className="w-auto p-0 rounded-[24px] border-white/[0.09] shadow-2xl overflow-hidden" align="start">
                       <Calendar
                         initialFocus
                         mode="range"
@@ -332,8 +332,8 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                     className={cn(
                       "h-11 rounded-[12px] border text-[14px] font-semibold transition-all flex items-center justify-center gap-2",
                       tipo === "vacaciones"
-                        ? "bg-[#0066CC] border-[#0066CC] text-white shadow-sm"
-                        : "bg-[#F2F2F7]/50 border-black/[0.04] text-neutral-500 hover:bg-black/[0.02]"
+                        ? "bg-[#0066CC] border-[#0066CC] text-white shadow-[0_0_20px_rgba(0,102,204,0.3)]"
+                        : "bg-white/[0.05] border-white/[0.09] text-slate-400 hover:bg-white/[0.09]"
                     )}
                   >
                     <Sun className="h-4 w-4" />
@@ -345,15 +345,15 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                     className={cn(
                       "h-11 rounded-[12px] border text-[14px] font-semibold transition-all flex items-center justify-center gap-2",
                       tipo === "asuntos_propios"
-                        ? "bg-[#FF9500] border-[#FF9500] text-white shadow-sm"
-                        : "bg-[#F2F2F7]/50 border-black/[0.04] text-neutral-500 hover:bg-black/[0.02]"
+                        ? "bg-amber-500 border-amber-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)]"
+                        : "bg-white/[0.05] border-white/[0.09] text-slate-400 hover:bg-white/[0.09]"
                     )}
                   >
                     <ArrowRight className="h-4 w-4" />
                     Asuntos Propios
                   </button>
                 </div>
-                <p className="text-[11px] text-[#86868B] px-1">
+                <p className="text-[11px] text-slate-500 px-1">
                   {tipo === "vacaciones"
                     ? "Vacaciones anuales retribuidas — 22 días hábiles/año"
                     : "Asuntos propios — 9 a 14 días según antigüedad (no acumulables a vacaciones)"}
@@ -366,22 +366,22 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                   placeholder="Ej: Vacaciones de verano, semana de agosto..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] focus:bg-white transition-all min-h-[80px] text-[15px] p-4 resize-none"
+                  className="rounded-[12px] bg-white/[0.05] border-white/[0.09] text-slate-200 placeholder:text-slate-600 focus:bg-white/[0.08] transition-all min-h-[80px] text-[15px] p-4 resize-none"
                 />
               </div>
 
               {conflictResult && !conflictResult.valid && (
-                <div className="bg-red-50 border border-red-100 rounded-[20px] p-5 flex items-start gap-4 animate-in fade-in slide-in-from-top-2">
-                  <XCircle className="h-6 w-6 text-red-600 shrink-0" />
+                <div className="bg-red-500/[0.12] border border-red-500/[0.25] rounded-[20px] p-5 flex items-start gap-4 animate-in fade-in slide-in-from-top-2">
+                  <XCircle className="h-6 w-6 text-red-400 shrink-0" />
                   <div>
-                    <p className="text-[15px] font-bold text-red-900">Conflicto con Guardias</p>
-                    <div className="text-[13px] text-red-700/90 mt-1 space-y-1">
+                    <p className="text-[15px] font-bold text-red-300">Conflicto con Guardias</p>
+                    <div className="text-[13px] text-red-400/90 mt-1 space-y-1">
                       {conflictResult.conflicts.map((c, i) => (
                         <p key={i}>
                           &bull; Tienes guardia la week {c.guard_week_number} ({format(parseISO(c.guard_start_date), 'dd/MM')} al {format(parseISO(c.guard_end_date), 'dd/MM')}).
                         </p>
                       ))}
-                      <p className="font-bold text-red-800 mt-2">Reasigna tu guardia antes de pedir estas fechas.</p>
+                      <p className="font-bold text-red-300 mt-2">Reasigna tu guardia antes de pedir estas fechas.</p>
                     </div>
                   </div>
                 </div>
@@ -409,10 +409,10 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                
                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                   <Select value={staffFilter} onValueChange={setStaffFilter}>
-                    <SelectTrigger className="w-full md:w-[150px] rounded-[12px] h-10 bg-white border-black/[0.08] text-[13px]">
+                    <SelectTrigger className="w-full md:w-[150px] rounded-[12px] h-10 bg-white/[0.05] border-white/[0.09] text-slate-300 text-[13px]">
                       <SelectValue placeholder="Trabajador" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
+                    <SelectContent className="rounded-[16px] border-white/[0.09] shadow-xl">
                       <SelectItem value="all">Todo el personal</SelectItem>
                       {staff.map(s => (
                         <SelectItem key={s.id} value={s.id}>{buildFullName(s)}</SelectItem>
@@ -421,10 +421,10 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                   </Select>
 
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full md:w-[140px] rounded-[12px] h-10 bg-white border-black/[0.08] text-[13px]">
+                    <SelectTrigger className="w-full md:w-[140px] rounded-[12px] h-10 bg-white/[0.05] border-white/[0.09] text-slate-300 text-[13px]">
                       <SelectValue placeholder="Estado" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
+                    <SelectContent className="rounded-[16px] border-white/[0.09] shadow-xl">
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="approved">Aprobadas</SelectItem>
                       <SelectItem value="cancelled">Canceladas</SelectItem>
@@ -452,18 +452,18 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                     <DSCard key={v.id} className={cn("group transition-all", isCan && "opacity-60 grayscale-[0.3]")}>
                       <div className="flex justify-between items-start mb-4">
                         <div className="space-y-1">
-                          <p className="text-[15px] font-bold text-neutral-900">{staffMem ? buildFullName(staffMem) : "???"}</p>
+                          <p className="text-[15px] font-bold text-slate-100">{staffMem ? buildFullName(staffMem) : "???"}</p>
                           <div className="flex items-center gap-2">
                             <span className={cn(
                               "text-[11px] font-bold px-2 py-0.5 rounded-full",
                               v.tipo === 'asuntos_propios'
-                                ? "bg-orange-100 text-orange-700"
-                                : "bg-blue-50 text-[#0066CC]"
+                                ? "bg-amber-500/[0.15] text-amber-300"
+                                : "bg-blue-500/[0.15] text-blue-300"
                             )}>
                               {v.tipo === 'asuntos_propios' ? 'Asuntos propios' : 'Vacaciones'}
                             </span>
                           </div>
-                          <p className="text-[12px] text-[#86868B] flex items-center gap-1.5">
+                          <p className="text-[12px] text-slate-500 flex items-center gap-1.5">
                             <Info className="h-3 w-3" />
                             {v.notes || "Sin observaciones"}
                           </p>
@@ -473,12 +473,12 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                         </DSBadge>
                       </div>
 
-                      <div className="flex items-center justify-between py-3 border-y border-black/[0.04] border-dashed">
-                         <div className="flex items-center gap-2 text-[14px] font-semibold text-neutral-900">
-                            <CalendarIcon className="h-4 w-4 text-[#0066CC]" />
+                      <div className="flex items-center justify-between py-3 border-y border-white/[0.07] border-dashed">
+                         <div className="flex items-center gap-2 text-[14px] font-semibold text-slate-200">
+                            <CalendarIcon className="h-4 w-4 text-[#60A5FA]" />
                             {format(parseISO(v.start_date), 'd MMM')} &rarr; {format(parseISO(v.end_date), 'd MMM', {locale: es})}
                          </div>
-                         <div className="text-[13px] font-bold bg-[#F2F2F7] text-neutral-600 py-1 px-3 rounded-full">
+                         <div className="text-[13px] font-bold bg-white/[0.07] text-slate-300 py-1 px-3 rounded-full">
                             {daysNum} días
                          </div>
                       </div>
@@ -568,13 +568,13 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#0066CC]/20 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none" />
             </div>
 
-            <div className="bg-white rounded-[28px] p-6 border border-black/[0.04] shadow-sm flex items-start gap-4">
-              <div className="h-10 w-10 rounded-full bg-[#F2F2F7] flex items-center justify-center shrink-0">
-                <AlertCircle className="h-5 w-5 text-[#0066CC]" />
+            <div className="rounded-[28px] p-6 border border-white/[0.07] flex items-start gap-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <div className="h-10 w-10 rounded-full bg-white/[0.07] flex items-center justify-center shrink-0">
+                <AlertCircle className="h-5 w-5 text-[#60A5FA]" />
               </div>
               <div>
-                <p className="text-[14px] font-bold text-neutral-900 tracking-tight uppercase">Política de Calendario</p>
-                <p className="text-[13px] text-[#86868B] mt-1 leading-relaxed">
+                <p className="text-[14px] font-bold text-slate-200 tracking-tight uppercase">Política de Calendario</p>
+                <p className="text-[13px] text-slate-400 mt-1 leading-relaxed">
                   Las solicitudes de vacaciones están sujetas a la cobertura mínima del juzgado y no pueden solapar con periodos de guardia asignados.
                 </p>
               </div>
@@ -585,22 +585,22 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
 
       {/* Cancel confirmation dialog */}
       <AlertDialog open={cancelConfirm.open} onOpenChange={(open) => !open && setCancelConfirm({ open: false, id: null })}>
-        <AlertDialogContent className="rounded-[20px] border-black/[0.08] shadow-2xl max-w-sm">
+        <AlertDialogContent className="rounded-[20px] max-w-sm" style={{ background: "#0D1628", border: "1px solid rgba(255,255,255,0.1)" }}>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[17px] font-semibold">
+            <AlertDialogTitle className="text-[17px] font-semibold text-white">
               ¿Anular este periodo?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[14px] text-[#86868B]">
+            <AlertDialogDescription className="text-[14px] text-slate-400">
               El periodo de vacaciones quedará marcado como cancelado y ya no se mostrará como vigente. Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="rounded-xl h-10 text-[14px]">
+            <AlertDialogCancel className="rounded-xl h-10 text-[14px] bg-white/[0.07] border-white/[0.12] text-slate-300 hover:bg-white/[0.12]">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmCancelVacation}
-              className="rounded-xl h-10 text-[14px] bg-red-500 hover:bg-red-600 text-white"
+              className="rounded-xl h-10 text-[14px] bg-red-500/[0.2] hover:bg-red-500/[0.3] text-red-300 border border-red-500/[0.3]"
             >
               Sí, anular
             </AlertDialogAction>

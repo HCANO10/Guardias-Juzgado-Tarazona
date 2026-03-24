@@ -4,40 +4,41 @@ import React from "react"
 import { LucideIcon } from "lucide-react"
 
 // ============================================
-// DESIGN TOKENS
+// DESIGN TOKENS — Dark Mode Premium
 // ============================================
 export const tokens = {
   colors: {
     primary: "#0066CC",
-    primaryDark: "#004C99",
-    primaryLight: "#EBF4FF",
-    accent: "#E42313",
-    success: "#22C55E",
-    successLight: "#DCFCE7",
-    warning: "#F59E0B",
-    warningLight: "#FEF3C7",
-    danger: "#DC2626",
-    dangerLight: "#FEF2F2",
+    primaryDark: "#0055AA",
+    primaryLight: "rgba(0,102,204,0.15)",
+    accent: "#06B6D4",           // Cyan accent for glassmorphism
+    accentLight: "rgba(6,182,212,0.15)",
+    success: "#34D399",
+    successLight: "rgba(52,211,153,0.15)",
+    warning: "#FBBF24",
+    warningLight: "rgba(251,191,36,0.15)",
+    danger: "#F87171",
+    dangerLight: "rgba(248,113,113,0.15)",
 
-    bgPage: "#F7F8FA",
-    bgSurface: "#FFFFFF",
-    bgSidebar: "#0D0D0D",
-    bgSubtle: "#F2F3F5",
+    bgPage: "#060C18",           // Deep navy page background
+    bgSurface: "rgba(255,255,255,0.05)",  // Glassmorphism surface
+    bgSidebar: "#080E1C",
+    bgSubtle: "rgba(255,255,255,0.04)",
 
-    textPrimary: "#0D0D0D",
-    textSecondary: "#6B7280",
-    textMuted: "#9CA3AF",
-    textInverse: "#FFFFFF",
+    textPrimary: "#F1F5F9",      // Near white
+    textSecondary: "#94A3B8",    // Slate-400
+    textMuted: "#64748B",        // Slate-500
+    textInverse: "#060C18",
 
-    border: "#E5E7EB",
-    borderLight: "#F3F4F6",
+    border: "rgba(255,255,255,0.08)",
+    borderLight: "rgba(255,255,255,0.05)",
 
-    auxilio: "#F59E0B",
-    auxilioLight: "#FEF3C7",
-    tramitador: "#3B82F6",
-    tramitadorLight: "#DBEAFE",
-    gestor: "#10B981",
-    gestorLight: "#DCFCE7",
+    auxilio: "#FBBF24",
+    auxilioLight: "rgba(251,191,36,0.15)",
+    tramitador: "#60A5FA",
+    tramitadorLight: "rgba(96,165,250,0.15)",
+    gestor: "#34D399",
+    gestorLight: "rgba(52,211,153,0.15)",
   },
   radius: {
     sm: "8px",
@@ -52,7 +53,7 @@ export const tokens = {
 } as const
 
 // ============================================
-// CARD COMPONENT
+// CARD COMPONENT — Glassmorphism dark
 // ============================================
 export function DSCard({
   children,
@@ -67,13 +68,13 @@ export function DSCard({
   hover?: boolean
   dark?: boolean
 }) {
-  const base = dark
-    ? "bg-neutral-900 text-white border-neutral-800"
-    : "bg-white border-gray-200/60"
+  void dark // keep for API compat, always dark now
   return (
     <div
-      className={`rounded-2xl ${padding} border shadow-sm ${base} ${
-        hover ? "transition-all hover:shadow-md" : ""
+      className={`rounded-2xl ${padding} border border-white/[0.07] bg-white/[0.04] backdrop-blur-xl shadow-[0_1px_30px_rgba(0,0,0,0.3)] ${
+        hover
+          ? "transition-all duration-300 hover:bg-white/[0.07] hover:border-white/[0.12] hover:shadow-[0_4px_40px_rgba(0,0,0,0.4)]"
+          : ""
       } ${className}`}
     >
       {children}
@@ -82,7 +83,7 @@ export function DSCard({
 }
 
 // ============================================
-// BADGE COMPONENT
+// BADGE COMPONENT — Dark variants
 // ============================================
 export type BadgeVariant =
   | "neutral"
@@ -107,21 +108,21 @@ export function DSBadge({
   className?: string
 }) {
   const variants: Record<BadgeVariant, string> = {
-    neutral: "bg-gray-100 text-gray-600",
-    indigo: "bg-indigo-50 text-indigo-600",
-    green: "bg-emerald-50 text-emerald-600",
-    blue: "bg-blue-50 text-blue-600",
-    orange: "bg-orange-50 text-orange-600",
-    red: "bg-red-50 text-red-600",
-    amber: "bg-amber-50 text-amber-700",
-    purple: "bg-purple-50 text-purple-700",
-    auxilio: "bg-amber-50 text-amber-700",
-    tramitador: "bg-blue-50 text-blue-600",
-    gestor: "bg-emerald-50 text-emerald-600",
+    neutral:    "bg-white/[0.09] text-slate-300 border border-white/[0.08]",
+    indigo:     "bg-indigo-500/[0.18] text-indigo-300 border border-indigo-500/[0.2]",
+    green:      "bg-emerald-500/[0.18] text-emerald-300 border border-emerald-500/[0.2]",
+    blue:       "bg-blue-500/[0.18] text-blue-300 border border-blue-500/[0.2]",
+    orange:     "bg-orange-500/[0.18] text-orange-300 border border-orange-500/[0.2]",
+    red:        "bg-red-500/[0.18] text-red-300 border border-red-500/[0.2]",
+    amber:      "bg-amber-500/[0.18] text-amber-300 border border-amber-500/[0.2]",
+    purple:     "bg-purple-500/[0.18] text-purple-300 border border-purple-500/[0.2]",
+    auxilio:    "bg-amber-500/[0.18] text-amber-300 border border-amber-500/[0.2]",
+    tramitador: "bg-blue-500/[0.18] text-blue-300 border border-blue-500/[0.2]",
+    gestor:     "bg-emerald-500/[0.18] text-emerald-300 border border-emerald-500/[0.2]",
   }
   return (
     <span
-      className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-full inline-flex items-center justify-center ${variants[variant]} ${className}`}
+      className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-full inline-flex items-center justify-center transition-all ${variants[variant]} ${className}`}
     >
       {children}
     </span>
@@ -129,7 +130,7 @@ export function DSBadge({
 }
 
 // ============================================
-// ICON BOX COMPONENT
+// ICON BOX COMPONENT — Dark variants
 // ============================================
 export function DSIconBox({
   icon: Icon,
@@ -143,16 +144,17 @@ export function DSIconBox({
   className?: string
 }) {
   const variants: Record<string, string> = {
-    neutral: "bg-gray-100 text-gray-600",
-    indigo: "bg-indigo-50 text-indigo-500",
-    green: "bg-emerald-50 text-emerald-500",
-    blue: "bg-blue-50 text-blue-600",
-    orange: "bg-amber-50 text-amber-500",
-    red: "bg-red-50 text-red-500",
-    primary: "bg-blue-50 text-[#0066CC]",
-    success: "bg-emerald-50 text-emerald-500",
-    warning: "bg-amber-50 text-amber-500",
-    danger: "bg-red-50 text-red-500",
+    neutral: "bg-white/[0.08] text-slate-400",
+    indigo:  "bg-indigo-500/[0.18] text-indigo-400",
+    green:   "bg-emerald-500/[0.18] text-emerald-400",
+    blue:    "bg-blue-500/[0.18] text-blue-400",
+    orange:  "bg-amber-500/[0.18] text-amber-400",
+    red:     "bg-red-500/[0.18] text-red-400",
+    primary: "bg-blue-500/[0.18] text-[#60A5FA]",
+    success: "bg-emerald-500/[0.18] text-emerald-400",
+    warning: "bg-amber-500/[0.18] text-amber-400",
+    danger:  "bg-red-500/[0.18] text-red-400",
+    cyan:    "bg-cyan-500/[0.18] text-cyan-400",
   }
 
   const sizes = {
@@ -194,13 +196,13 @@ export function DSPageHeader({
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       <div className="space-y-1">
         <h1
-          className="text-2xl md:text-[28px] font-medium tracking-tight text-gray-900"
+          className="text-2xl md:text-[28px] font-medium tracking-tight text-white"
           style={{ fontFamily: tokens.fonts.heading }}
         >
           {title}
         </h1>
         {subtitle && (
-          <p className="text-sm text-gray-500">{subtitle}</p>
+          <p className="text-sm text-slate-400">{subtitle}</p>
         )}
       </div>
       {actions && <div className="flex items-center gap-3">{actions}</div>}
@@ -220,7 +222,7 @@ export function DSSectionHeading({
 }) {
   return (
     <h2
-      className={`text-lg font-semibold text-gray-900 ${className}`}
+      className={`text-lg font-semibold text-slate-200 ${className}`}
       style={{ fontFamily: tokens.fonts.heading }}
     >
       {children}
@@ -229,7 +231,7 @@ export function DSSectionHeading({
 }
 
 // ============================================
-// BUTTON COMPONENT
+// BUTTON COMPONENT — Dark variants
 // ============================================
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost"
 
@@ -252,11 +254,13 @@ export function DSButton({
 }) {
   const variants: Record<ButtonVariant, string> = {
     primary:
-      "bg-[#0066CC] text-white hover:bg-[#0055AA] shadow-sm",
+      "bg-[#0066CC] text-white hover:bg-[#0055BB] shadow-[0_0_20px_rgba(0,102,204,0.25)] hover:shadow-[0_0_28px_rgba(0,102,204,0.4)] active:scale-[0.98]",
     secondary:
-      "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm",
-    danger: "bg-red-50 text-red-600 hover:bg-red-100 border border-red-100",
-    ghost: "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+      "bg-white/[0.07] border border-white/[0.12] text-slate-200 hover:bg-white/[0.12] hover:border-white/[0.18] active:scale-[0.98]",
+    danger:
+      "bg-red-500/[0.15] text-red-300 hover:bg-red-500/[0.25] border border-red-500/[0.25] hover:border-red-500/[0.4] active:scale-[0.98]",
+    ghost:
+      "text-slate-400 hover:bg-white/[0.07] hover:text-white active:scale-[0.98]",
   }
 
   const sizes: Record<string, string> = {
@@ -270,7 +274,7 @@ export function DSButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 ${sizes[size]} ${variants[variant]} ${className}`}
+      className={`font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 ${sizes[size]} ${variants[variant]} ${className}`}
     >
       {children}
     </button>
@@ -278,7 +282,7 @@ export function DSButton({
 }
 
 // ============================================
-// METRIC CARD
+// METRIC CARD — Dark glassmorphism
 // ============================================
 export function DSMetricCard({
   label,
@@ -296,18 +300,18 @@ export function DSMetricCard({
   return (
     <DSCard className="flex flex-col gap-3" padding="p-5">
       <div className="flex items-center justify-between">
-        <span className="text-[13px] text-gray-500">{label}</span>
+        <span className="text-[13px] text-slate-400">{label}</span>
         <DSIconBox icon={Icon} variant={iconVariant} size="sm" />
       </div>
       <div>
         <p
-          className="text-2xl md:text-[28px] font-semibold text-gray-900 tracking-tight"
+          className="text-2xl md:text-[28px] font-semibold text-white tracking-tight"
           style={{ fontFamily: tokens.fonts.heading }}
         >
           {value}
         </p>
         {subtitle && (
-          <p className="text-[13px] text-gray-500 mt-1">{subtitle}</p>
+          <p className="text-[13px] text-slate-400 mt-1">{subtitle}</p>
         )}
       </div>
     </DSCard>
@@ -315,7 +319,7 @@ export function DSMetricCard({
 }
 
 // ============================================
-// EMPTY STATE
+// EMPTY STATE — Dark
 // ============================================
 export function DSEmptyState({
   icon: Icon,
@@ -330,28 +334,28 @@ export function DSEmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-      <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-        <Icon className="h-7 w-7 text-gray-400" strokeWidth={1.5} />
+      <div className="h-14 w-14 rounded-2xl bg-white/[0.07] flex items-center justify-center mb-4 border border-white/[0.08]">
+        <Icon className="h-7 w-7 text-slate-500" strokeWidth={1.5} />
       </div>
       <h3
-        className="text-lg font-medium text-gray-900 mb-1"
+        className="text-lg font-medium text-slate-200 mb-1"
         style={{ fontFamily: tokens.fonts.heading }}
       >
         {title}
       </h3>
-      <p className="text-sm text-gray-500 max-w-sm mb-6">{description}</p>
+      <p className="text-sm text-slate-500 max-w-sm mb-6">{description}</p>
       {action}
     </div>
   )
 }
 
 // ============================================
-// LOADING SKELETON
+// LOADING SKELETON — Dark
 // ============================================
 export function DSSkeleton({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`animate-pulse bg-gray-200/60 rounded-lg ${className}`}
+      className={`animate-pulse bg-white/[0.07] rounded-lg ${className}`}
     />
   )
 }
@@ -379,17 +383,17 @@ export function DSStatusDot({
   label?: string
 }) {
   const colors = {
-    success: "bg-emerald-500",
-    warning: "bg-amber-500",
-    danger: "bg-red-500",
-    neutral: "bg-gray-400",
-    info: "bg-blue-500",
+    success: "bg-emerald-400",
+    warning: "bg-amber-400",
+    danger:  "bg-red-400",
+    neutral: "bg-slate-500",
+    info:    "bg-blue-400",
   }
 
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className={`h-2 w-2 rounded-full ${colors[status]}`} />
-      {label && <span className="text-sm text-gray-600">{label}</span>}
+      <span className={`h-2 w-2 rounded-full ${colors[status]} shadow-sm`} />
+      {label && <span className="text-sm text-slate-400">{label}</span>}
     </span>
   )
 }
@@ -414,7 +418,7 @@ export function getPositionBadgeVariant(
 }
 
 // ============================================
-// ALERT / BANNER
+// ALERT / BANNER — Dark variants
 // ============================================
 export function DSAlert({
   variant = "info",
@@ -428,15 +432,15 @@ export function DSAlert({
   icon?: LucideIcon
 }) {
   const styles = {
-    info: "bg-blue-50 border-blue-200 text-blue-800",
-    success: "bg-emerald-50 border-emerald-200 text-emerald-800",
-    warning: "bg-amber-50 border-amber-200 text-amber-800",
-    danger: "bg-red-50 border-red-200 text-red-800",
+    info:    "bg-blue-500/[0.12] border-blue-500/[0.25] text-blue-200",
+    success: "bg-emerald-500/[0.12] border-emerald-500/[0.25] text-emerald-200",
+    warning: "bg-amber-500/[0.12] border-amber-500/[0.25] text-amber-200",
+    danger:  "bg-red-500/[0.12] border-red-500/[0.25] text-red-200",
   }
 
   return (
     <div
-      className={`rounded-xl border p-4 ${styles[variant]} flex gap-3`}
+      className={`rounded-xl border p-4 backdrop-blur-sm ${styles[variant]} flex gap-3`}
     >
       {Icon && (
         <Icon className="h-5 w-5 flex-shrink-0 mt-0.5" strokeWidth={2} />
@@ -448,4 +452,3 @@ export function DSAlert({
     </div>
   )
 }
-

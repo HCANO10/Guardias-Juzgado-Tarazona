@@ -223,7 +223,7 @@ export default async function StaffDetailPage({ params }: { params: { id: string
               <DSCard padding="p-0" className="overflow-hidden">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                    <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-white/[0.06]" style={{ background: "rgba(255,255,255,0.03)" }}>
                       <th className="px-6 py-3">Semana</th>
                       <th className="px-6 py-3">Periodo</th>
                       <th className="px-6 py-3">Estado</th>

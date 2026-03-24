@@ -295,20 +295,20 @@ export function ProfilePageClient({
              
              <div className="p-8 grid md:grid-cols-2 gap-8">
                 <div className="space-y-1.5 pt-1">
-                   <p className="text-[11px] font-black uppercase tracking-widest text-[#86868B]">Correo Institucional</p>
-                   <p className="text-[17px] font-bold text-neutral-900 flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-[#0066CC]" /> {staffData.email}
+                   <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Correo Institucional</p>
+                   <p className="text-[17px] font-bold text-slate-200 flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-[#60A5FA]" /> {staffData.email}
                    </p>
                 </div>
-                <div className="space-y-1.5 pt-1 border-black/[0.04] md:border-l md:pl-8">
-                   <p className="text-[11px] font-black uppercase tracking-widest text-[#86868B]">Fecha de Alta</p>
-                   <p className="text-[17px] font-bold text-neutral-900 flex items-center gap-2">
-                      <CalendarDays className="h-4 w-4 text-[#34C759]" />
+                <div className="space-y-1.5 pt-1 border-white/[0.07] md:border-l md:pl-8">
+                   <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Fecha de Alta</p>
+                   <p className="text-[17px] font-bold text-slate-200 flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4 text-emerald-400" />
                       {staffData.start_date ? format(parseISO(staffData.start_date), "dd 'de' MMMM, yyyy", { locale: es }) : '—'}
                    </p>
                 </div>
                 {staffData.notes && (
-                  <div className="md:col-span-2 p-5 bg-[#F2F2F7]/50 rounded-[20px] border border-black/[0.04] italic text-[14px] text-neutral-600">
+                  <div className="md:col-span-2 p-5 bg-white/[0.04] rounded-[20px] border border-white/[0.07] italic text-[14px] text-slate-400">
                      "{staffData.notes}"
                   </div>
                 )}
@@ -322,30 +322,30 @@ export function ProfilePageClient({
                 <div className="flex items-center gap-3 mb-8">
                    <DSIconBox icon={Lock} variant="blue" />
                    <div>
-                      <h3 className="text-[18px] font-bold text-neutral-900">Seguridad</h3>
-                      <p className="text-[12px] text-[#86868B]">Actualiza tu contraseña de acceso.</p>
+                      <h3 className="text-[18px] font-bold text-white">Seguridad</h3>
+                      <p className="text-[12px] text-slate-400">Actualiza tu contraseña de acceso.</p>
                    </div>
                 </div>
-                
+
                 <div className="space-y-5">
                    <div className="space-y-2">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-[#86868B] px-1">Nueva Contraseña</label>
-                      <Input 
-                        type="password" 
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1">Nueva Contraseña</label>
+                      <Input
+                        type="password"
                         value={newPwd}
                         onChange={e => setNewPwd(e.target.value)}
                         placeholder="Mínimo 8 caracteres"
-                        className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                        className="h-11 rounded-[12px] bg-white/[0.05] border-white/[0.09] text-slate-200 placeholder:text-slate-600 text-[15px]"
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-[#86868B] px-1">Confirmar Contraseña</label>
-                      <Input 
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1">Confirmar Contraseña</label>
+                      <Input
                         type="password"
                         value={confirmPwd}
                         onChange={e => setConfirmPwd(e.target.value)}
                         placeholder="Repite la contraseña"
-                        className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                        className="h-11 rounded-[12px] bg-white/[0.05] border-white/[0.09] text-slate-200 placeholder:text-slate-600 text-[15px]"
                       />
                    </div>
                    {newPwd && confirmPwd && newPwd !== confirmPwd && (

@@ -5,38 +5,34 @@
 
 @layer base {
   :root {
-    /* #F2F2F7 — Apple system gray 6 */
-    --background: 240 20% 96%;
-    --foreground: 0 0% 9%;
+    /* ── DARK MODE PREMIUM ─────────────────────────── */
+    --background: 222 47% 5%;        /* #060C18  deep navy */
+    --foreground: 210 40% 97%;       /* #F8FAFC  near-white */
 
-    /* White surfaces */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card: 220 40% 8%;              /* #0D1628  surface card */
+    --card-foreground: 210 40% 97%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover: 220 40% 7%;
+    --popover-foreground: 210 40% 97%;
 
-    /* #0066CC — Apple blue */
-    --primary: 210 100% 40%;
+    --primary: 210 100% 40%;         /* #0066CC  brand blue */
     --primary-foreground: 0 0% 100%;
 
-    /* #F2F2F7 */
-    --secondary: 240 20% 96%;
-    --secondary-foreground: 240 1% 54%;
+    --secondary: 222 35% 13%;        /* #172038  subtle surface */
+    --secondary-foreground: 215 20% 65%;
 
-    --muted: 240 20% 96%;
-    --muted-foreground: 240 1% 54%;
+    --muted: 222 35% 11%;
+    --muted-foreground: 215 16% 52%;
 
-    /* #EBF4FF — Light blue tint */
-    --accent: 210 100% 96%;
-    --accent-foreground: 210 100% 40%;
+    --accent: 199 89% 48%;           /* #06B6D4  cyan accent */
+    --accent-foreground: 222 47% 5%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 89%;
-    --input: 0 0% 89%;
-    --ring: 210 100% 40%;
+    --border: 220 25% 14%;           /* #17233A  subtle border */
+    --input: 220 35% 10%;
+    --ring: 210 100% 50%;
 
     --radius: 0.75rem;
   }
@@ -50,6 +46,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-attachment: fixed;
   }
 
   html {
@@ -62,11 +59,78 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
+  /* Dark glassmorphism card */
   .glass {
-    @apply bg-white/70 backdrop-blur-xl border border-white/20;
+    @apply bg-white/[0.05] backdrop-blur-xl border border-white/[0.08];
   }
-  
+
+  /* Stronger glass for elevated elements */
+  .glass-elevated {
+    @apply bg-white/[0.08] backdrop-blur-2xl border border-white/[0.12];
+  }
+
+  /* Subtle inner glow on interactive elements */
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(0, 102, 204, 0.35);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  }
+
+  .glow-emerald {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+
+  /* Page ambient background glows (decorative) */
+  .ambient-glow::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: 10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 102, 204, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ambient-glow::after {
+    content: '';
+    position: fixed;
+    bottom: -10%;
+    right: 5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Custom scrollbar for dark mode */
+  .scrollbar-dark::-webkit-scrollbar {
+    width: 4px;
+  }
+  .scrollbar-dark::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-dark::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+
+  /* Table dark overrides for shadcn/custom tables */
+  .table-dark tbody tr {
+    @apply border-white/[0.04];
+  }
+  .table-dark tbody tr:hover {
+    @apply bg-white/[0.04];
+  }
+  .table-dark thead tr {
+    @apply bg-white/[0.04];
+  }
 }

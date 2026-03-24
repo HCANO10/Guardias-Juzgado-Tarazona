@@ -136,13 +136,13 @@ export default function ActivityPageClient() {
           <button
             onClick={() => fetchFirst(typeFilter)}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#86868B] hover:bg-black/[0.04] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:bg-white/[0.06] transition-colors"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             Actualizar
           </button>
           {lastUpdated && (
-            <span className="text-[11px] text-[#86868B]">
+            <span className="text-[11px] text-slate-500">
               Actualizado {format(lastUpdated, "HH:mm:ss", { locale: es })}
             </span>
           )}
@@ -151,12 +151,12 @@ export default function ActivityPageClient() {
 
       {/* Filters */}
       <div className="flex items-center gap-3">
-        <Filter className="h-4 w-4 text-[#86868B]" />
+        <Filter className="h-4 w-4 text-slate-500" />
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[200px] rounded-xl h-10 bg-white border-black/[0.08] text-[14px]">
+          <SelectTrigger className="w-[200px] rounded-xl h-10 bg-white/[0.05] border-white/[0.09] text-slate-300 text-[14px]">
             <SelectValue placeholder="Tipo de entidad" />
           </SelectTrigger>
-          <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
+          <SelectContent className="rounded-[16px] border-white/[0.09] shadow-xl">
             <SelectItem value="all">Todos los tipos</SelectItem>
             {entityTypes.map(t => (
               <SelectItem key={t} value={t}>{ENTITY_LABELS[t] || t}</SelectItem>
@@ -164,21 +164,21 @@ export default function ActivityPageClient() {
           </SelectContent>
         </Select>
         {entries.length > 0 && !loading && (
-          <span className="text-[13px] text-[#86868B]">{entries.length} registros</span>
+          <span className="text-[13px] text-slate-500">{entries.length} registros</span>
         )}
       </div>
 
       {/* Activity List */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 text-[#86868B]">
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
           <Loader2 className="h-8 w-8 animate-spin mb-3" />
           <span className="text-sm">Cargando actividad...</span>
         </div>
       ) : entries.length === 0 ? (
         <DSCard className="text-center py-16">
-          <ClipboardList className="h-12 w-12 text-[#86868B]/30 mx-auto mb-4" />
-          <p className="text-[15px] font-medium text-neutral-900">Sin actividad registrada</p>
-          <p className="text-sm text-[#86868B] mt-1">Las acciones del sistema apareceran aqui.</p>
+          <ClipboardList className="h-12 w-12 text-slate-600 mx-auto mb-4" />
+          <p className="text-[15px] font-medium text-slate-200">Sin actividad registrada</p>
+          <p className="text-sm text-slate-500 mt-1">Las acciones del sistema apareceran aqui.</p>
         </DSCard>
       ) : (
         <div className="space-y-3">
@@ -194,22 +194,22 @@ export default function ActivityPageClient() {
             return (
               <DSCard key={entry.id} className="flex items-start gap-4 py-4">
                 <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
-                  variant === "green" ? "bg-green-50 text-green-600" :
-                  variant === "blue" ? "bg-blue-50 text-[#0066CC]" :
-                  variant === "orange" ? "bg-amber-50 text-amber-600" :
-                  variant === "red" ? "bg-red-50 text-red-500" :
-                  "bg-gray-50 text-[#86868B]"
+                  variant === "green" ? "bg-emerald-500/[0.15] text-emerald-400" :
+                  variant === "blue" ? "bg-blue-500/[0.15] text-blue-400" :
+                  variant === "orange" ? "bg-amber-500/[0.15] text-amber-400" :
+                  variant === "red" ? "bg-red-500/[0.15] text-red-400" :
+                  "bg-white/[0.07] text-slate-400"
                 }`}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[15px] font-semibold text-neutral-900">{entry.action}</span>
+                    <span className="text-[15px] font-semibold text-slate-100">{entry.action}</span>
                     <DSBadge variant={variant === "neutral" ? "blue" : variant}>
                       {ENTITY_LABELS[entry.entity_type] || entry.entity_type}
                     </DSBadge>
                   </div>
-                  <div className="flex items-center gap-3 mt-1 text-[13px] text-[#86868B]">
+                  <div className="flex items-center gap-3 mt-1 text-[13px] text-slate-500">
                     <span className="flex items-center gap-1">
                       <User className="h-3 w-3" />
                       {staffName}
@@ -223,13 +223,13 @@ export default function ActivityPageClient() {
                       <button
                         type="button"
                         onClick={() => toggleDetails(entry.id)}
-                        className="flex items-center gap-1 text-[12px] text-[#86868B] hover:text-neutral-900 transition-colors"
+                        className="flex items-center gap-1 text-[12px] text-slate-500 hover:text-slate-200 transition-colors"
                       >
                         <ChevronDown className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                         {isExpanded ? "Ocultar detalles" : "Ver detalles"}
                       </button>
                       {isExpanded && (
-                        <pre className="mt-2 text-[11px] text-[#86868B] bg-[#F2F2F7]/70 rounded-lg px-3 py-2 font-mono overflow-x-auto whitespace-pre-wrap break-all">
+                        <pre className="mt-2 text-[11px] text-slate-400 bg-white/[0.04] border border-white/[0.07] rounded-lg px-3 py-2 font-mono overflow-x-auto whitespace-pre-wrap break-all">
                           {JSON.stringify(entry.details, null, 2)}
                         </pre>
                       )}
@@ -246,7 +246,7 @@ export default function ActivityPageClient() {
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-[14px] font-medium text-[#0066CC] border border-[#0066CC]/20 hover:bg-[#0066CC]/[0.06] transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-[14px] font-medium text-blue-400 border border-blue-500/[0.25] hover:bg-blue-500/[0.08] transition-colors disabled:opacity-50"
               >
                 {loadingMore
                   ? <><Loader2 className="h-4 w-4 animate-spin" />Cargando...</>

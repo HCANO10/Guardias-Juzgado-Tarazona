@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useMemo } from "react"
@@ -9,10 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Textarea } from "@/components/ui/textarea"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
-import { format, differenceInDays } from "date-fns"
+import { format, differenceInDays, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
 import { 
   Calendar as CalendarIcon, 
@@ -40,11 +37,41 @@ import {
   DSButton 
 } from "@/lib/design-system"
 
+interface StaffMember {
+  id: string
+  first_name: string
+  last_name: string
+}
+
+type VacationTipo = 'vacaciones' | 'asuntos_propios'
+
+interface VacationRecord {
+  id: string
+  staff_id: string
+  start_date: string
+  end_date: string
+  status: string
+  tipo: VacationTipo
+  notes?: string
+}
+
+interface GuardPeriodInfo {
+  week_number: number
+  start_date: string
+  end_date: string
+}
+
+interface ConflictInfo {
+  guard_week_number: number
+  guard_start_date: string
+  guard_end_date: string
+}
+
 interface VacationsPageClientProps {
-  staff: any[]
-  vacations: any[]
+  staff: StaffMember[]
+  vacations: VacationRecord[]
   currentStaffId: string | null
-  nextGuard: any | null
+  nextGuard: GuardPeriodInfo | null
 }
 
 export default function VacationsPageClient({ staff, vacations, currentStaffId, nextGuard }: VacationsPageClientProps) {
@@ -59,10 +86,11 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
     from: undefined,
     to: undefined
   })
+  const [tipo, setTipo] = useState<VacationTipo>("vacaciones")
   const [notes, setNotes] = useState("")
   const [isValidating, setIsValidating] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [conflictResult, setConflictResult] = useState<{ valid: boolean; conflicts: any[] } | null>(null)
+  const [conflictResult, setConflictResult] = useState<{ valid: boolean; conflicts: ConflictInfo[] } | null>(null)
 
   // Filter states
   const [staffFilter, setStaffFilter] = useState("all")
@@ -75,28 +103,28 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
     const staffMember = staff.find(s => s.id === selectedStaffId)
     const currentYear = new Date().getFullYear()
     
-    const approvedVacations = vacations.filter(v => 
-      v.staff_id === selectedStaffId && 
+    const approvedVacations = vacations.filter(v =>
+      v.staff_id === selectedStaffId &&
       v.status === 'approved' &&
-      new Date(v.start_date).getFullYear() === currentYear
+      parseISO(v.start_date).getFullYear() === currentYear
     )
 
     const usedDays = approvedVacations.reduce((acc, v) => {
-      const days = differenceInDays(new Date(v.end_date), new Date(v.start_date)) + 1
+      const days = differenceInDays(parseISO(v.end_date), parseISO(v.start_date)) + 1
       return acc + days
     }, 0)
 
     const today = new Date()
     const nextVac = vacations
-      .filter(v => v.staff_id === selectedStaffId && v.status === 'approved' && new Date(v.start_date) >= today)
-      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())[0]
+      .filter(v => v.staff_id === selectedStaffId && v.status === 'approved' && parseISO(v.start_date) >= today)
+      .sort((a, b) => parseISO(a.start_date).getTime() - parseISO(b.start_date).getTime())[0]
 
     return {
       name: staffMember ? buildFullName(staffMember) : "",
       usedDays,
-      nextVac: nextVac ? `${format(new Date(nextVac.start_date), 'dd/MM')} al ${format(new Date(nextVac.end_date), 'dd/MM')}` : "Ninguna",
-      nextGuard: selectedStaffId === currentStaffId && nextGuard 
-        ? `Semana ${nextGuard.week_number} (${format(new Date(nextGuard.start_date), 'dd/MM', { locale: es })})`
+      nextVac: nextVac ? `${format(parseISO(nextVac.start_date), 'dd/MM')} al ${format(parseISO(nextVac.end_date), 'dd/MM')}` : "Ninguna",
+      nextGuard: selectedStaffId === currentStaffId && nextGuard
+        ? `Semana ${nextGuard.week_number} (${format(parseISO(nextGuard.start_date), 'dd/MM', { locale: es })})`
         : "—"
     }
   }, [selectedStaffId, vacations, staff, currentStaffId, nextGuard])
@@ -125,7 +153,8 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
         body: JSON.stringify({
           staff_id: selectedStaffId,
           start_date: format(dateRange.from, 'yyyy-MM-dd'),
-          end_date: format(dateRange.to, 'yyyy-MM-dd')
+          end_date: format(dateRange.to, 'yyyy-MM-dd'),
+          tipo,
         })
       })
 
@@ -138,8 +167,9 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
       } else {
         handleSave()
       }
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Error", description: e.message })
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Error desconocido"
+      toast({ variant: "destructive", title: "Error", description: message })
     } finally {
       setIsValidating(false)
     }
@@ -155,7 +185,8 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
           start_date: format(dateRange.from!, 'yyyy-MM-dd'),
           end_date: format(dateRange.to!, 'yyyy-MM-dd'),
           notes: notes,
-          status: 'approved'
+          status: 'approved',
+          tipo,
         })
 
       if (error) throw error
@@ -163,6 +194,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
       toast({ title: "Vacaciones registradas", description: "Se han guardado correctamente." })
       setDateRange({ from: undefined, to: undefined })
       setNotes("")
+      setTipo("vacaciones")
       setConflictResult(null)
       router.refresh()
     } catch (e: any) {
@@ -182,8 +214,9 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
       if (error) throw error
       toast({ title: "Vacaciones canceladas" })
       router.refresh()
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Error", description: e.message })
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Error desconocido"
+      toast({ variant: "destructive", title: "Error", description: message })
     }
   }
 
@@ -256,7 +289,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                         mode="range"
                         defaultMonth={dateRange.from}
                         selected={{ from: dateRange.from, to: dateRange.to }}
-                        onSelect={(range: any) => setDateRange({ from: range?.from, to: range?.to })}
+                        onSelect={(range) => { setDateRange({ from: range?.from, to: range?.to }); setConflictResult(null); }}
                         numberOfMonths={2}
                         locale={es}
                         className="p-4"
@@ -266,13 +299,51 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                 </div>
               </div>
 
+              {/* Selector de tipo */}
               <div className="space-y-2">
-                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Motivo / Notas (opcional)</label>
-                <Textarea 
-                  placeholder="Ej: Vacaciones de verano, asuntos propios..." 
+                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Tipo de ausencia</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setTipo("vacaciones")}
+                    className={cn(
+                      "h-11 rounded-[12px] border text-[14px] font-semibold transition-all flex items-center justify-center gap-2",
+                      tipo === "vacaciones"
+                        ? "bg-[#0066CC] border-[#0066CC] text-white shadow-sm"
+                        : "bg-[#F2F2F7]/50 border-black/[0.04] text-neutral-500 hover:bg-black/[0.02]"
+                    )}
+                  >
+                    <Sun className="h-4 w-4" />
+                    Vacaciones
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTipo("asuntos_propios")}
+                    className={cn(
+                      "h-11 rounded-[12px] border text-[14px] font-semibold transition-all flex items-center justify-center gap-2",
+                      tipo === "asuntos_propios"
+                        ? "bg-[#FF9500] border-[#FF9500] text-white shadow-sm"
+                        : "bg-[#F2F2F7]/50 border-black/[0.04] text-neutral-500 hover:bg-black/[0.02]"
+                    )}
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    Asuntos Propios
+                  </button>
+                </div>
+                <p className="text-[11px] text-[#86868B] px-1">
+                  {tipo === "vacaciones"
+                    ? "Vacaciones anuales retribuidas — 22 días hábiles/año"
+                    : "Asuntos propios — 9 a 14 días según antigüedad (no acumulables a vacaciones)"}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Notas (opcional)</label>
+                <Textarea
+                  placeholder="Ej: Vacaciones de verano, semana de agosto..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] focus:bg-white transition-all min-h-[100px] text-[15px] p-4 resize-none"
+                  className="rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] focus:bg-white transition-all min-h-[80px] text-[15px] p-4 resize-none"
                 />
               </div>
 
@@ -284,7 +355,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                     <div className="text-[13px] text-red-700/90 mt-1 space-y-1">
                       {conflictResult.conflicts.map((c, i) => (
                         <p key={i}>
-                          &bull; Tienes guardia la week {c.guard_week_number} ({format(new Date(c.guard_start_date), 'dd/MM')} al {format(new Date(c.guard_end_date), 'dd/MM')}).
+                          &bull; Tienes guardia la week {c.guard_week_number} ({format(parseISO(c.guard_start_date), 'dd/MM')} al {format(parseISO(c.guard_end_date), 'dd/MM')}).
                         </p>
                       ))}
                       <p className="font-bold text-red-800 mt-2">Reasigna tu guardia antes de pedir estas fechas.</p>
@@ -350,15 +421,25 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                 </div>
               ) : (
                 filteredVacations.map((v) => {
-                  const daysNum = differenceInDays(new Date(v.end_date), new Date(v.start_date)) + 1
+                  const daysNum = differenceInDays(parseISO(v.end_date), parseISO(v.start_date)) + 1
                   const staffMem = staff.find(s => s.id === v.staff_id)
                   const isCan = v.status === 'cancelled'
                   
                   return (
                     <DSCard key={v.id} className={cn("group transition-all", isCan && "opacity-60 grayscale-[0.3]")}>
                       <div className="flex justify-between items-start mb-4">
-                        <div className="space-y-0.5">
+                        <div className="space-y-1">
                           <p className="text-[15px] font-bold text-neutral-900">{staffMem ? buildFullName(staffMem) : "???"}</p>
+                          <div className="flex items-center gap-2">
+                            <span className={cn(
+                              "text-[11px] font-bold px-2 py-0.5 rounded-full",
+                              v.tipo === 'asuntos_propios'
+                                ? "bg-orange-100 text-orange-700"
+                                : "bg-blue-50 text-[#0066CC]"
+                            )}>
+                              {v.tipo === 'asuntos_propios' ? 'Asuntos propios' : 'Vacaciones'}
+                            </span>
+                          </div>
                           <p className="text-[12px] text-[#86868B] flex items-center gap-1.5">
                             <Info className="h-3 w-3" />
                             {v.notes || "Sin observaciones"}
@@ -372,7 +453,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                       <div className="flex items-center justify-between py-3 border-y border-black/[0.04] border-dashed">
                          <div className="flex items-center gap-2 text-[14px] font-semibold text-neutral-900">
                             <CalendarIcon className="h-4 w-4 text-[#0066CC]" />
-                            {format(new Date(v.start_date), 'd MMM')} &rarr; {format(new Date(v.end_date), 'd MMM', {locale: es})}
+                            {format(parseISO(v.start_date), 'd MMM')} &rarr; {format(parseISO(v.end_date), 'd MMM', {locale: es})}
                          </div>
                          <div className="text-[13px] font-bold bg-[#F2F2F7] text-neutral-600 py-1 px-3 rounded-full">
                             {daysNum} días

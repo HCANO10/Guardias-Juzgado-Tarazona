@@ -1,8 +1,41 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/(app)/dashboard/page.tsx
 import { createClient } from "@/lib/supabase/server"
 import DashboardPageClient from "./DashboardPageClient"
 import { differenceInDays, addDays, isWithinInterval } from "date-fns"
+
+interface GuardPeriodInfo {
+  week_number: number;
+  start_date: string;
+  end_date: string;
+}
+
+interface StaffPosition {
+  guard_role: string | null;
+}
+
+interface AssignmentStaff {
+  id: string;
+  first_name: string;
+  last_name: string;
+  positions: StaffPosition | null;
+}
+
+interface GuardAssignment {
+  staff_id: string;
+  staff: AssignmentStaff | null;
+}
+
+interface PeriodWithAssignments {
+  id: string;
+  week_number: number;
+  start_date: string;
+  end_date: string;
+  guard_assignments: GuardAssignment[];
+}
+
+interface AlertItem extends PeriodWithAssignments {
+  count: number;
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -25,9 +58,9 @@ export default async function DashboardPage() {
 
   // 3. Stats: Breakdown
   const staffBreakdown = {
-    auxilio: activeStaff.filter(s => s.positions?.guard_role === 'auxilio').length,
-    tramitador: activeStaff.filter(s => s.positions?.guard_role === 'tramitador').length,
-    gestor: activeStaff.filter(s => s.positions?.guard_role === 'gestor').length,
+    auxilio: activeStaff.filter(s => (s as unknown as { positions: StaffPosition | null }).positions?.guard_role === 'auxilio').length,
+    tramitador: activeStaff.filter(s => (s as unknown as { positions: StaffPosition | null }).positions?.guard_role === 'tramitador').length,
+    gestor: activeStaff.filter(s => (s as unknown as { positions: StaffPosition | null }).positions?.guard_role === 'gestor').length,
   }
 
   // 4. Stats: Mi próxima guardia
@@ -45,7 +78,7 @@ export default async function DashboardPage() {
       .limit(1)
 
     if (myGuards && myGuards.length > 0) {
-      nextGuard = (myGuards[0] as any).guard_periods
+      nextGuard = (myGuards[0] as unknown as { guard_periods: GuardPeriodInfo }).guard_periods
     }
   }
 
@@ -83,22 +116,23 @@ export default async function DashboardPage() {
   let completeCount = 0
   let partialCount = 0
   let missingCount = 0
-  const alerts: any[] = []
+  const alerts: AlertItem[] = []
 
   const next30Days = addDays(todayDate, 30)
 
   periods?.forEach(p => {
-    const assignments = p.guard_assignments || []
+    const typedPeriod = p as unknown as PeriodWithAssignments
+    const assignments = typedPeriod.guard_assignments || []
     const count = assignments.length
-    
+
     if (count === 3) completeCount++
     else if (count > 0) partialCount++
     else missingCount++
 
     // Alertas próximas (30 días)
-    const pDate = new Date(p.start_date)
+    const pDate = new Date(typedPeriod.start_date)
     if (count < 3 && isWithinInterval(pDate, { start: todayDate, end: next30Days })) {
-      alerts.push({ ...p, count })
+      alerts.push({ ...typedPeriod, count })
     }
   })
 
@@ -110,30 +144,31 @@ export default async function DashboardPage() {
     .eq('status', 'approved')
 
   const calendarGuards = periods?.map(p => {
-    const assignments = p.guard_assignments || []
+    const typedPeriod = p as unknown as PeriodWithAssignments
+    const assignments = typedPeriod.guard_assignments || []
     return {
-      id: p.id,
-      week_number: p.week_number,
-      start_date: p.start_date,
-      end_date: p.end_date,
-      auxilio: assignments.find((a: any) => a.staff?.positions?.guard_role === 'auxilio')?.staff,
-      tramitador: assignments.find((a: any) => a.staff?.positions?.guard_role === 'tramitador')?.staff,
-      gestor: assignments.find((a: any) => a.staff?.positions?.guard_role === 'gestor')?.staff
+      id: typedPeriod.id,
+      week_number: typedPeriod.week_number,
+      start_date: typedPeriod.start_date,
+      end_date: typedPeriod.end_date,
+      auxilio: assignments.find(a => a.staff?.positions?.guard_role === 'auxilio')?.staff ?? null,
+      tramitador: assignments.find(a => a.staff?.positions?.guard_role === 'tramitador')?.staff ?? null,
+      gestor: assignments.find(a => a.staff?.positions?.guard_role === 'gestor')?.staff ?? null,
     }
   })
 
   // Only show events for current user in the mini calendar on dashboard?
   // User asked for "Solo mostrar eventos del usuario actual"
-  const myCalendarGuards = calendarGuards?.filter(g => 
-    g.auxilio?.id === currentStaff?.id || 
-    g.tramitador?.id === currentStaff?.id || 
+  const myCalendarGuards = calendarGuards?.filter(g =>
+    g.auxilio?.id === currentStaff?.id ||
+    g.tramitador?.id === currentStaff?.id ||
     g.gestor?.id === currentStaff?.id
   ) || []
-  
+
   const myCalendarVacations = allVacations?.filter(v => v.staff_id === currentStaff?.id) || []
 
   return (
-    <DashboardPageClient 
+    <DashboardPageClient
       stats={{
         nextGuard,
         vacationDays,

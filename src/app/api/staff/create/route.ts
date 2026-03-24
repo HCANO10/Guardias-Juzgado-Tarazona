@@ -1,70 +1,46 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
-
-const supabaseAdmin = createSupabaseAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
-
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { requireHeadmaster } from '@/lib/auth/require-role'
+import { validateBody } from '@/lib/validators/api'
+import { staffCreateSchema } from '@/lib/validators/schemas'
 
 export async function POST(request: NextRequest) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const auth = await requireHeadmaster()
+  if (!auth.success) return auth.response
 
-  if (!user) {
-    return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-  }
+  const validation = await validateBody(request, staffCreateSchema)
+  if (!validation.success) return validation.response
 
-  const { data: staff } = await supabase
-    .from('staff')
-    .select('role')
-    .eq('auth_user_id', user.id)
-    .single();
-
-  if (staff?.role !== 'headmaster') {
-    return NextResponse.json({ error: 'No autorizado. Se requiere rol headmaster.' }, { status: 403 });
-  }
+  const { first_name, last_name, email, position_id, start_date, notes, password, is_guard_eligible } = validation.data
 
   try {
-    const body = await request.json();
-    const { first_name, last_name, email, position_id, start_date, notes, password } = body;
-
-    if (!first_name || !last_name || !email || !position_id) {
-      return NextResponse.json(
-        { error: 'Campos obligatorios: nombre, apellidos, email y puesto' },
-        { status: 400 }
-      );
-    }
-
-    const userPassword = password || 'Tarazona123456';
+    const adminClient = createAdminClient()
+    const userPassword = password || 'Tarazona123456'
 
     // 1. Crear usuario en Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
       email,
       password: userPassword,
       email_confirm: true,
       user_metadata: { first_name, last_name },
-    });
+    })
 
     if (authError) {
       if (authError.message?.includes('already') || authError.message?.includes('exists')) {
         return NextResponse.json(
           { error: `Ya existe un usuario con el email ${email}` },
           { status: 409 }
-        );
+        )
       }
-      throw authError;
+      throw authError
     }
 
     if (!authData.user) {
-      throw new Error('No se pudo crear el usuario en Auth');
+      throw new Error('No se pudo crear el usuario en Auth')
     }
 
     // 2. Insertar en tabla staff
-    const { data: staffData, error: staffError } = await supabaseAdmin
+    const { data: staffData, error: staffError } = await adminClient
       .from('staff')
       .insert({
         auth_user_id: authData.user.id,
@@ -75,26 +51,24 @@ export async function POST(request: NextRequest) {
         is_active: true,
         start_date: start_date || new Date().toISOString().split('T')[0],
         notes: notes || null,
+        is_guard_eligible: is_guard_eligible ?? true,
       })
       .select('*, positions(name, guard_role)')
-      .single();
+      .single()
 
     if (staffError) {
-      // Rollback: eliminar usuario Auth si falla la inserción en staff
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-      throw staffError;
+      await adminClient.auth.admin.deleteUser(authData.user.id)
+      throw staffError
     }
 
     return NextResponse.json({
       success: true,
       staff: staffData,
       message: `Usuario creado: ${first_name} ${last_name} (${email}). Contraseña: ${userPassword}`,
-    });
-  } catch (error: any) {
-    console.error('Error creando usuario:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error interno al crear usuario' },
-      { status: 500 }
-    );
+    })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error interno al crear usuario'
+    console.error('Error creando usuario:', error)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/lib/guards/staff-by-category.ts
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface StaffMember {
@@ -13,6 +11,13 @@ export interface StaffByCategory {
   auxilio: StaffMember[];
   tramitador: StaffMember[];
   gestor: StaffMember[];
+}
+
+interface StaffWithPosition {
+  id: string;
+  first_name: string;
+  last_name: string;
+  positions: { guard_role: string };
 }
 
 export async function getActiveStaffByCategory(
@@ -33,12 +38,13 @@ export async function getActiveStaffByCategory(
   const result: StaffByCategory = { auxilio: [], tramitador: [], gestor: [] };
 
   for (const person of data || []) {
-    const role = (person.positions as any).guard_role as keyof StaffByCategory;
+    const typedPerson = person as unknown as StaffWithPosition;
+    const role = typedPerson.positions.guard_role as keyof StaffByCategory;
     if (role in result) {
       result[role].push({
-        id: person.id,
-        first_name: person.first_name,
-        last_name: person.last_name,
+        id: typedPerson.id,
+        first_name: typedPerson.first_name,
+        last_name: typedPerson.last_name,
       });
     }
   }

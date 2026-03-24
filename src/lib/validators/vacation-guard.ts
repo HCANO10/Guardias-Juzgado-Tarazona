@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/lib/validators/vacation-guard.ts
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from '@supabase/supabase-js';
+import { parseISO } from 'date-fns';
 
 export interface VacationConflict {
   guard_period_id: string;
@@ -15,6 +14,12 @@ export interface VacationConflict {
 export interface VacationConflictResult {
   valid: boolean;
   conflicts: VacationConflict[];
+}
+
+interface GuardPeriodData {
+  week_number: number;
+  start_date: string;
+  end_date: string;
 }
 
 export async function checkVacationGuardConflict(
@@ -34,14 +39,14 @@ export async function checkVacationGuardConflict(
 
   if (error) throw error;
 
-  const vacStart = new Date(startDate);
-  const vacEnd = new Date(endDate);
+  const vacStart = parseISO(startDate);
+  const vacEnd = parseISO(endDate);
   const conflicts: VacationConflict[] = [];
 
   for (const assignment of assignments || []) {
-    const gp = assignment.guard_periods as any;
-    const guardStart = new Date(gp.start_date);
-    const guardEnd = new Date(gp.end_date);
+    const gp = (assignment as unknown as { guard_periods: GuardPeriodData }).guard_periods;
+    const guardStart = parseISO(gp.start_date);
+    const guardEnd = parseISO(gp.end_date);
 
     // Hay solapamiento si: vacStart <= guardEnd AND vacEnd >= guardStart
     if (vacStart <= guardEnd && vacEnd >= guardStart) {

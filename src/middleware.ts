@@ -1,9 +1,49 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { getApiRateLimit } from '@/lib/rate-limit-tiers'
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
-  
+  const pathname = request.nextUrl.pathname
+
+  // ── Rate limiting for API routes ──
+  if (pathname.startsWith('/api/')) {
+    const rateConfig = getApiRateLimit(pathname, request.method)
+
+    // Use IP + pathname as the rate limit key
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown'
+    const key = `${ip}:${pathname}`
+
+    const result = checkRateLimit(key, rateConfig)
+
+    if (!result.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Demasiadas solicitudes. Intenta de nuevo más tarde.',
+          retryAfterSeconds: Math.ceil(result.retryAfterMs / 1000),
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil(result.retryAfterMs / 1000).toString(),
+            'X-RateLimit-Limit': result.limit.toString(),
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      )
+    }
+
+    // Add rate limit headers to successful responses
+    response.headers.set('X-RateLimit-Limit', result.limit.toString())
+    response.headers.set('X-RateLimit-Remaining', result.remaining.toString())
+
+    return response
+  }
+
+  // ── Supabase auth for page routes ──
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -20,12 +60,10 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  const pathname = request.nextUrl.pathname
 
   // Public routes — always allow
-  const publicRoutes = ['/login', '/auth/callback', '/api/']
+  const publicRoutes = ['/login', '/auth/callback']
   if (publicRoutes.some(route => pathname.startsWith(route))) {
-    // But if user is authenticated and going to /login, redirect to dashboard
     if (user && pathname === '/login') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }

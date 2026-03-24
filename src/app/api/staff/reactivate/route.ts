@@ -1,35 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
+import { requireHeadmaster } from '@/lib/auth/require-role'
+import { validateBody } from '@/lib/validators/api'
+import { staffReactivateSchema } from '@/lib/validators/schemas'
 
 export async function POST(request: Request) {
+  const auth = await requireHeadmaster()
+  if (!auth.success) return auth.response
+
+  const validation = await validateBody(request, staffReactivateSchema)
+  if (!validation.success) return validation.response
+
+  const { staffId } = validation.data
+
   try {
-    const supabase = createClient()
-    
-    // Verificar sesión y rol
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
-    }
-
-    const { data: requester } = await supabase
-      .from('staff')
-      .select('role')
-      .eq('auth_user_id', user.id)
-      .single()
-
-    if (requester?.role !== 'headmaster') {
-      return NextResponse.json({ error: 'No autorizado. Se requiere rol headmaster.' }, { status: 403 })
-    }
-
-    const body = await request.json()
-    const { staffId } = body
-
-    if (!staffId) {
-      return NextResponse.json({ error: 'Falta staffId' }, { status: 400 })
-    }
-
     const adminClient = createAdminClient()
 
     // 1. Obtener al trabajador
@@ -57,15 +41,15 @@ export async function POST(request: Request) {
     if (staff.auth_user_id) {
       const { error: unbanError } = await adminClient.auth.admin.updateUserById(
         staff.auth_user_id,
-        { ban_duration: 'none' } // Retirar baneo
+        { ban_duration: 'none' }
       )
       if (unbanError) {
-         console.error("Error retirando el ban de auth user:", unbanError)
+        console.error("Error retirando el ban de auth user:", unbanError)
       }
     }
 
     return NextResponse.json({ success: true, message: 'Trabajador reactivado' })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Internal Error POST /api/staff/reactivate:", error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }

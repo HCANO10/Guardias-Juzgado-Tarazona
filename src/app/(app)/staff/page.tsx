@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import StaffPageClient from "./StaffPageClient"
 
 export default async function StaffPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   // Obtenemos los puestos una sola vez desde el servidor para pasarlos al cliente
   const { data: positions } = await supabase

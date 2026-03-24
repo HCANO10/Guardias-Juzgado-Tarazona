@@ -1,26 +1,24 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app/api/vacations/validate/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { checkVacationGuardConflict } from '@/lib/validators/vacation-guard';
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth/require-role'
+import { validateBody } from '@/lib/validators/api'
+import { vacationValidateSchema } from '@/lib/validators/schemas'
+import { checkVacationGuardConflict } from '@/lib/validators/vacation-guard'
 
 export async function POST(request: NextRequest) {
+  // FIX: This route previously had NO authentication check
+  const auth = await requireAuth()
+  if (!auth.success) return auth.response
+
+  const validation = await validateBody(request, vacationValidateSchema)
+  if (!validation.success) return validation.response
+
+  const { staff_id, start_date, end_date } = validation.data
+
   try {
-    const { staff_id, start_date, end_date } = await request.json();
-
-    if (!staff_id || !start_date || !end_date) {
-      return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 });
-    }
-
-    if (new Date(start_date) > new Date(end_date)) {
-      return NextResponse.json({ error: 'La fecha de inicio debe ser anterior a la de fin' }, { status: 400 });
-    }
-
-    const supabase = await createClient();
-    const result = await checkVacationGuardConflict(supabase, staff_id, start_date, end_date);
-
-    return NextResponse.json(result);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const result = await checkVacationGuardConflict(auth.supabase, staff_id, start_date, end_date)
+    return NextResponse.json(result)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error interno'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

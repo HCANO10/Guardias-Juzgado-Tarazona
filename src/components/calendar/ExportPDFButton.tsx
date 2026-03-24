@@ -1,18 +1,54 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { DSButton } from "@/lib/design-system"
 import { FileDown, Loader2 } from "lucide-react"
 import { format, getDaysInMonth } from "date-fns"
 import { es } from "date-fns/locale"
 import { buildFullName } from "@/lib/staff/normalize"
 
+interface PDFStaffMember {
+  id: string
+  first_name: string
+  last_name: string
+  second_last_name?: string | null
+}
+
+interface PDFGuardPeriod {
+  week_number: number
+  start_date: string
+  end_date: string
+}
+
+interface PDFGuardAssignment {
+  staff_id: string
+}
+
+interface PDFGuard {
+  id: string
+  guard_periods?: PDFGuardPeriod | null
+  assignments?: PDFGuardAssignment[]
+}
+
+interface PDFVacation {
+  id: string
+  staff_id: string
+  start_date: string
+  end_date: string
+}
+
+interface PDFHoliday {
+  id: string
+  date: string
+  name: string
+  scope: string
+}
+
 interface ExportPDFButtonProps {
-  guards: any[]
-  vacations: any[]
-  holidays: any[]
-  staff: any[]
+  guards: PDFGuard[]
+  vacations: PDFVacation[]
+  holidays: PDFHoliday[]
+  staff: PDFStaffMember[]
   currentDate?: Date
 }
 
@@ -25,7 +61,7 @@ export function ExportPDFButton({ guards, vacations, holidays, staff, currentDat
       const { jsPDF } = await import('jspdf')
       const autoTable = (await import('jspdf-autotable')).default
 
-      const doc = new (jsPDF as any)({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+      const doc = new (jsPDF as unknown as new (opts: Record<string, string>) => InstanceType<typeof jsPDF>)({ orientation: 'landscape', unit: 'mm', format: 'a4' })
 
       const monthName = format(currentDate, 'MMMM yyyy', { locale: es }).toUpperCase()
       const year = currentDate.getFullYear()
@@ -42,16 +78,16 @@ export function ExportPDFButton({ guards, vacations, holidays, staff, currentDat
 
       // Obtener guardias del mes
       const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`
-      const monthGuards = guards.filter((g: any) => {
+      const monthGuards = guards.filter((g) => {
         const gMonth = g.guard_periods?.start_date?.slice(0, 7)
         return gMonth === monthStr
       })
 
       // Tabla de guardias
-      const guardRows = monthGuards.map((g: any) => {
+      const guardRows = monthGuards.map((g) => {
         const period = g.guard_periods
-        const assignedStaff = g.assignments?.map((a: any) => {
-          const s = staff.find((p: any) => p.id === a.staff_id)
+        const assignedStaff = g.assignments?.map((a) => {
+          const s = staff.find((p) => p.id === a.staff_id)
           return s ? buildFullName(s) : '—'
         }).join('\n') || '—'
         return [
@@ -72,16 +108,16 @@ export function ExportPDFButton({ guards, vacations, holidays, staff, currentDat
       })
 
       // Festivos del mes
-      const monthHolidays = holidays.filter((h: any) => h.date?.slice(0, 7) === monthStr)
+      const monthHolidays = holidays.filter((h) => h.date?.slice(0, 7) === monthStr)
       if (monthHolidays.length > 0) {
-        const lastY = (doc as any).lastAutoTable?.finalY + 8 || 50
+        const lastY = ((doc as unknown as Record<string, { finalY?: number }>).lastAutoTable?.finalY ?? 42) + 8
         doc.setFontSize(12)
         doc.setFont('helvetica', 'bold')
         doc.text('FESTIVOS DEL MES', 10, lastY)
         autoTable(doc, {
           startY: lastY + 4,
           head: [['Fecha', 'Festivo', 'Ámbito']],
-          body: monthHolidays.map((h: any) => [
+          body: monthHolidays.map((h: PDFHoliday) => [
             h.date ? format(new Date(h.date + 'T00:00:00'), 'dd/MM/yyyy') : '—',
             h.name || '—',
             h.scope || '—',
@@ -92,7 +128,7 @@ export function ExportPDFButton({ guards, vacations, holidays, staff, currentDat
       }
 
       // Nota final
-      const finalY = (doc as any).lastAutoTable?.finalY + 6 || 120
+      const finalY = ((doc as unknown as Record<string, { finalY?: number }>).lastAutoTable?.finalY ?? 114) + 6
       doc.setFontSize(8)
       doc.setFont('helvetica', 'italic')
       doc.text(`Generado el ${format(new Date(), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}`, 148, finalY, { align: 'center' })
@@ -107,9 +143,9 @@ export function ExportPDFButton({ guards, vacations, holidays, staff, currentDat
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
+    <DSButton variant="secondary" size="sm" onClick={handleExport} disabled={exporting}>
       {exporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
       Exportar PDF
-    </Button>
+    </DSButton>
   )
 }

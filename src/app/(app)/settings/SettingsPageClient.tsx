@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState } from "react"
@@ -6,24 +5,20 @@ import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { format } from "date-fns"
+import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
-import { 
-  Loader2, 
-  Settings2, 
-  CalendarDays, 
-  BrainCircuit, 
-  Activity, 
-  Info,
+import {
+  Loader2,
+  Settings2,
+  CalendarDays,
+  Activity,
   Database,
   Users,
   CheckCircle2,
   AlertTriangle,
   ChevronRight,
-  TrendingUp,
   Cpu
 } from "lucide-react"
-import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 import { 
   DSCard, 
@@ -34,9 +29,21 @@ import {
   DSIconBox
 } from "@/lib/design-system"
 
+interface AppSettings {
+  active_year: number
+  groq_model: string
+}
+
+interface GuardPeriod {
+  id?: string
+  week_number: number
+  start_date: string
+  end_date: string
+}
+
 interface SettingsPageClientProps {
-  initialSettings: any
-  initialPeriods: any[]
+  initialSettings: AppSettings | null
+  initialPeriods: GuardPeriod[]
   systemStats: {
     staff: { total: number, aux: number, tra: number, ges: number }
     periods: number
@@ -52,8 +59,8 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
   // Guard Generator States
   const [yearToGenerate, setYearToGenerate] = useState(new Date().getFullYear().toString())
   const [generating, setGenerating] = useState(false)
-  const [periods, setPeriods] = useState<any[]>(initialPeriods)
-  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean, data: any }>({ open: false, data: null })
+  const [periods, setPeriods] = useState<GuardPeriod[]>(initialPeriods)
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean, data: Record<string, unknown> | null }>({ open: false, data: null })
 
   // Settings Form States
   const [activeYear, setActiveYear] = useState(initialSettings?.active_year || 2026)
@@ -83,8 +90,9 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
         if (data.data) setPeriods(data.data)
         setConfirmDialog({ open: false, data: null })
       }
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Error desconocido"
+      toast({ variant: "destructive", title: "Error", description: message })
     } finally {
       setGenerating(false)
     }
@@ -101,8 +109,9 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       toast({ title: "Configuración actualizada" })
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Error desconocido"
+      toast({ variant: "destructive", title: "Error", description: message })
     } finally {
       setSavingSettings(false)
     }
@@ -120,8 +129,9 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
       } else {
         toast({ variant: "destructive", title: "Error de conexión", description: data.error })
       }
-    } catch (error: any) {
-      setGroqStatus({ connected: false, error: error.message })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Error desconocido"
+      setGroqStatus({ connected: false, error: message })
       toast({ variant: "destructive", title: "Error" })
     } finally {
       setTestingGroq(false)
@@ -239,8 +249,8 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
                            {periods.map((p) => (
                              <tr key={p.id || p.week_number} className="hover:bg-[#F2F2F7]/30 transition-colors">
                                 <td className="px-6 py-3.5"><DSBadge variant="indigo">S{p.week_number}</DSBadge></td>
-                                <td className="px-6 py-3.5 text-[14px] font-medium text-neutral-800">{format(new Date(p.start_date), 'dd MMM yyyy', { locale: es })}</td>
-                                <td className="px-6 py-3.5 text-[14px] font-medium text-neutral-800">{format(new Date(p.end_date), 'dd MMM yyyy', { locale: es })}</td>
+                                <td className="px-6 py-3.5 text-[14px] font-medium text-neutral-800">{format(parseISO(p.start_date), 'dd MMM yyyy', { locale: es })}</td>
+                                <td className="px-6 py-3.5 text-[14px] font-medium text-neutral-800">{format(parseISO(p.end_date), 'dd MMM yyyy', { locale: es })}</td>
                                 <td className="px-6 py-3.5 text-right"><ChevronRight className="h-4 w-4 text-black/10 inline-block" /></td>
                              </tr>
                            ))}
@@ -256,62 +266,70 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
         <div className="lg:col-span-4 space-y-10">
            
            {/* System Health Card */}
-           <DSCard className="bg-neutral-900 text-white border-none shadow-2xl relative overflow-hidden group">
-              <div className="relative z-10 space-y-8">
+           <DSCard dark hover={false} className="shadow-2xl relative overflow-hidden" padding="p-8">
+              <div className="relative z-10 space-y-6">
                  <div className="flex items-center justify-between">
-                    <DSIconBox icon={Activity} variant="blue" className="bg-white/10 text-blue-400" />
-                    <DSBadge variant="blue" className="bg-blue-500/20 text-blue-400 border-none px-2 text-[10px]">Online</DSBadge>
+                    <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center">
+                      <Activity className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <span className="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-[11px] font-semibold">
+                      Online
+                    </span>
                  </div>
-                 
+
                  <div>
-                    <h4 className="text-[20px] font-bold mb-1">Estado del Sistema</h4>
+                    <h4 className="text-[20px] font-bold text-white mb-1">Estado del Sistema</h4>
                     <p className="text-white/40 text-[12px] font-medium">Monitor de recursos y conectividad.</p>
                  </div>
 
-                 <div className="space-y-6">
+                 <div className="space-y-4">
                     <div className="space-y-2">
-                       <div className="flex justify-between text-[11px] font-black uppercase text-white/40 tracking-widest px-1">
+                       <div className="flex justify-between text-[11px] font-bold uppercase text-white/40 tracking-wider px-1">
                           <span>Cobertura de Guardias</span>
-                          <span>{coveragePercent}%</span>
+                          <span className="text-white/60">{coveragePercent}%</span>
                        </div>
-                       <Progress value={coveragePercent} className="h-1.5 bg-white/10" />
+                       <div className="w-full h-1.5 rounded-full bg-white/10">
+                         <div
+                           className="h-1.5 rounded-full bg-blue-500 transition-all"
+                           style={{ width: `${coveragePercent}%` }}
+                         />
+                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                       <div className="bg-white/5 p-4 rounded-[20px] border border-white/10">
+                    <div className="grid grid-cols-2 gap-3">
+                       <div className="bg-white/[0.06] p-4 rounded-2xl border border-white/[0.08]">
                           <Users className="h-4 w-4 text-blue-400 mb-2" />
-                          <p className="text-[20px] font-black">{systemStats.staff.total}</p>
-                          <p className="text-[10px] text-white/40 uppercase font-bold">Personal</p>
+                          <p className="text-[22px] font-bold text-white">{systemStats.staff.total}</p>
+                          <p className="text-[10px] text-white/40 uppercase font-semibold mt-1">Personal</p>
                        </div>
-                       <div className="bg-white/5 p-4 rounded-[20px] border border-white/10">
+                       <div className="bg-white/[0.06] p-4 rounded-2xl border border-white/[0.08]">
                           <Database className="h-4 w-4 text-indigo-400 mb-2" />
-                          <p className="text-[20px] font-black">{systemStats.holidays}</p>
-                          <p className="text-[10px] text-white/40 uppercase font-bold">Festivos</p>
+                          <p className="text-[22px] font-bold text-white">{systemStats.holidays}</p>
+                          <p className="text-[10px] text-white/40 uppercase font-semibold mt-1">Festivos</p>
                        </div>
                     </div>
                  </div>
 
-                 <div className="pt-4">
-                    <DSButton 
-                      variant="secondary" 
-                      onClick={handleTestGroq}
-                      disabled={testingGroq}
-                      className="w-full bg-white/10 border-white/20 text-white font-black uppercase text-[10px] tracking-widest hover:bg-white/20"
-                    >
-                       {testingGroq ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Cpu className="h-3.5 w-3.5 mr-2" />}
-                       Test IA Diagnostics
-                    </DSButton>
-                 </div>
+                 <button
+                   onClick={handleTestGroq}
+                   disabled={testingGroq}
+                   className="w-full h-10 rounded-xl bg-white/10 border border-white/[0.12] text-white text-[11px] font-bold uppercase tracking-wider hover:bg-white/[0.15] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                 >
+                    {testingGroq ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Cpu className="h-3.5 w-3.5" />}
+                    Test IA Diagnostics
+                 </button>
 
                  {groqStatus && (
                    <div className={cn(
-                      "mt-4 p-4 rounded-[16px] text-[12px] flex items-start gap-3 transition-all",
-                      groqStatus.connected ? "bg-green-500/20 text-green-300 border border-green-500/30" : "bg-red-500/20 text-red-300 border border-red-500/30"
+                      "p-4 rounded-xl text-[12px] flex items-start gap-3 transition-all",
+                      groqStatus.connected
+                        ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                        : "bg-red-500/15 text-red-300 border border-red-500/20"
                    )}>
-                      {groqStatus.connected ? <CheckCircle2 className="h-4 w-4 mt-0.5" /> : <AlertTriangle className="h-4 w-4 mt-0.5" />}
+                      {groqStatus.connected ? <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" /> : <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />}
                       <div className="space-y-1">
-                         <p className="font-bold">{groqStatus.connected ? "Groq Conectado" : "Error de Link"}</p>
-                         <p className="opacity-80 leading-tight">{groqStatus.connected ? groqStatus.model : groqStatus.error}</p>
+                         <p className="font-bold">{groqStatus.connected ? "Groq Conectado" : "Error de Conexión"}</p>
+                         <p className="opacity-70 leading-tight">{groqStatus.connected ? groqStatus.model : groqStatus.error}</p>
                       </div>
                    </div>
                  )}

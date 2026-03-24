@@ -1,66 +1,53 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { createClient as createAdminClient } from '@supabase/supabase-js';
-
-const supabaseAdmin = createAdminClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { requireHeadmaster } from '@/lib/auth/require-role'
+import { validateBody } from '@/lib/validators/api'
+import { staffChangeRoleSchema } from '@/lib/validators/schemas'
 
 export async function POST(request: NextRequest) {
+  const auth = await requireHeadmaster()
+  if (!auth.success) return auth.response
+
+  const validation = await validateBody(request, staffChangeRoleSchema)
+  if (!validation.success) return validation.response
+
+  const { staff_id, new_role } = validation.data
+
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    const adminClient = createAdminClient()
 
-    const { data: requester } = await supabaseAdmin
-      .from('staff')
-      .select('role')
-      .eq('auth_user_id', user.id)
-      .single();
-
-    if (requester?.role !== 'headmaster') {
-      return NextResponse.json({ error: 'Solo un Headmaster puede cambiar roles' }, { status: 403 });
-    }
-
-    const { staff_id, new_role } = await request.json();
-
-    if (!staff_id || !['headmaster', 'worker'].includes(new_role)) {
-      return NextResponse.json({ error: 'Datos no válidos' }, { status: 400 });
-    }
-
+    // Prevenir eliminar el último headmaster
     if (new_role === 'worker') {
-      const { data: headmasters } = await supabaseAdmin
+      const { data: headmasters } = await adminClient
         .from('staff')
         .select('id')
         .eq('role', 'headmaster')
-        .eq('is_active', true);
+        .eq('is_active', true)
 
       if (headmasters && headmasters.length <= 1) {
-        const isLastHeadmaster = headmasters.some(h => h.id === staff_id);
+        const isLastHeadmaster = headmasters.some(h => h.id === staff_id)
         if (isLastHeadmaster) {
           return NextResponse.json(
             { error: 'No se puede quitar el rol de Headmaster al último administrador. Nombra otro Headmaster primero.' },
             { status: 400 }
-          );
+          )
         }
       }
     }
 
-    const { error } = await supabaseAdmin
+    const { error } = await adminClient
       .from('staff')
       .update({ role: new_role })
-      .eq('id', staff_id);
+      .eq('id', staff_id)
 
-    if (error) throw error;
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
       message: `Rol actualizado a ${new_role === 'headmaster' ? 'Headmaster' : 'Trabajador'}`,
-    });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error interno'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

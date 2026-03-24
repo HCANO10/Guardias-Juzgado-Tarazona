@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
   Dialog, 
@@ -98,14 +97,14 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
       const matchScope = scopeFilter === 'all' || h.scope === scopeFilter;
       const matchYear = yearFilter === 'all' || h.year.toString() === yearFilter;
       return matchScope && matchYear;
-    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }).sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
   }, [holidays, scopeFilter, yearFilter]);
 
   const handleOpenDialog = (holiday?: Holiday) => {
     if (holiday) {
       setEditingHoliday(holiday);
       setFormData({
-        date: new Date(holiday.date),
+        date: parseISO(holiday.date),
         name: holiday.name,
         scope: holiday.scope
       });
@@ -155,8 +154,9 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
       }
       setIsDialogOpen(false);
       router.refresh();
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      toast({ title: "Error", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -176,8 +176,9 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
       toast({ title: "Festivo eliminado" });
       setIsDelOpen(false);
       router.refresh();
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      toast({ title: "Error", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
       setDeletingHolidayId(null);
@@ -253,15 +254,15 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
               <DSCard key={holiday.id} className="group hover:scale-[1.02] transition-all duration-300">
                 <div className="flex justify-between items-start mb-4">
                   <div className="h-10 w-10 flex items-center justify-center rounded-[12px] bg-[#F2F2F7] text-neutral-900 font-bold text-[13px] border border-black/[0.04]">
-                    {format(new Date(holiday.date), 'dd')}
+                    {format(parseISO(holiday.date), 'dd')}
                   </div>
                   <DSBadge variant={scope.variant}>{scope.label}</DSBadge>
                 </div>
-                
+
                 <div className="space-y-1 mb-6">
                   <p className="text-[17px] font-semibold text-neutral-900 leading-tight min-h-[44px]">{holiday.name}</p>
                   <p className="text-[13px] text-[#86868B] font-medium capitalize">
-                    {format(new Date(holiday.date), "MMMM 'de' yyyy", { locale: es })}
+                    {format(parseISO(holiday.date), "MMMM 'de' yyyy", { locale: es })}
                   </p>
                 </div>
 
@@ -340,7 +341,7 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
 
               <div className="space-y-2">
                 <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Ámbito</label>
-                <Select value={formData.scope} onValueChange={(val: any) => setFormData(prev => ({ ...prev, scope: val }))}>
+                <Select value={formData.scope} onValueChange={(val) => setFormData(prev => ({ ...prev, scope: val as Holiday['scope'] }))}>
                   <SelectTrigger className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]">
                     <SelectValue placeholder="Seleccionar ámbito" />
                   </SelectTrigger>
@@ -382,7 +383,7 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
             </AlertDialogCancel>
             <DSButton 
               variant="danger"
-              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+              onClick={() => handleDelete()}
               disabled={loading}
               className="h-11 px-8"
             >

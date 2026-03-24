@@ -1,70 +1,72 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
-import { createClient } from '@/lib/supabase/server';
-
-const supabaseAdmin = createSupabaseAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { requireHeadmaster } from '@/lib/auth/require-role'
+import { validateBody } from '@/lib/validators/api'
+import { guardSwapSchema } from '@/lib/validators/schemas'
 
 export async function POST(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  const auth = await requireHeadmaster()
+  if (!auth.success) return auth.response
 
-    const body = await request.json();
-    const { periodId1, staffId1, periodId2, staffId2, swapperStaffId } = body;
+  const validation = await validateBody(request, guardSwapSchema)
+  if (!validation.success) return validation.response
+
+  const { periodId1, staffId1, periodId2, staffId2, swapperStaffId } = validation.data
+
+  try {
+    const adminClient = createAdminClient()
 
     // Verificar que ambas asignaciones existen
-    const { data: assign1, error: err1 } = await supabaseAdmin
+    const { data: assign1, error: err1 } = await adminClient
       .from('guard_assignments')
       .select('id, staff_id, guard_period_id')
       .eq('guard_period_id', periodId1)
       .eq('staff_id', staffId1)
-      .single();
+      .single()
 
-    const { data: assign2, error: err2 } = await supabaseAdmin
+    const { data: assign2, error: err2 } = await adminClient
       .from('guard_assignments')
       .select('id, staff_id, guard_period_id')
       .eq('guard_period_id', periodId2)
       .eq('staff_id', staffId2)
-      .single();
+      .single()
 
     if (err1 || !assign1 || err2 || !assign2) {
-      return NextResponse.json({ error: 'No se encontraron las asignaciones a intercambiar' }, { status: 404 });
+      return NextResponse.json({ error: 'No se encontraron las asignaciones a intercambiar' }, { status: 404 })
     }
 
-    // Intercambiar: asign1 staff → staffId2, asign2 staff → staffId1
-    const { error: upd1 } = await supabaseAdmin
+    // Intercambiar
+    const { error: upd1 } = await adminClient
       .from('guard_assignments')
       .update({ staff_id: staffId2, assigned_by: 'manual' })
-      .eq('id', assign1.id);
+      .eq('id', assign1.id)
 
-    const { error: upd2 } = await supabaseAdmin
+    const { error: upd2 } = await adminClient
       .from('guard_assignments')
       .update({ staff_id: staffId1, assigned_by: 'manual' })
-      .eq('id', assign2.id);
+      .eq('id', assign2.id)
 
     if (upd1 || upd2) {
-      throw new Error('Error al actualizar las asignaciones');
+      throw new Error('Error al actualizar las asignaciones')
     }
 
-    // Registrar en activity_log (si la tabla existe)
+    // Registrar en activity_log (no bloquea la operación principal)
     try {
-      await supabaseAdmin.from('activity_log').insert({
+      const { error: logError } = await adminClient.from('activity_log').insert({
         action: 'guard_swapped',
         entity_type: 'guard_assignment',
         details: { periodId1, staffId1, periodId2, staffId2 },
         performed_by: swapperStaffId || null,
-      });
-    } catch (_) { /* Si no existe la tabla, ignorar */ }
+      })
+      if (logError) console.warn('activity_log insert failed:', logError.message)
+    } catch (logErr) {
+      console.warn('activity_log error:', logErr)
+    }
 
-    return NextResponse.json({ success: true, message: 'Guardia intercambiada correctamente' });
-  } catch (error: any) {
-    console.error('Error intercambiando guardias:', error);
-    return NextResponse.json({ error: error.message || 'Error interno' }, { status: 500 });
+    return NextResponse.json({ success: true, message: 'Guardia intercambiada correctamente' })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error interno'
+    console.error('Error intercambiando guardias:', error)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

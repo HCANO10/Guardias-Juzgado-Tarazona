@@ -1,49 +1,30 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { requireHeadmaster } from '@/lib/auth/require-role'
+import { validateBody } from '@/lib/validators/api'
+import { settingsUpdateSchema } from '@/lib/validators/schemas'
+import { setSetting } from '@/lib/settings'
 
 export async function POST(request: NextRequest) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const auth = await requireHeadmaster()
+  if (!auth.success) return auth.response
 
-  if (!user) {
-    return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-  }
+  const validation = await validateBody(request, settingsUpdateSchema)
+  if (!validation.success) return validation.response
 
-  const { data: staff } = await supabase
-    .from('staff')
-    .select('role')
-    .eq('auth_user_id', user.id)
-    .single();
-
-  if (staff?.role !== 'headmaster') {
-    return NextResponse.json({ error: 'No autorizado. Se requiere rol headmaster.' }, { status: 403 });
-  }
+  const { active_year, groq_model } = validation.data
 
   try {
-    const { active_year, groq_model } = await request.json();
-
-    if (!active_year || !groq_model) {
-      return NextResponse.json(
-        { error: 'Faltan parámetros' },
-        { status: 400 }
-      );
+    // Update each setting by key
+    if (active_year !== undefined) {
+      await setSetting(auth.supabase, 'current_year', String(active_year), 'Año activo para gestión de guardias')
+    }
+    if (groq_model !== undefined) {
+      await setSetting(auth.supabase, 'groq_model', groq_model, 'Modelo de Groq para generación de guardias')
     }
 
-    const supabase = await createClient();
-
-    const { error } = await supabase
-      .from('app_settings')
-      .update({ active_year, groq_model })
-      .eq('id', 1);
-
-    if (error) throw error;
-
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Error interno al actualizar settings' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error interno al actualizar settings'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

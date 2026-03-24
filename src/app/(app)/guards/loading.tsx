@@ -1,7 +1,6 @@
-// src/app/(app)/guards/loading.tsx
 import { Skeleton } from "@/components/ui/skeleton"
 import { TableSkeleton } from "@/components/ui/table-skeleton"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { DSCard } from "@/lib/design-system"
 
 export default function GuardsLoading() {
   return (
@@ -15,23 +14,19 @@ export default function GuardsLoading() {
         <Skeleton className="h-6 w-[250px]" />
         <div className="grid gap-4 md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader className="pb-2">
-                <Skeleton className="h-4 w-[100px]" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-[80%]" />
-                </div>
-              </CardContent>
-            </Card>
+            <DSCard key={i}>
+              <Skeleton className="h-4 w-[100px] mb-4" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-[80%]" />
+              </div>
+            </DSCard>
           ))}
         </div>
       </div>
 
-      <div className="space-y-4 pt-4 border-t">
+      <div className="space-y-4 pt-4 border-t border-black/[0.04]">
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           <Skeleton className="h-10 w-full md:w-[150px]" />
           <Skeleton className="h-10 w-full md:w-[220px]" />

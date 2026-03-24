@@ -1,6 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@/lib/supabase/server"
 import VacationsPageClient from "./VacationsPageClient"
+
+interface GuardPeriodInfo {
+  week_number: number;
+  start_date: string;
+  end_date: string;
+}
 
 export default async function VacationsPage() {
   const supabase = await createClient()
@@ -37,12 +42,12 @@ export default async function VacationsPage() {
       .limit(1)
 
     if (assignments && assignments.length > 0) {
-      nextGuard = (assignments[0] as any).guard_periods
+      nextGuard = (assignments[0] as unknown as { guard_periods: GuardPeriodInfo }).guard_periods
     }
   }
 
   return (
-    <VacationsPageClient 
+    <VacationsPageClient
       staff={staff || []}
       vacations={vacations || []}
       currentStaffId={currentUserStaff?.id || null}

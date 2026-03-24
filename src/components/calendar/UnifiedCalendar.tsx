@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -6,22 +5,53 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
+import type { EventInput } from '@fullcalendar/core';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { addDays } from 'date-fns';
+import { addDays, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { 
-  DSCard, 
-  DSIconBox, 
-  DSBadge 
+import {
+  DSCard,
+  DSIconBox,
+  DSBadge
 } from '@/lib/design-system';
 import { Calendar as CalendarIcon, Filter, Layers, Users } from 'lucide-react';
 
+interface CalendarStaffMember {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
+interface CalendarGuard {
+  id: string;
+  start_date: string;
+  end_date: string;
+  auxilio: { id: string; first_name: string } | null;
+  tramitador: { id: string; first_name: string } | null;
+  gestor: { id: string; first_name: string } | null;
+}
+
+interface CalendarVacation {
+  id: string;
+  staff_id: string;
+  start_date: string;
+  end_date: string;
+  staff: { first_name: string } | null;
+}
+
+interface CalendarHoliday {
+  id: string;
+  date: string;
+  name: string;
+  scope: string;
+}
+
 interface UnifiedCalendarProps {
-  guards: any[];
-  vacations: any[];
-  holidays: any[];
-  staff: any[];
+  guards: CalendarGuard[];
+  vacations: CalendarVacation[];
+  holidays: CalendarHoliday[];
+  staff: CalendarStaffMember[];
 }
 
 export default function UnifiedCalendar({ guards, vacations, holidays, staff }: UnifiedCalendarProps) {
@@ -31,7 +61,7 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
   const [showHolidays, setShowHolidays] = useState(true);
 
   const events = useMemo(() => {
-    const allEvents: any[] = [];
+    const allEvents: EventInput[] = [];
 
     // 1. Guardias (Rojo)
     if (showGuards) {
@@ -54,7 +84,7 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
           id: `guard-${g.id}`,
           title: isUncovered ? "🛡️ SIN CUBRIR" : `🛡️ ${titleParts.join(' | ')}`,
           start: g.start_date,
-          end: addDays(new Date(g.end_date), 1).toISOString().split('T')[0], 
+          end: addDays(parseISO(g.end_date), 1).toISOString().split('T')[0], 
           allDay: true,
           backgroundColor: isUncovered ? '#991B1B' : '#DC2626',
           borderColor: 'transparent',
@@ -73,7 +103,7 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
           id: `vac-${v.id}`,
           title: `🌴 ${v.staff?.first_name}`,
           start: v.start_date,
-          end: addDays(new Date(v.end_date), 1).toISOString().split('T')[0],
+          end: addDays(parseISO(v.end_date), 1).toISOString().split('T')[0],
           allDay: true,
           backgroundColor: '#34C759',
           borderColor: 'transparent',

@@ -1,11 +1,36 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { ProfilePageClient } from "./ProfilePageClient"
-import { format } from "date-fns"
+
+interface GuardPeriodData {
+  id: string;
+  week_number: number;
+  start_date: string;
+  end_date: string;
+  year: number;
+}
+
+interface GuardAssignmentWithPeriod {
+  id: string;
+  guard_period_id: string;
+  guard_periods: GuardPeriodData | null;
+}
+
+interface VacationRecord {
+  id: string;
+  staff_id: string;
+  start_date: string;
+  end_date: string;
+  status: string;
+  [key: string]: unknown;
+}
+
+interface PositionRecord {
+  id: string;
+}
 
 export default async function ProfilePage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -34,20 +59,21 @@ export default async function ProfilePage() {
   const currentYear = new Date().getFullYear()
   const today = new Date().toISOString().split('T')[0]
 
-  // Mis guardias futuras
+  // Mis guardias futuras (guard_period_id necesario para el intercambio)
   const { data: myGuards } = await supabase
     .from('guard_assignments')
-    .select('guard_period_id, guard_periods(week_number, start_date, end_date, year)')
+    .select('id, guard_period_id, guard_periods(id, week_number, start_date, end_date, year)')
     .eq('staff_id', staffData.id)
     .order('guard_period_id', { ascending: true })
 
-  const futureGuards = (myGuards || [])
-    .filter((g: any) => g.guard_periods?.start_date >= today && g.guard_periods?.year === currentYear)
+  const typedGuards = (myGuards || []) as unknown as GuardAssignmentWithPeriod[]
+
+  const futureGuards = typedGuards
+    .filter(g => g.guard_periods?.start_date && g.guard_periods.start_date >= today && g.guard_periods?.year === currentYear)
     .slice(0, 10)
 
-  const totalGuards = (myGuards || []).filter((g: any) => g.guard_periods?.year === currentYear).length
+  const totalGuards = typedGuards.filter(g => g.guard_periods?.year === currentYear).length
 
-  // Próxima guardia
   const nextGuard = futureGuards[0] || null
 
   // Mis vacaciones este año
@@ -59,17 +85,44 @@ export default async function ProfilePage() {
     .lte('end_date', `${currentYear}-12-31`)
     .order('start_date', { ascending: true })
 
-  // Total días de vacaciones aprobadas
-  const approvedVacations = (myVacations || []).filter((v: any) => v.status === 'approved')
-  const totalVacationDays = approvedVacations.reduce((acc: number, v: any) => {
-    const start = new Date(v.start_date)
-    const end = new Date(v.end_date)
-    const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+  const typedVacations = (myVacations || []) as unknown as VacationRecord[]
+
+  // Total días de vacaciones aprobadas (noon trick para evitar problemas de timezone)
+  const approvedVacations = typedVacations.filter(v => v.status === 'approved')
+  const totalVacationDays = approvedVacations.reduce((acc: number, v) => {
+    const msPerDay = 1000 * 60 * 60 * 24
+    const diff = Math.round(
+      (new Date(v.end_date + 'T12:00:00').getTime() - new Date(v.start_date + 'T12:00:00').getTime()) / msPerDay
+    ) + 1
     return acc + diff
   }, 0)
 
-  // Próximas vacaciones
-  const nextVacation = approvedVacations.find((v: any) => v.end_date >= today) || null
+  const nextVacation = approvedVacations.find(v => v.end_date >= today) || null
+
+  // Personal del mismo rol para poder solicitar intercambios de guardia
+  const guardRole = staffData.positions?.guard_role as 'auxilio' | 'tramitador' | 'gestor' | null
+  let sameRoleStaff: { id: string; first_name: string; last_name: string }[] = []
+
+  if (guardRole) {
+    const { data: positionsWithRole } = await supabase
+      .from('positions')
+      .select('id')
+      .eq('guard_role', guardRole)
+
+    const positionIds = ((positionsWithRole || []) as unknown as PositionRecord[]).map(p => p.id)
+
+    if (positionIds.length > 0) {
+      const { data: sameRole } = await supabase
+        .from('staff')
+        .select('id, first_name, last_name')
+        .eq('is_active', true)
+        .eq('is_guard_eligible', true)
+        .neq('id', staffData.id)
+        .in('position_id', positionIds)
+        .order('last_name', { ascending: true })
+      sameRoleStaff = sameRole || []
+    }
+  }
 
   return (
     <ProfilePageClient
@@ -80,6 +133,8 @@ export default async function ProfilePage() {
       vacations={myVacations || []}
       totalVacationDays={totalVacationDays}
       nextVacation={nextVacation}
+      sameRoleStaff={sameRoleStaff}
+      guardRole={guardRole}
     />
   )
 }

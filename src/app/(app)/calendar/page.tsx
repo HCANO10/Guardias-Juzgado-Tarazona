@@ -1,13 +1,37 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@/lib/supabase/server"
 import dynamic from 'next/dynamic'
 import { CalendarSkeleton } from "@/components/calendar/CalendarSkeleton"
 import { ExportPDFButton } from "@/components/calendar/ExportPDFButton"
+import { DSPageHeader } from "@/lib/design-system"
 
 const UnifiedCalendar = dynamic(
   () => import('@/components/calendar/UnifiedCalendar'),
   { ssr: false, loading: () => <CalendarSkeleton /> }
 )
+
+interface StaffPosition {
+  guard_role: string | null;
+}
+
+interface AssignmentStaff {
+  id: string;
+  first_name: string;
+  last_name: string;
+  positions: StaffPosition | null;
+}
+
+interface GuardAssignment {
+  staff_id: string;
+  staff: AssignmentStaff | null;
+}
+
+interface PeriodWithAssignments {
+  id: string;
+  week_number: number;
+  start_date: string;
+  end_date: string;
+  guard_assignments: GuardAssignment[];
+}
 
 export default async function CalendarPage() {
   const supabase = await createClient()
@@ -30,32 +54,36 @@ export default async function CalendarPage() {
     .order('start_date', { ascending: true })
 
   const formattedGuards = periods?.map(p => {
-    const assignments = p.guard_assignments || []
+    const typedPeriod = p as unknown as PeriodWithAssignments
+    const assignments = typedPeriod.guard_assignments || []
     return {
-      id: p.id,
-      week_number: p.week_number,
-      start_date: p.start_date,
-      end_date: p.end_date,
+      id: typedPeriod.id,
+      week_number: typedPeriod.week_number,
+      start_date: typedPeriod.start_date,
+      end_date: typedPeriod.end_date,
       assignments,
-      auxilio: assignments.find((a: any) => a.staff?.positions?.guard_role === 'auxilio')?.staff,
-      tramitador: assignments.find((a: any) => a.staff?.positions?.guard_role === 'tramitador')?.staff,
-      gestor: assignments.find((a: any) => a.staff?.positions?.guard_role === 'gestor')?.staff,
+      auxilio: assignments.find(a => a.staff?.positions?.guard_role === 'auxilio')?.staff ?? null,
+      tramitador: assignments.find(a => a.staff?.positions?.guard_role === 'tramitador')?.staff ?? null,
+      gestor: assignments.find(a => a.staff?.positions?.guard_role === 'gestor')?.staff ?? null,
     }
   })
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Calendario Unificado</h2>
-        <ExportPDFButton
-          guards={formattedGuards || []}
-          vacations={vacations || []}
-          holidays={holidays || []}
-          staff={staff || []}
-        />
-      </div>
-      
-      <UnifiedCalendar 
+    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
+      <DSPageHeader
+        title="Calendario Unificado"
+        subtitle="Guardias, vacaciones y festivos en una vista integrada."
+        actions={
+          <ExportPDFButton
+            guards={formattedGuards || []}
+            vacations={vacations || []}
+            holidays={holidays || []}
+            staff={staff || []}
+          />
+        }
+      />
+
+      <UnifiedCalendar
         guards={formattedGuards || []}
         vacations={vacations || []}
         holidays={holidays || []}

@@ -1,52 +1,81 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useEffect } from "react"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { 
-  User, 
-  Shield, 
-  Palmtree, 
-  Mail, 
-  Briefcase, 
-  CalendarDays, 
-  Edit, 
+import {
+  Mail,
+  Briefcase,
+  CalendarDays,
+  Edit,
   Loader2,
-  CheckCircle2, 
+  CheckCircle2,
   AlertCircle,
   Activity,
   ChevronRight,
   Lock,
-  Globe
+  Globe,
+  ArrowLeftRight
 } from "lucide-react"
-import { format, differenceInDays } from "date-fns"
+import { format, differenceInDays, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { GoogleButton } from "@/components/auth/GoogleButton"
-import { 
-  DSCard, 
-  DSBadge, 
+import { GuardSwapDialog } from "@/components/guards/GuardSwapDialog"
+import {
+  DSCard,
+  DSBadge,
   DSIconBox,
-  DSPageHeader, 
-  DSSectionHeading, 
-  DSButton 
+  DSPageHeader,
+  DSSectionHeading,
+  DSButton
 } from "@/lib/design-system"
 import { cn } from "@/lib/utils"
 
+interface StaffData {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  start_date: string
+  notes?: string
+  positions?: { name: string }
+}
+
+interface FutureGuard {
+  id: string
+  guard_period_id: string
+  guard_periods?: {
+    week_number: number
+    start_date: string
+    end_date: string
+  } | null
+}
+
+interface VacationRecord {
+  id: string
+  start_date: string
+  end_date: string
+  status: string
+  notes?: string
+}
+
+// Use Supabase's own UserIdentity type for compatibility with unlinkIdentity()
+type UserIdentity = { provider: string; id: string; identity_id: string; user_id: string; [key: string]: unknown }
+
 interface ProfilePageClientProps {
-  staffData: any
-  futureGuards: any[]
+  staffData: StaffData
+  futureGuards: FutureGuard[]
   totalGuards: number
-  nextGuard: any | null
-  vacations: any[]
+  nextGuard: FutureGuard | null
+  vacations: VacationRecord[]
   totalVacationDays: number
-  nextVacation: any | null
+  nextVacation: VacationRecord | null
+  sameRoleStaff: { id: string; first_name: string; last_name: string }[]
+  guardRole: 'auxilio' | 'tramitador' | 'gestor' | null
 }
 
 export function ProfilePageClient({
@@ -57,10 +86,19 @@ export function ProfilePageClient({
   vacations,
   totalVacationDays,
   nextVacation,
+  sameRoleStaff,
+  guardRole,
 }: ProfilePageClientProps) {
   const { toast } = useToast()
   const router = useRouter()
   const supabase = createClient()
+
+  // Swap dialog state
+  const [swapDialog, setSwapDialog] = useState<{
+    open: boolean
+    periodId: string
+    weekNumber: number
+  }>({ open: false, periodId: '', weekNumber: 0 })
 
   // Personal data edit
   const [editOpen, setEditOpen] = useState(false)
@@ -82,15 +120,21 @@ export function ProfilePageClient({
   const [updatingEmail, setUpdatingEmail] = useState(false)
 
   // Google link state
-  const [userIdentities, setUserIdentities] = useState<any[]>([])
+  const [userIdentities, setUserIdentities] = useState<UserIdentity[]>([])
   const [hasPassword, setHasPassword] = useState(true)
 
   useEffect(() => {
     const fetchIdentities = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        setUserIdentities(user.identities || [])
-        setHasPassword(user.identities?.some(i => i.provider === 'email') || false)
+        const identities = (user.identities || []).map(i => ({
+          provider: i.provider,
+          id: i.id,
+          identity_id: i.identity_id,
+          user_id: i.user_id,
+        }))
+        setUserIdentities(identities as UserIdentity[])
+        setHasPassword(identities.some(i => i.provider === 'email'))
       }
     }
     fetchIdentities()
@@ -114,8 +158,9 @@ export function ProfilePageClient({
       toast({ title: "Perfil actualizado correctamente" })
       setEditOpen(false)
       router.refresh()
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Error", description: err.message })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      toast({ variant: "destructive", title: "Error", description: message })
     } finally {
       setSavingEdit(false)
     }
@@ -136,8 +181,9 @@ export function ProfilePageClient({
       if (error) throw error
       toast({ title: "Contraseña actualizada" })
       setNewPwd(""); setConfirmPwd("")
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Error", description: err.message })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      toast({ variant: "destructive", title: "Error", description: message })
     } finally {
       setChangingPwd(false)
     }
@@ -157,8 +203,9 @@ export function ProfilePageClient({
       toast({ title: "Email actualizado" })
       setNewEmail(""); setConfirmEmail("")
       router.refresh()
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Error", description: err.message })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      toast({ variant: "destructive", title: "Error", description: message })
     } finally {
       setUpdatingEmail(false)
     }
@@ -168,8 +215,9 @@ export function ProfilePageClient({
     try {
       const { error } = await supabase.auth.linkIdentity({ provider: 'google' })
       if (error) throw error
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Error al vincular", description: err.message })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      toast({ variant: "destructive", title: "Error al vincular", description: message })
     }
   }
 
@@ -184,13 +232,17 @@ export function ProfilePageClient({
       if (error) throw error
       toast({ title: "Cuenta desvinculada" })
       setUserIdentities(prev => prev.filter(i => i.provider !== 'google'))
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Error al desvincular", description: err.message })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      toast({ variant: "destructive", title: "Error al desvincular", description: message })
     }
   }
 
   const handleCancelVacation = async (vacationId: string) => {
-    const { error } = await supabase.from('vacations').delete().eq('id', vacationId)
+    const { error } = await supabase
+      .from('vacations')
+      .update({ status: 'cancelled' })
+      .eq('id', vacationId)
     if (error) {
       toast({ variant: "destructive", title: "Error al cancelar" })
     } else {
@@ -251,8 +303,8 @@ export function ProfilePageClient({
                 <div className="space-y-1.5 pt-1 border-black/[0.04] md:border-l md:pl-8">
                    <p className="text-[11px] font-black uppercase tracking-widest text-[#86868B]">Fecha de Alta</p>
                    <p className="text-[17px] font-bold text-neutral-900 flex items-center gap-2">
-                      <CalendarDays className="h-4 w-4 text-[#34C759]" /> 
-                      {staffData.start_date ? format(new Date(staffData.start_date), "dd 'de' MMMM, yyyy", { locale: es }) : '—'}
+                      <CalendarDays className="h-4 w-4 text-[#34C759]" />
+                      {staffData.start_date ? format(parseISO(staffData.start_date), "dd 'de' MMMM, yyyy", { locale: es }) : '—'}
                    </p>
                 </div>
                 {staffData.notes && (
@@ -423,7 +475,7 @@ export function ProfilePageClient({
                        <div className="flex items-center justify-between text-[14px]">
                           <span className="text-white/40 font-bold uppercase text-[10px] tracking-wider">Siguiente Salida</span>
                           <span className="font-black text-green-400">
-                             {nextVacation ? format(new Date(nextVacation.start_date), 'dd/MM') : '—'}
+                             {nextVacation ? format(parseISO(nextVacation.start_date), 'dd/MM') : '—'}
                           </span>
                        </div>
                     </div>
@@ -438,17 +490,30 @@ export function ProfilePageClient({
                    <p className="text-[14px] text-[#86868B] px-2 italic">Sin asignaciones próximas.</p>
                  ) : (
                    <div className="space-y-3">
-                      {futureGuards.slice(0, 3).map((g, i) => (
+                      {futureGuards.slice(0, 5).map((g, i) => (
                         <div key={i} className="bg-white rounded-[20px] p-4 border border-black/[0.04] flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
                            <div className="flex items-center gap-3">
                               <div className="h-9 w-9 bg-[#F2F2F7] rounded-[10px] flex items-center justify-center text-[12px] font-black text-[#0066CC]">
-                                 {g.guard_periods?.week_number}
+                                 {g.guard_periods?.week_number ?? '—'}
                               </div>
-                              <p className="text-[14px] font-bold text-neutral-900">
-                                 {format(new Date(g.guard_periods?.start_date), 'dd MMM', { locale: es })}
-                              </p>
+                              <div>
+                                <p className="text-[14px] font-bold text-neutral-900">
+                                   {g.guard_periods?.start_date ? format(parseISO(g.guard_periods.start_date), 'dd MMM', { locale: es }) : '—'}
+                                </p>
+                                <p className="text-[11px] text-[#86868B] font-medium">Sem. {g.guard_periods?.week_number ?? '—'}</p>
+                              </div>
                            </div>
-                           <ChevronRight className="h-4 w-4 text-black/10" />
+                           {guardRole && sameRoleStaff.length > 0 ? (
+                             <button
+                               onClick={() => setSwapDialog({ open: true, periodId: g.guard_period_id, weekNumber: g.guard_periods?.week_number ?? 0 })}
+                               className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-[#F2F2F7] text-[#86868B] hover:text-[#0066CC] transition-colors"
+                               title="Solicitar intercambio"
+                             >
+                               <ArrowLeftRight className="h-3.5 w-3.5" />
+                             </button>
+                           ) : (
+                             <ChevronRight className="h-4 w-4 text-black/10" />
+                           )}
                         </div>
                       ))}
                    </div>
@@ -457,6 +522,20 @@ export function ProfilePageClient({
            </div>
         </div>
       </div>
+
+      {/* Guard Swap Dialog */}
+      {guardRole && (
+        <GuardSwapDialog
+          open={swapDialog.open}
+          onOpenChange={(v) => setSwapDialog(prev => ({ ...prev, open: v }))}
+          periodId={swapDialog.periodId}
+          weekNumber={swapDialog.weekNumber}
+          currentStaffId={staffData.id}
+          currentStaffName={`${staffData.first_name} ${staffData.last_name}`}
+          role={guardRole}
+          sameRoleStaff={sameRoleStaff}
+        />
+      )}
 
       {/* Edit Modal */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

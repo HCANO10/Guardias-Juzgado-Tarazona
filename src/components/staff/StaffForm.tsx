@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState } from "react"
@@ -6,15 +5,16 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { createClient } from "@/lib/supabase/client"
-import { Button } from "@/components/ui/button"
+import { DSButton } from "@/lib/design-system"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CalendarIcon, Loader2 } from "lucide-react"
+import { CalendarIcon, Loader2, Shield } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
@@ -28,6 +28,7 @@ const staffSchema = z.object({
   startDate: z.date(),
   password: z.string().optional(),
   notes: z.string().optional(),
+  isGuardEligible: z.boolean(),
 })
 
 type StaffFormValues = z.infer<typeof staffSchema>
@@ -37,11 +38,22 @@ interface Position {
   name: string
 }
 
+interface StaffInitialData {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  position_id: string
+  start_date?: string
+  notes?: string | null
+  is_guard_eligible?: boolean
+}
+
 interface StaffFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   positions: Position[]
-  initialData?: any
+  initialData?: StaffInitialData | null
   onSuccess: () => void
 }
 
@@ -62,6 +74,7 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
       startDate: initialData?.start_date ? new Date(initialData.start_date + 'T00:00:00') : new Date(),
       password: "",
       notes: initialData?.notes || "",
+      isGuardEligible: initialData?.is_guard_eligible ?? true,
     },
   })
 
@@ -77,6 +90,7 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
             position_id: data.positionId,
             start_date: format(data.startDate, 'yyyy-MM-dd'),
             notes: data.notes || null,
+            is_guard_eligible: data.isGuardEligible,
           })
           .eq('id', initialData.id)
 
@@ -94,6 +108,7 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
             start_date: format(data.startDate, 'yyyy-MM-dd'),
             password: data.password || undefined,
             notes: data.notes || undefined,
+            is_guard_eligible: data.isGuardEligible,
           }),
         })
 
@@ -112,8 +127,9 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
       onSuccess()
       onOpenChange(false)
       form.reset()
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "❌ Error", description: error.message })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      toast({ variant: "destructive", title: "❌ Error", description: message })
     } finally {
       setLoading(false)
     }
@@ -121,10 +137,12 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto rounded-[28px] border-none shadow-2xl p-0 overflow-hidden">
+        <div className="h-2 bg-[#0066CC] w-full" />
+        <div className="p-8">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Editar Trabajador' : 'Nuevo Trabajador'}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-[22px] font-bold text-neutral-900">{isEditing ? 'Editar Trabajador' : 'Nuevo Trabajador'}</DialogTitle>
+          <DialogDescription className="text-[15px] text-[#86868B]">
             {isEditing
               ? 'Modifica los datos del trabajador.'
               : 'Añade un nuevo miembro al equipo. Se creará su cuenta de acceso inmediatamente.'}
@@ -210,13 +228,17 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                        <button
+                          type="button"
+                          className={cn(
+                            "flex h-10 w-full items-center rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm transition-all hover:bg-gray-50",
+                            "text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
                         >
                           {field.value ? format(field.value, "PP", { locale: es }) : <span>Elige una fecha</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
+                        </button>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -267,17 +289,43 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
               )}
             />
 
+            {/* is_guard_eligible toggle */}
+            <FormField
+              control={form.control}
+              name="isGuardEligible"
+              render={({ field }) => (
+                <FormItem className="flex items-start space-x-3 space-y-0 rounded-lg border border-black/[0.08] p-4 bg-[#F2F2F7]/40">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="flex items-center gap-2 cursor-pointer">
+                      <Shield className="h-3.5 w-3.5 text-[#0066CC]" />
+                      Disponible para guardias
+                    </FormLabel>
+                    <p className="text-xs text-muted-foreground">
+                      Si está activo, esta persona puede ser asignada en turnos de guardia. Desactívalo en sustituciones temporales o personal no elegible.
+                    </p>
+                  </div>
+                </FormItem>
+              )}
+            />
+
             <div className="flex justify-end pt-4 space-x-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <DSButton type="button" variant="secondary" onClick={() => onOpenChange(false)}>
                 Cancelar
-              </Button>
-              <Button type="submit" disabled={loading}>
+              </DSButton>
+              <DSButton type="submit" variant="primary" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEditing ? 'Guardar Cambios' : 'Crear usuario'}
-              </Button>
+              </DSButton>
             </div>
           </form>
         </Form>
+        </div>
       </DialogContent>
     </Dialog>
   )

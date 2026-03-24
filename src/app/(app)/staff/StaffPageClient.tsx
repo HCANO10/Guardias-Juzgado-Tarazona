@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -7,23 +6,21 @@ import { createClient } from "@/lib/supabase/client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { 
-  MoreHorizontal, 
-  Plus, 
-  Search, 
-  Eye, 
-  Edit, 
-  UserX, 
-  UserCheck, 
-  Crown, 
-  User, 
-  Mail, 
-  Phone, 
-  Shield, 
-  Briefcase,
+import {
+  MoreHorizontal,
+  Plus,
+  Search,
+  Eye,
+  Edit,
+  UserX,
+  UserCheck,
+  Crown,
+  User,
+  Mail,
+  Phone,
   Calendar as CalendarIcon
 } from "lucide-react"
-import { format } from "date-fns"
+import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -46,23 +43,38 @@ interface Position {
   name: string
 }
 
+interface StaffMember {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  phone?: string
+  position_id: string
+  start_date: string
+  end_date?: string
+  is_active: boolean
+  role: string
+  notes?: string
+  positions?: { name: string }
+}
+
 export default function StaffPageClient({ positions }: { positions: Position[] }) {
   const { isHeadmaster, isLoading: roleLoading } = useRole()
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<StaffMember[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [positionFilter, setPositionFilter] = useState("all")
-  
+
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingStaff, setEditingStaff] = useState<any | null>(null)
-  
-  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean, type: 'deactivate' | 'reactivate', staff: any | null }>({
+  const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null)
+
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean, type: 'deactivate' | 'reactivate', staff: StaffMember | null }>({
     open: false, type: 'deactivate', staff: null
   })
   const [actionLoading, setActionLoading] = useState(false)
-  
-  const [roleDialog, setRoleDialog] = useState<{ open: boolean, staff: any | null, newRole: string }>({
+
+  const [roleDialog, setRoleDialog] = useState<{ open: boolean, staff: StaffMember | null, newRole: string }>({
     open: false, staff: null, newRole: 'worker'
   })
   const [roleChangeLoading, setRoleChangeLoading] = useState(false)
@@ -96,7 +108,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
     setIsFormOpen(true)
   }
 
-  const handleEdit = (staff: any) => {
+  const handleEdit = (staff: StaffMember) => {
     setEditingStaff(staff)
     setIsFormOpen(true)
   }
@@ -118,8 +130,9 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
 
       toast({ title: result.message })
       fetchStaff()
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Error desconocido"
+      toast({ variant: "destructive", title: "Error", description: message })
     } finally {
       setActionLoading(false)
       setConfirmDialog({ open: false, type: 'deactivate', staff: null })
@@ -210,7 +223,6 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
           </div>
         ) : (
           filteredData.map((staff) => {
-            const isMan = isHeadmaster;
             const initials = `${staff.first_name[0]}${staff.last_name[0]}`;
             
             return (
@@ -220,7 +232,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                     {initials}
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <DSBadge variant={getPositionBadgeVariant(staff.positions?.name)}>{staff.positions?.name}</DSBadge>
+                    <DSBadge variant={getPositionBadgeVariant(staff.positions?.name || '')}>{staff.positions?.name}</DSBadge>
                     {staff.role === 'headmaster' && (
                       <DSBadge variant="purple" className="flex items-center gap-1">
                         <Crown className="h-3 w-3" /> Admin
@@ -248,7 +260,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                 <div className="pt-4 border-t border-black/[0.04] flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-tight text-[#86868B]">
                     <CalendarIcon className="h-3.5 w-3.5" />
-                    {format(new Date(staff.start_date), 'MMM yyyy', { locale: es })}
+                    {format(parseISO(staff.start_date), 'MMM yyyy', { locale: es })}
                   </div>
 
                   {isHeadmaster ? (
@@ -310,7 +322,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
           open={isFormOpen} 
           onOpenChange={setIsFormOpen} 
           positions={positions} 
-          initialData={editingStaff} 
+          initialData={editingStaff}
           onSuccess={fetchStaff} 
         />
       )}
@@ -374,8 +386,9 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                   if (!res.ok) throw new Error(result.error)
                   toast({ title: '✅ Rol actualizado' })
                   fetchStaff()
-                } catch (error: any) {
-                  toast({ variant: 'destructive', title: 'Error', description: error.message })
+                } catch (error: unknown) {
+                  const message = error instanceof Error ? error.message : "Error desconocido"
+                  toast({ variant: 'destructive', title: 'Error', description: message })
                 } finally {
                   setRoleChangeLoading(false)
                   setRoleDialog({ open: false, staff: null, newRole: 'worker' })

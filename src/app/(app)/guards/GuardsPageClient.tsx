@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useMemo } from "react"
@@ -7,11 +6,12 @@ import { StaffByCategory } from "@/lib/guards/staff-by-category"
 import { buildFullName } from "@/lib/staff/normalize"
 import { useRole } from "@/hooks/use-role"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Bot, Edit2, Scale, Calendar as CalendarIcon, Search, ArrowRight, Shield } from "lucide-react"
-import { format } from "date-fns"
+import { Bot, Edit2, Calendar as CalendarIcon, Search, ArrowRight, Trash2 } from "lucide-react"
+import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
 import { GuardAssigner } from "@/components/guards/GuardAssigner"
 import { AIProposalReview } from "@/components/guards/AIProposalReview"
+import { GuardDeleteDialog } from "@/components/guards/GuardDeleteDialog"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useRouter } from "next/navigation"
 import { 
@@ -42,6 +42,7 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
   const [assignerOpen, setAssignerOpen] = useState(false)
   const [selectedWeek, setSelectedWeek] = useState<GuardWeekView | null>(null)
   const [aiReviewOpen, setAiReviewOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   const calculateEquidad = (categoryId: 'auxilio' | 'tramitador' | 'gestor') => {
     const staffInCat = staffByCategory[categoryId]
@@ -69,8 +70,8 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
 
   const filteredGuards = guards.filter(g => {
     if (monthFilter !== "all") {
-      const monthStart = new Date(g.start_date).getMonth().toString()
-      const monthEnd = new Date(g.end_date).getMonth().toString()
+      const monthStart = parseISO(g.start_date).getMonth().toString()
+      const monthEnd = parseISO(g.end_date).getMonth().toString()
       if (monthStart !== monthFilter && monthEnd !== monthFilter) return false
     }
     if (personFilter !== "all") {
@@ -104,9 +105,14 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
           subtitle={`Planificación y seguimiento de turnos para el juzgado (${activeYear})`}
         />
         {isHeadmaster && (
-          <DSButton onClick={() => setAiReviewOpen(true)} className="flex items-center gap-2">
-            <Bot className="h-4 w-4" /> Generar con IA
-          </DSButton>
+          <div className="flex items-center gap-3">
+            <DSButton variant="secondary" onClick={() => setDeleteOpen(true)} className="flex items-center gap-2 text-red-500 hover:text-red-600 border-red-200 hover:border-red-300">
+              <Trash2 className="h-4 w-4" /> Borrar guardias
+            </DSButton>
+            <DSButton onClick={() => setAiReviewOpen(true)} className="flex items-center gap-2">
+              <Bot className="h-4 w-4" /> Generar con IA
+            </DSButton>
+          </div>
         )}
       </div>
 
@@ -222,9 +228,9 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3 text-[15px] font-semibold text-neutral-900">
-                        {format(new Date(g.start_date), "dd MMM", { locale: es })}
+                        {format(parseISO(g.start_date), "dd MMM", { locale: es })}
                         <ArrowRight className="h-3 w-3 text-[#86868B]" />
-                        {format(new Date(g.end_date), "dd MMM", { locale: es })}
+                        {format(parseISO(g.end_date), "dd MMM", { locale: es })}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -283,9 +289,9 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
                 <div>
                   <div className="text-[13px] font-bold text-[#86868B] uppercase tracking-wider mb-1">Semana {g.week_number}</div>
                   <div className="text-[17px] font-semibold text-neutral-900 flex items-center gap-2">
-                    {format(new Date(g.start_date), "dd MMM", { locale: es })}
+                    {format(parseISO(g.start_date), "dd MMM", { locale: es })}
                     <ArrowRight className="h-3 w-3 text-[#86868B]" />
-                    {format(new Date(g.end_date), "dd MMM", { locale: es })}
+                    {format(parseISO(g.end_date), "dd MMM", { locale: es })}
                   </div>
                 </div>
                 {g.coverage === 3 ? (
@@ -339,6 +345,13 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
         onSuccess={handleSuccessSave}
         staffByCategory={staffByCategory}
         weeksCount={guards.length}
+      />
+
+      <GuardDeleteDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        activeYear={activeYear}
+        onSuccess={handleSuccessSave}
       />
     </div>
   )

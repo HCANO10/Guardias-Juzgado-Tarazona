@@ -34,6 +34,8 @@ export interface PromptData {
   periods: PeriodForPrompt[];
   vacations: VacationForPrompt[];
   existingAssignments: ExistingAssignment[];
+  startDate?: string;
+  endDate?: string;
 }
 
 export function buildSystemPrompt(): string {
@@ -75,7 +77,11 @@ export function buildUserPrompt(data: PromptData): string {
     gestor: data.staff.filter(s => s.category === 'gestor'),
   };
 
-  return `Genera la distribución de guardias para el año ${data.year} del Juzgado de Tarazona.
+  const rangeDescription = data.startDate || data.endDate
+    ? `para el periodo ${data.startDate || 'inicio'} a ${data.endDate || 'fin'} del año ${data.year}`
+    : `para el año ${data.year}`
+
+  return `Genera la distribución de guardias ${rangeDescription} del Juzgado de Tarazona.
 
 PERSONAL ACTIVO POR CATEGORÍA:
 

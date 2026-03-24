@@ -1,6 +1,5 @@
-// src/app/(app)/dashboard/loading.tsx
 import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { DSCard } from "@/lib/design-system"
 
 export default function DashboardLoading() {
   return (
@@ -11,44 +10,36 @@ export default function DashboardLoading() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="border-border/50 bg-card/60">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <DSCard key={i}>
+            <div className="flex items-center justify-between mb-3">
               <Skeleton className="h-4 w-[100px]" />
               <Skeleton className="h-4 w-4 rounded-full" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-[120px] mb-2" />
-              <Skeleton className="h-3 w-[150px]" />
-            </CardContent>
-          </Card>
+            </div>
+            <Skeleton className="h-8 w-[120px] mb-2" />
+            <Skeleton className="h-3 w-[150px]" />
+          </DSCard>
         ))}
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
         <div className="md:col-span-3">
-          <Card className="border-border/50 bg-card/60">
-            <CardHeader className="pb-2 border-b">
-              <div className="flex justify-between items-center">
-                <Skeleton className="h-6 w-[150px]" />
-                <Skeleton className="h-8 w-[120px]" />
-              </div>
-            </CardHeader>
-            <CardContent className="p-4">
-              <Skeleton className="h-[400px] w-full" />
-            </CardContent>
-          </Card>
+          <DSCard>
+            <div className="flex justify-between items-center mb-4">
+              <Skeleton className="h-6 w-[150px]" />
+              <Skeleton className="h-8 w-[120px]" />
+            </div>
+            <Skeleton className="h-[400px] w-full rounded-[12px]" />
+          </DSCard>
         </div>
         <div className="space-y-6">
-          <Card className="border-border/50 bg-card/60">
-            <CardHeader>
-              <Skeleton className="h-4 w-[120px]" />
-            </CardHeader>
-            <CardContent className="grid gap-3 p-4">
+          <DSCard>
+            <Skeleton className="h-4 w-[120px] mb-4" />
+            <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
+                <Skeleton key={i} className="h-12 w-full rounded-[10px]" />
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </DSCard>
         </div>
       </div>
     </div>

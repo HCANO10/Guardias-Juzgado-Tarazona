@@ -1,45 +1,56 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@/lib/supabase/server"
+import { getAllSettings } from "@/lib/settings"
 import SettingsPageClient from "./SettingsPageClient"
 
+interface StaffWithPosition {
+  id: string;
+  positions: { guard_role: string | null } | null;
+}
+
+interface PeriodWithAssignments {
+  id: string;
+  guard_assignments: { id: string }[];
+}
+
 export default async function SettingsPage() {
-  const supabase = createClient()
-  
-  // Obtenemos los settings del año activo
-  const { data: settings } = await supabase
-    .from('app_settings')
-    .select('*')
-    .eq('id', 1)
-    .single()
+  const supabase = await createClient()
 
-  const activeYear = settings?.active_year || 2026
+  // Read all settings from key/value table
+  const settingsMap = await getAllSettings(supabase)
+  const activeYear = parseInt(settingsMap.current_year) || 2026
+  const groqModel = settingsMap.groq_model || 'llama-3.3-70b-versatile'
 
-  // Obtenemos los periodos ya generados para pasárselos al cliente
+  // Build settings object for client component
+  const settings = { active_year: activeYear, groq_model: groqModel }
+
+  // Periods for the active year
   const { data: periods } = await supabase
     .from('guard_periods')
     .select('*')
     .eq('year', activeYear)
     .order('week_number', { ascending: true })
 
-  // 3. System Stats
+  // System Stats
   const { data: staff } = await supabase.from('staff').select('id, positions(guard_role)')
   const { data: holidays } = await supabase.from('holidays').select('id').eq('year', activeYear)
   const { data: vacations } = await supabase.from('vacations').select('id').gte('start_date', `${activeYear}-01-01`).lte('start_date', `${activeYear}-12-31`)
-  
+
   // Calculate completed periods (those with 3 assignments)
   const { data: periodAssignments } = await supabase
     .from('guard_periods')
     .select('id, guard_assignments(id)')
     .eq('year', activeYear)
 
-  const completeAssignments = periodAssignments?.filter(p => (p.guard_assignments as any[]).length === 3).length || 0
+  const completeAssignments = periodAssignments?.filter(p => ((p as unknown as PeriodWithAssignments).guard_assignments).length === 3).length || 0
+
+  const typedStaff = (staff || []) as unknown as StaffWithPosition[]
 
   const systemStats = {
     staff: {
-      total: staff?.length || 0,
-      aux: staff?.filter((s: any) => s.positions?.guard_role === 'auxilio').length || 0,
-      tra: staff?.filter((s: any) => s.positions?.guard_role === 'tramitador').length || 0,
-      ges: staff?.filter((s: any) => s.positions?.guard_role === 'gestor').length || 0,
+      total: typedStaff.length,
+      aux: typedStaff.filter(s => s.positions?.guard_role === 'auxilio').length,
+      tra: typedStaff.filter(s => s.positions?.guard_role === 'tramitador').length,
+      ges: typedStaff.filter(s => s.positions?.guard_role === 'gestor').length,
     },
     periods: periods?.length || 0,
     assignments: {
@@ -51,9 +62,9 @@ export default async function SettingsPage() {
   }
 
   return (
-    <SettingsPageClient 
-      initialSettings={settings} 
-      initialPeriods={periods || []} 
+    <SettingsPageClient
+      initialSettings={settings}
+      initialPeriods={periods || []}
       systemStats={systemStats}
     />
   )

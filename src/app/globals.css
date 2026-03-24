@@ -5,39 +5,44 @@
 
 @layer base {
   :root {
-    --background: 242 242 247; /* #F2F2F7 - Apple system gray */
-    --foreground: 22 22 23;    /* #171717 - Near black */
-    
+    /* #F2F2F7 — Apple system gray 6 */
+    --background: 240 20% 96%;
+    --foreground: 0 0% 9%;
+
+    /* White surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 22 22 23;
-    
+    --card-foreground: 0 0% 9%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 22 22 23;
-    
-    --primary: 210 100% 40%;  /* #0066CC - Apple blue */
+    --popover-foreground: 0 0% 9%;
+
+    /* #0066CC — Apple blue */
+    --primary: 210 100% 40%;
     --primary-foreground: 0 0% 100%;
-    
-    --secondary: 242 242 247;
-    --secondary-foreground: 140 3% 54%; /* #86868B - Apple gray */
-    
-    --muted: 242 242 247;
-    --muted-foreground: 140 3% 54%;
-    
-    --accent: 210 100% 96%;   /* #EBF4FF - Apple light blue */
+
+    /* #F2F2F7 */
+    --secondary: 240 20% 96%;
+    --secondary-foreground: 240 1% 54%;
+
+    --muted: 240 20% 96%;
+    --muted-foreground: 240 1% 54%;
+
+    /* #EBF4FF — Light blue tint */
+    --accent: 210 100% 96%;
     --accent-foreground: 210 100% 40%;
-    
-    --destructive: 0 100% 97%; /* Apple light red tint */
-    --destructive-foreground: 0 72% 51%; /* #ef4444 */
-    
-    --border: 0 0% 0% / 0.08;
-    --input: 0 0% 0% / 0.08;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 89%;
+    --input: 0 0% 89%;
     --ring: 210 100% 40%;
-    
+
     --radius: 0.75rem;
   }
 
   * {
-    border-color: var(--border);
+    @apply border-border;
   }
 
   body {
@@ -45,7 +50,6 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #F2F2F7;
   }
 
   html {

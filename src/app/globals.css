@@ -5,8 +5,8 @@
 
 @layer base {
   :root {
-    /* ── MODO CLARO Y VIVO ─────────────────────────── */
-    --background: 225 60% 97%;       /* #F2F4FC  lavender-white fresco */
+    /* ── COLORES BASE ───────────────────────────────── */
+    --background: 225 60% 97%;       /* #F2F4FC  lavender-white */
     --foreground: 222 47% 11%;       /* #0F172A  casi negro */
 
     --card: 0 0% 100%;               /* #FFFFFF  tarjetas blancas */
@@ -35,10 +35,27 @@
     --ring: 231 90% 56%;
 
     --radius: 0.75rem;
+
+    /* ── SIDEBAR CSS VARIABLES ─────────────────────── */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 231 90% 56%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 96%;
+    --sidebar-accent-foreground: 222 30% 30%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 231 90% 56%;
   }
 
   * {
     @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    @apply font-sans;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
   }
 
   body {
@@ -46,11 +63,22 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
   }
 
-  html {
-    @apply font-sans;
-    overflow-x: hidden;
+  /* Tipografía base mejorada */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  button {
+    cursor: pointer;
   }
 }
 
@@ -64,13 +92,13 @@
     @apply bg-white rounded-2xl border border-slate-100 shadow-sm;
   }
 
-  /* Utilidades de scroll */
+  /* Scrollbar oculta */
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Gradientes decorativos de fondo */
+  /* Gradiente decorativo de fondo */
   .page-bg-gradient {
-    background: linear-gradient(135deg, #F0F4FF 0%, #F5F0FF 40%, #FFF0F5 100%);
+    background: linear-gradient(135deg, #EEF2FF 0%, #F5F0FF 40%, #FFF0F8 100%);
   }
 
   /* Sombra de tarjeta */
@@ -79,5 +107,28 @@
   }
   .card-shadow-hover {
     box-shadow: 0 6px 20px rgba(79,70,229,0.12), 0 2px 6px rgba(0,0,0,0.06);
+  }
+
+  /* Gradiente de texto */
+  .text-gradient-indigo {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Animación suave de entrada */
+  .animate-fade-in {
+    animation: fadeIn 0.35s ease-out both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Focus ring personalizado */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2;
   }
 }

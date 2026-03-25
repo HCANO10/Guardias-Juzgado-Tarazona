@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { ProfilePageClient } from "./ProfilePageClient"
+import type { SwapRequest } from "@/components/guards/SwapRequestsPanel"
 
 interface GuardPeriodData {
   id: string;
@@ -27,6 +28,18 @@ interface VacationRecord {
 
 interface PositionRecord {
   id: string;
+}
+
+// Raw shape from Supabase nested query
+interface RawSwapRequest {
+  id: string;
+  status: string;
+  message: string | null;
+  created_at: string;
+  requester: { id: string; first_name: string; last_name: string } | null;
+  requested: { id: string; first_name: string; last_name: string } | null;
+  period_requester: { week_number: number; start_date: string; end_date: string } | null;
+  period_requested: { week_number: number; start_date: string; end_date: string } | null;
 }
 
 export default async function ProfilePage() {
@@ -87,17 +100,26 @@ export default async function ProfilePage() {
 
   const typedVacations = (myVacations || []) as unknown as VacationRecord[]
 
-  // Total días de vacaciones aprobadas (noon trick para evitar problemas de timezone)
-  const approvedVacations = typedVacations.filter(v => v.status === 'approved')
-  const totalVacationDays = approvedVacations.reduce((acc: number, v) => {
-    const msPerDay = 1000 * 60 * 60 * 24
-    const diff = Math.round(
-      (new Date(v.end_date + 'T12:00:00').getTime() - new Date(v.start_date + 'T12:00:00').getTime()) / msPerDay
+  // Helper para contar días de un periodo de vacaciones
+  const countVacDays = (v: VacationRecord) =>
+    Math.round(
+      (new Date(v.end_date + 'T12:00:00').getTime() - new Date(v.start_date + 'T12:00:00').getTime()) /
+      (1000 * 60 * 60 * 24)
     ) + 1
-    return acc + diff
-  }, 0)
 
-  const nextVacation = approvedVacations.find(v => v.end_date >= today) || null
+  // Pendientes de asignar: solicitadas pero sin aprobar todavía
+  const pendingVacations = typedVacations.filter(v => v.status === 'pending')
+  const vacacionesPendientesDias = pendingVacations.reduce((acc, v) => acc + countVacDays(v), 0)
+
+  // Asignadas: aprobadas con fecha futura (aún no disfrutadas)
+  const approvedFutureVacations = typedVacations.filter(v => v.status === 'approved' && v.end_date >= today)
+  const vacacionesAsignadasDias = approvedFutureVacations.reduce((acc, v) => acc + countVacDays(v), 0)
+
+  // Gastadas: aprobadas con fecha pasada (ya disfrutadas)
+  const approvedPastVacations = typedVacations.filter(v => v.status === 'approved' && v.end_date < today)
+  const vacacionesGastadasDias = approvedPastVacations.reduce((acc, v) => acc + countVacDays(v), 0)
+
+  const nextVacation = approvedFutureVacations[0] || null
 
   // Personal del mismo rol para poder solicitar intercambios de guardia
   const guardRole = staffData.positions?.guard_role as 'auxilio' | 'tramitador' | 'gestor' | null
@@ -124,6 +146,34 @@ export default async function ProfilePage() {
     }
   }
 
+  // Solicitudes de intercambio de guardia (enviadas y recibidas, últimas 30)
+  const { data: rawSwapReqs } = await supabase
+    .from('guard_swap_requests')
+    .select(`
+      id, status, message, created_at,
+      requester:requester_id(id, first_name, last_name),
+      requested:requested_id(id, first_name, last_name),
+      period_requester:period_id_requester(week_number, start_date, end_date),
+      period_requested:period_id_requested(week_number, start_date, end_date)
+    `)
+    .or(`requester_id.eq.${staffData.id},requested_id.eq.${staffData.id}`)
+    .order('created_at', { ascending: false })
+    .limit(30)
+
+  // Normalize nested objects from Supabase (returns arrays for joins)
+  const swapRequests: SwapRequest[] = ((rawSwapReqs || []) as unknown as RawSwapRequest[])
+    .filter(r => r.requester && r.requested && r.period_requester && r.period_requested)
+    .map(r => ({
+      id: r.id,
+      status: r.status as SwapRequest['status'],
+      message: r.message,
+      created_at: r.created_at,
+      requester: r.requester!,
+      requested: r.requested!,
+      period_requester: r.period_requester!,
+      period_requested: r.period_requested!,
+    }))
+
   return (
     <ProfilePageClient
       staffData={staffData}
@@ -131,10 +181,13 @@ export default async function ProfilePage() {
       totalGuards={totalGuards}
       nextGuard={nextGuard}
       vacations={myVacations || []}
-      totalVacationDays={totalVacationDays}
+      vacacionesPendientesDias={vacacionesPendientesDias}
+      vacacionesAsignadasDias={vacacionesAsignadasDias}
+      vacacionesGastadasDias={vacacionesGastadasDias}
       nextVacation={nextVacation}
       sameRoleStaff={sameRoleStaff}
       guardRole={guardRole}
+      swapRequests={swapRequests}
     />
   )
 }

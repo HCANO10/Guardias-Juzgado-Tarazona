@@ -30,6 +30,36 @@ interface GuardsPageClientProps {
   activeYear: number
 }
 
+// Determina el estado visual de una guardia según fecha y cobertura
+function getGuardStatus(g: GuardWeekView): { label: string; variant: "green" | "neutral" | "indigo" | "blue" | "orange" | "red" } {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const end = new Date(g.end_date)
+  const start = new Date(g.start_date)
+
+  const isPast = end < today
+  const isCurrent = start <= today && today <= end
+
+  if (isPast) {
+    return g.coverage === 3
+      ? { label: "Realizada", variant: "neutral" }
+      : { label: "Incompleta", variant: "red" }
+  }
+  if (isCurrent) {
+    return g.coverage === 3
+      ? { label: "Activa", variant: "indigo" }
+      : g.coverage > 0
+        ? { label: `En curso (${g.coverage}/3)`, variant: "orange" }
+        : { label: "Sin cubrir", variant: "red" }
+  }
+  // Future
+  return g.coverage === 3
+    ? { label: "Programada", variant: "blue" }
+    : g.coverage > 0
+      ? { label: `Parcial (${g.coverage}/3)`, variant: "orange" }
+      : { label: "Sin cubrir", variant: "red" }
+}
+
 export default function GuardsPageClient({ initialGuards, staffByCategory, activeYear }: GuardsPageClientProps) {
   const router = useRouter()
   const { isHeadmaster } = useRole()
@@ -256,13 +286,7 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {g.coverage === 3 ? (
-                        <DSBadge variant="green">Completa</DSBadge>
-                      ) : g.coverage === 0 ? (
-                        <DSBadge variant="red">Sin cubrir</DSBadge>
-                      ) : (
-                        <DSBadge variant="orange">Parcial ({g.coverage}/3)</DSBadge>
-                      )}
+                      {(() => { const s = getGuardStatus(g); return <DSBadge variant={s.variant}>{s.label}</DSBadge> })()}
                     </td>
                     {isHeadmaster && (
                       <td className="px-6 py-4 text-right">
@@ -294,11 +318,7 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
                     {format(parseISO(g.end_date), "dd MMM", { locale: es })}
                   </div>
                 </div>
-                {g.coverage === 3 ? (
-                  <DSBadge variant="green">3/3</DSBadge>
-                ) : (
-                  <DSBadge variant={g.coverage === 0 ? "red" : "orange"}>{g.coverage}/3</DSBadge>
-                )}
+                {(() => { const s = getGuardStatus(g); return <DSBadge variant={s.variant}>{s.label}</DSBadge> })()}
               </div>
 
               <div className="space-y-3 rounded-[16px] p-4 mt-1 bg-slate-50 border border-slate-100">

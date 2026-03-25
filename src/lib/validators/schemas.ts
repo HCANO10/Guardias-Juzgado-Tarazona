@@ -163,6 +163,26 @@ export const groqGenerateGuardsSchema = z.object({
 )
 
 // ============================================================
+// Guard swap request schemas
+// ============================================================
+
+export const guardSwapRequestCreateSchema = z.object({
+  // My guard period
+  periodIdRequester: uuid,
+  // The colleague I want to swap with
+  staffIdRequested: uuid,
+  // Their guard period I want
+  periodIdRequested: uuid,
+  // Optional message
+  message: z.string().trim().max(300).optional(),
+})
+
+export const guardSwapRequestRespondSchema = z.object({
+  // "accept" | "reject" | "cancel"
+  action: z.enum(["accept", "reject", "cancel"]),
+})
+
+// ============================================================
 // Activity schemas
 // ============================================================
 

@@ -25,6 +25,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { GoogleButton } from "@/components/auth/GoogleButton"
 import { GuardSwapDialog } from "@/components/guards/GuardSwapDialog"
+import { SwapRequestsPanel } from "@/components/guards/SwapRequestsPanel"
+import type { SwapRequest } from "@/components/guards/SwapRequestsPanel"
 import {
   DSCard,
   DSBadge,
@@ -72,10 +74,13 @@ interface ProfilePageClientProps {
   totalGuards: number
   nextGuard: FutureGuard | null
   vacations: VacationRecord[]
-  totalVacationDays: number
+  vacacionesPendientesDias: number
+  vacacionesAsignadasDias: number
+  vacacionesGastadasDias: number
   nextVacation: VacationRecord | null
   sameRoleStaff: { id: string; first_name: string; last_name: string }[]
   guardRole: 'auxilio' | 'tramitador' | 'gestor' | null
+  swapRequests: SwapRequest[]
 }
 
 export function ProfilePageClient({
@@ -84,10 +89,13 @@ export function ProfilePageClient({
   totalGuards,
   nextGuard,
   vacations,
-  totalVacationDays,
+  vacacionesPendientesDias,
+  vacacionesAsignadasDias,
+  vacacionesGastadasDias,
   nextVacation,
   sameRoleStaff,
   guardRole,
+  swapRequests,
 }: ProfilePageClientProps) {
   const { toast } = useToast()
   const router = useRouter()
@@ -457,13 +465,26 @@ export function ProfilePageClient({
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
-                       <div className="bg-white/5 p-5 rounded-[24px] border border-white/10">
-                          <p className="text-[11px] text-white/40 uppercase font-bold mb-1">Guardias</p>
+                       <div className="bg-white/5 p-5 rounded-[24px] border border-white/10 col-span-2">
+                          <p className="text-[11px] text-white/40 uppercase font-bold mb-1">Guardias este año</p>
                           <p className="text-[32px] font-bold">{totalGuards}</p>
                        </div>
-                       <div className="bg-white/5 p-5 rounded-[24px] border border-white/10">
-                          <p className="text-[11px] text-white/40 uppercase font-bold mb-1">Vacaciones</p>
-                          <p className="text-[32px] font-bold text-[#34C759]">{totalVacationDays}</p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                       <div className="bg-white/5 p-4 rounded-[20px] border border-white/10 text-center">
+                          <p className="text-[9px] text-amber-300/80 uppercase font-bold mb-1 leading-tight">Pend. asignar</p>
+                          <p className="text-[24px] font-bold text-amber-300">{vacacionesPendientesDias}</p>
+                          <p className="text-[9px] text-white/30 font-medium">días</p>
+                       </div>
+                       <div className="bg-white/5 p-4 rounded-[20px] border border-white/10 text-center">
+                          <p className="text-[9px] text-blue-300/80 uppercase font-bold mb-1 leading-tight">Asignadas</p>
+                          <p className="text-[24px] font-bold text-blue-300">{vacacionesAsignadasDias}</p>
+                          <p className="text-[9px] text-white/30 font-medium">días</p>
+                       </div>
+                       <div className="bg-white/5 p-4 rounded-[20px] border border-white/10 text-center">
+                          <p className="text-[9px] text-emerald-300/80 uppercase font-bold mb-1 leading-tight">Gastadas</p>
+                          <p className="text-[24px] font-bold text-emerald-300">{vacacionesGastadasDias}</p>
+                          <p className="text-[9px] text-white/30 font-medium">días</p>
                        </div>
                     </div>
 
@@ -522,6 +543,14 @@ export function ProfilePageClient({
            </div>
         </div>
       </div>
+
+      {/* Swap Requests Panel — full width below the two-column grid */}
+      {swapRequests.length > 0 && (
+        <SwapRequestsPanel
+          currentStaffId={staffData.id}
+          requests={swapRequests}
+        />
+      )}
 
       {/* Guard Swap Dialog */}
       {guardRole && (

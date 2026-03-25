@@ -78,31 +78,33 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
 
   return (
     <>
-      <div className="flex flex-col h-full py-6 px-4">
+      <div className="flex flex-col h-full overflow-hidden">
         {/* Logo */}
-        <div className="flex items-center gap-3 px-3 mb-8">
-          <div className="h-9 w-9 rounded-[12px] flex items-center justify-center shadow-sm"
-            style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}>
-            <Scale className="h-5 w-5 text-white" strokeWidth={2} />
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-100">
+          <div
+            className="h-9 w-9 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}
+          >
+            <Scale className="h-[18px] w-[18px] text-white" strokeWidth={2} />
           </div>
           <div>
             <div
-              className="text-[17px] font-bold text-slate-800 tracking-tight"
+              className="text-[16px] font-bold text-slate-800 leading-tight tracking-tight"
               style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
             >
               Guardias
             </div>
-            <div className="text-[11px] text-slate-400 mt-0.5">
+            <div className="text-[11px] text-slate-400 leading-tight mt-0.5">
               Juzgado Tarazona
             </div>
           </div>
         </div>
 
         {/* Nav Sections */}
-        <nav className="flex-1 space-y-6 overflow-y-auto scrollbar-hide">
-          {sections.map((section) => (
-            <div key={section.label}>
-              <div className="px-3 mb-2 text-[10px] font-bold tracking-[1.8px] uppercase text-slate-400">
+        <nav className="flex-1 overflow-y-auto scrollbar-hide py-4 px-3">
+          {sections.map((section, sIdx) => (
+            <div key={section.label} className={sIdx > 0 ? "mt-6" : ""}>
+              <div className="px-3 mb-1.5 text-[10px] font-bold tracking-[2px] uppercase text-slate-400/80">
                 {section.label}
               </div>
               <div className="space-y-0.5">
@@ -113,19 +115,23 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
                   return (
                     <Link key={item.title} href={item.url}>
                       <div
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium transition-all duration-200 cursor-pointer ${
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all duration-150 cursor-pointer group ${
                           isActive
-                            ? "bg-indigo-50 text-indigo-700 border border-indigo-100"
+                            ? "bg-indigo-50 text-indigo-700"
                             : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
                         }`}
                       >
                         <item.icon
-                          className={`h-[17px] w-[17px] flex-shrink-0 ${isActive ? "text-indigo-600" : "text-slate-400"}`}
-                          strokeWidth={isActive ? 2.2 : 1.75}
+                          className={`h-4 w-4 flex-shrink-0 transition-colors ${
+                            isActive
+                              ? "text-indigo-600"
+                              : "text-slate-400 group-hover:text-slate-600"
+                          }`}
+                          strokeWidth={isActive ? 2.2 : 1.8}
                         />
-                        <span>{item.title}</span>
+                        <span className="flex-1">{item.title}</span>
                         {isActive && (
-                          <div className="ml-auto h-2 w-2 rounded-full bg-indigo-400" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
                         )}
                       </div>
                     </Link>
@@ -137,21 +143,20 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
         </nav>
 
         {/* User Card & Logout */}
-        <div className="mt-auto pt-4 space-y-2 border-t border-slate-100">
+        <div className="px-3 py-3 border-t border-slate-100 space-y-1">
           {userEmail && (
-            <div
-              className="rounded-xl p-3 flex items-center gap-3 cursor-default bg-slate-50 border border-slate-100"
-              title={userEmail}
-            >
-              <div className="h-9 w-9 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0 uppercase text-white"
-                style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}>
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-100">
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
+                style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}
+              >
                 {userInitials}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[13px] font-semibold text-slate-700 truncate">
+                <div className="text-[12.5px] font-semibold text-slate-700 truncate leading-tight">
                   {userEmail.split("@")[0]}
                 </div>
-                <div className="text-[11px] text-slate-400 truncate mt-0.5">
+                <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
                   {userEmail}
                 </div>
               </div>
@@ -160,9 +165,9 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
 
           <button
             onClick={() => setShowLogoutDialog(true)}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-medium text-slate-400 transition-all duration-200 hover:bg-red-50 hover:text-red-600"
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium text-slate-500 transition-all duration-150 hover:bg-red-50 hover:text-red-600 group"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-4 w-4 group-hover:text-red-500 transition-colors" />
             <span>Cerrar sesión</span>
           </button>
         </div>
@@ -170,13 +175,13 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
 
       {/* Logout confirmation dialog */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <AlertDialogContent className="rounded-[20px] max-w-sm border-slate-100 bg-white shadow-xl">
+        <AlertDialogContent className="rounded-[20px] max-w-sm border-slate-100 bg-white shadow-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-[17px] font-semibold text-slate-800">
               ¿Cerrar sesión?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[14px] text-slate-500">
-              Se cerrará tu sesión actual y tendrás que volver a identificarte para acceder al sistema.
+              Se cerrará tu sesión y tendrás que volver a identificarte para acceder.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">

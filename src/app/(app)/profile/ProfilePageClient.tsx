@@ -295,20 +295,20 @@ export function ProfilePageClient({
              
              <div className="p-8 grid md:grid-cols-2 gap-8">
                 <div className="space-y-1.5 pt-1">
-                   <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Correo Institucional</p>
-                   <p className="text-[17px] font-bold text-slate-200 flex items-center gap-2">
+                   <p className="text-[11px] font-black uppercase tracking-widest text-slate-500">Correo Institucional</p>
+                   <p className="text-[17px] font-bold text-slate-800 flex items-center gap-2">
                       <Mail className="h-4 w-4 text-[#60A5FA]" /> {staffData.email}
                    </p>
                 </div>
-                <div className="space-y-1.5 pt-1 border-white/[0.07] md:border-l md:pl-8">
-                   <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Fecha de Alta</p>
-                   <p className="text-[17px] font-bold text-slate-200 flex items-center gap-2">
+                <div className="space-y-1.5 pt-1 border-slate-100 md:border-l md:pl-8">
+                   <p className="text-[11px] font-black uppercase tracking-widest text-slate-500">Fecha de Alta</p>
+                   <p className="text-[17px] font-bold text-slate-800 flex items-center gap-2">
                       <CalendarDays className="h-4 w-4 text-emerald-400" />
                       {staffData.start_date ? format(parseISO(staffData.start_date), "dd 'de' MMMM, yyyy", { locale: es }) : '—'}
                    </p>
                 </div>
                 {staffData.notes && (
-                  <div className="md:col-span-2 p-5 bg-white/[0.04] rounded-[20px] border border-white/[0.07] italic text-[14px] text-slate-400">
+                  <div className="md:col-span-2 p-5 bg-slate-50 rounded-[20px] border border-slate-200 italic text-[14px] text-slate-600">
                      "{staffData.notes}"
                   </div>
                 )}
@@ -322,30 +322,30 @@ export function ProfilePageClient({
                 <div className="flex items-center gap-3 mb-8">
                    <DSIconBox icon={Lock} variant="blue" />
                    <div>
-                      <h3 className="text-[18px] font-bold text-white">Seguridad</h3>
-                      <p className="text-[12px] text-slate-400">Actualiza tu contraseña de acceso.</p>
+                      <h3 className="text-[18px] font-bold text-slate-900">Seguridad</h3>
+                      <p className="text-[12px] text-slate-500">Actualiza tu contraseña de acceso.</p>
                    </div>
                 </div>
 
                 <div className="space-y-5">
                    <div className="space-y-2">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1">Nueva Contraseña</label>
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-1">Nueva Contraseña</label>
                       <Input
                         type="password"
                         value={newPwd}
                         onChange={e => setNewPwd(e.target.value)}
                         placeholder="Mínimo 8 caracteres"
-                        className="h-11 rounded-[12px] bg-white/[0.05] border-white/[0.09] text-slate-200 placeholder:text-slate-600 text-[15px]"
+                        className="h-11 rounded-[12px] bg-white border-slate-200 text-slate-800 placeholder:text-slate-400 text-[15px]"
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1">Confirmar Contraseña</label>
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-1">Confirmar Contraseña</label>
                       <Input
                         type="password"
                         value={confirmPwd}
                         onChange={e => setConfirmPwd(e.target.value)}
                         placeholder="Repite la contraseña"
-                        className="h-11 rounded-[12px] bg-white/[0.05] border-white/[0.09] text-slate-200 placeholder:text-slate-600 text-[15px]"
+                        className="h-11 rounded-[12px] bg-white border-slate-200 text-slate-800 placeholder:text-slate-400 text-[15px]"
                       />
                    </div>
                    {newPwd && confirmPwd && newPwd !== confirmPwd && (
@@ -368,29 +368,29 @@ export function ProfilePageClient({
                 <div className="flex items-center gap-3 mb-8">
                    <DSIconBox icon={Globe} variant="indigo" />
                    <div>
-                      <h3 className="text-[18px] font-bold text-neutral-900">Correo Electrónico</h3>
-                      <p className="text-[12px] text-[#86868B]">Cambia tu dirección institucional.</p>
+                      <h3 className="text-[18px] font-bold text-slate-900">Correo Electrónico</h3>
+                      <p className="text-[12px] text-slate-500">Cambia tu dirección institucional.</p>
                    </div>
                 </div>
-                
+
                 <div className="space-y-5">
                    <div className="space-y-2">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-[#86868B] px-1">Nuevo Email</label>
-                      <Input 
-                        type="email" 
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-1">Nuevo Email</label>
+                      <Input
+                        type="email"
                         value={newEmail}
                         onChange={e => setNewEmail(e.target.value)}
                         placeholder="nuevo@juzgado.local"
-                        className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                        className="h-11 rounded-[12px] bg-white border-slate-200 text-slate-800 text-[15px]"
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-[#86868B] px-1">Confirmar Email</label>
-                      <Input 
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-1">Confirmar Email</label>
+                      <Input
                         type="email"
                         value={confirmEmail}
                         onChange={e => setConfirmEmail(e.target.value)}
-                        className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                        className="h-11 rounded-[12px] bg-white border-slate-200 text-slate-800 text-[15px]"
                       />
                    </div>
                    <DSButton 
@@ -410,15 +410,15 @@ export function ProfilePageClient({
                 <div className="flex items-center gap-3">
                    <DSIconBox icon={CheckCircle2} variant="green" />
                    <div>
-                      <h3 className="text-[18px] font-bold text-neutral-900">Cuentas Vinculadas</h3>
-                      <p className="text-[12px] text-[#86868B]">Gestiona tus métodos de inicio de sesión social.</p>
+                      <h3 className="text-[18px] font-bold text-slate-900">Cuentas Vinculadas</h3>
+                      <p className="text-[12px] text-slate-500">Gestiona tus métodos de inicio de sesión social.</p>
                    </div>
                 </div>
              </div>
-             
-             <div className="p-6 rounded-[24px] bg-[#F2F2F7]/50 border border-black/[0.04] flex flex-col md:flex-row md:items-center justify-between gap-6">
+
+             <div className="p-6 rounded-[24px] bg-slate-50 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                   <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-sm border border-black/[0.04]">
+                   <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-200">
                       <svg width="20" height="20" viewBox="0 0 18 18">
                         <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
                         <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
@@ -427,8 +427,8 @@ export function ProfilePageClient({
                       </svg>
                    </div>
                    <div>
-                      <p className="font-bold text-neutral-900 text-[16px]">Google Account</p>
-                      <p className="text-[13px] text-[#86868B]">{googleIdentity ? "Vinculada correctamente" : "No vinculada"}</p>
+                      <p className="font-bold text-slate-900 text-[16px]">Google Account</p>
+                      <p className="text-[13px] text-slate-500">{googleIdentity ? "Vinculada correctamente" : "No vinculada"}</p>
                    </div>
                 </div>
                 {googleIdentity ? (
@@ -449,7 +449,7 @@ export function ProfilePageClient({
            <div className="lg:sticky lg:top-12 space-y-10">
               
               {/* Annual Stats */}
-              <div className="bg-neutral-900 rounded-[32px] p-8 text-white relative overflow-hidden group shadow-2xl">
+              <div style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }} className="rounded-[32px] p-8 text-white relative overflow-hidden group shadow-2xl">
                  <div className="relative z-10 space-y-8">
                     <div className="flex items-center justify-between">
                        <DSIconBox icon={Activity} variant="indigo" className="bg-white/10 text-indigo-400" />
@@ -491,28 +491,28 @@ export function ProfilePageClient({
                  ) : (
                    <div className="space-y-3">
                       {futureGuards.slice(0, 5).map((g, i) => (
-                        <div key={i} className="bg-white rounded-[20px] p-4 border border-black/[0.04] flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+                        <div key={i} className="bg-white rounded-[20px] p-4 border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
                            <div className="flex items-center gap-3">
-                              <div className="h-9 w-9 bg-[#F2F2F7] rounded-[10px] flex items-center justify-center text-[12px] font-black text-[#0066CC]">
+                              <div className="h-9 w-9 bg-indigo-50 rounded-[10px] flex items-center justify-center text-[12px] font-black text-indigo-700">
                                  {g.guard_periods?.week_number ?? '—'}
                               </div>
                               <div>
-                                <p className="text-[14px] font-bold text-neutral-900">
+                                <p className="text-[14px] font-bold text-slate-800">
                                    {g.guard_periods?.start_date ? format(parseISO(g.guard_periods.start_date), 'dd MMM', { locale: es }) : '—'}
                                 </p>
-                                <p className="text-[11px] text-[#86868B] font-medium">Sem. {g.guard_periods?.week_number ?? '—'}</p>
+                                <p className="text-[11px] text-slate-500 font-medium">Sem. {g.guard_periods?.week_number ?? '—'}</p>
                               </div>
                            </div>
                            {guardRole && sameRoleStaff.length > 0 ? (
                              <button
                                onClick={() => setSwapDialog({ open: true, periodId: g.guard_period_id, weekNumber: g.guard_periods?.week_number ?? 0 })}
-                               className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-[#F2F2F7] text-[#86868B] hover:text-[#0066CC] transition-colors"
+                               className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 transition-colors"
                                title="Solicitar intercambio"
                              >
                                <ArrowLeftRight className="h-3.5 w-3.5" />
                              </button>
                            ) : (
-                             <ChevronRight className="h-4 w-4 text-black/10" />
+                             <ChevronRight className="h-4 w-4 text-slate-200" />
                            )}
                         </div>
                       ))}
@@ -539,39 +539,39 @@ export function ProfilePageClient({
 
       {/* Edit Modal */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="rounded-[32px] border-none shadow-2xl p-0 overflow-hidden max-w-md">
-           <div className="bg-[#F2F2F7] p-8 border-b border-black/[0.04]">
+        <DialogContent className="rounded-[32px] border-none shadow-2xl p-0 overflow-hidden max-w-md bg-white">
+           <div className="bg-slate-50 p-8 border-b border-slate-100">
               <DialogHeader>
-                <DialogTitle className="text-[24px] font-extrabold text-neutral-900 tracking-tight">Editar Perfil</DialogTitle>
-                <DialogDescription className="text-[15px] text-[#86868B] font-medium">Modifica tus datos personales públicos.</DialogDescription>
+                <DialogTitle className="text-[24px] font-bold text-slate-900 tracking-tight">Editar Perfil</DialogTitle>
+                <DialogDescription className="text-[15px] text-slate-500 font-medium">Modifica tus datos personales públicos.</DialogDescription>
               </DialogHeader>
            </div>
-           
+
            <div className="p-8 space-y-6">
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
-                    <label className="text-[11px] font-black uppercase text-[#86868B] px-1">Nombre</label>
-                    <Input 
+                    <label className="text-[11px] font-black uppercase text-slate-500 px-1">Nombre</label>
+                    <Input
                       value={editForm.first_name}
                       onChange={e => setEditForm(prev => ({...prev, first_name: e.target.value}))}
-                      className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                      className="h-11 rounded-[12px] bg-white border-slate-200 text-slate-800 text-[15px]"
                     />
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[11px] font-black uppercase text-[#86868B] px-1">Apellidos</label>
-                    <Input 
+                    <label className="text-[11px] font-black uppercase text-slate-500 px-1">Apellidos</label>
+                    <Input
                       value={editForm.last_name}
                       onChange={e => setEditForm(prev => ({...prev, last_name: e.target.value}))}
-                      className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                      className="h-11 rounded-[12px] bg-white border-slate-200 text-slate-800 text-[15px]"
                     />
                  </div>
               </div>
               <div className="space-y-2">
-                 <label className="text-[11px] font-black uppercase text-[#86868B] px-1">Notas / Bio</label>
-                 <Textarea 
+                 <label className="text-[11px] font-black uppercase text-slate-500 px-1">Notas / Bio</label>
+                 <Textarea
                    value={editForm.notes}
                    onChange={e => setEditForm(prev => ({...prev, notes: e.target.value}))}
-                   className="rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] p-4 text-[15px] min-h-[100px] resize-none" 
+                   className="rounded-[12px] bg-white border-slate-200 p-4 text-slate-800 text-[15px] min-h-[100px] resize-none"
                    placeholder="Escribe algo sobre ti..."
                  />
               </div>

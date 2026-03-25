@@ -261,20 +261,20 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
             <div className="flex items-center gap-3 mb-6">
               <DSIconBox icon={Sun} variant="orange" />
               <div>
-                <h3 className="text-[20px] font-semibold text-white">Nueva Solicitud</h3>
-                <p className="text-[13px] text-slate-400">Validación automática de conflictos con guardias.</p>
+                <h3 className="text-[20px] font-semibold text-slate-900">Nueva Solicitud</h3>
+                <p className="text-[13px] text-slate-500">Validación automática de conflictos con guardias.</p>
               </div>
             </div>
 
             <div className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-[12px] font-bold uppercase tracking-wider text-slate-400 px-1">Trabajador</label>
+                  <label className="text-[12px] font-bold uppercase tracking-wider text-slate-500 px-1">Trabajador</label>
                   <Select value={selectedStaffId} onValueChange={setSelectedStaffId} disabled={!isHeadmaster}>
-                    <SelectTrigger className="rounded-[12px] h-11 bg-white/[0.05] border-white/[0.09] text-slate-300 text-[15px]">
+                    <SelectTrigger className="rounded-[12px] h-11 bg-white border-slate-200 text-slate-700 text-[15px]">
                       <SelectValue placeholder="Seleccionar..." />
                     </SelectTrigger>
-                    <SelectContent className="rounded-[16px] border-white/[0.09] shadow-xl">
+                    <SelectContent className="rounded-[16px] border-slate-100 shadow-xl">
                       {(isHeadmaster ? staff : staff.filter(s => s.id === currentStaffId)).map(s => (
                         <SelectItem key={s.id} value={s.id}>{buildFullName(s)}</SelectItem>
                       ))}
@@ -283,30 +283,30 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[12px] font-bold uppercase tracking-wider text-slate-400 px-1">Rango de fechas</label>
+                  <label className="text-[12px] font-bold uppercase tracking-wider text-slate-500 px-1">Rango de fechas</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <button
                         className={cn(
-                          "w-full flex items-center px-4 text-left h-11 rounded-[12px] bg-white/[0.05] border border-white/[0.09] hover:bg-white/[0.08] transition-colors text-[15px]",
-                          !dateRange.from && "text-slate-500"
+                          "w-full flex items-center px-4 text-left h-11 rounded-[12px] bg-white border border-slate-200 hover:bg-slate-50 transition-colors text-[15px]",
+                          !dateRange.from && "text-slate-400"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-[#60A5FA]" />
+                        <CalendarIcon className="mr-2 h-4 w-4 text-indigo-500" />
                         {dateRange.from ? (
                           dateRange.to ? (
-                            <span className="font-medium text-slate-200">
+                            <span className="font-medium text-slate-800">
                               {format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}
                             </span>
                           ) : (
-                            <span className="font-medium text-slate-200">{format(dateRange.from, "dd/MM/yyyy")}</span>
+                            <span className="font-medium text-slate-800">{format(dateRange.from, "dd/MM/yyyy")}</span>
                           )
                         ) : (
                           <span>Seleccionar fechas</span>
                         )}
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 rounded-[24px] border-white/[0.09] shadow-2xl overflow-hidden" align="start">
+                    <PopoverContent className="w-auto p-0 rounded-[24px] border-slate-200 shadow-2xl overflow-hidden" align="start">
                       <Calendar
                         initialFocus
                         mode="range"
@@ -324,7 +324,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
 
               {/* Selector de tipo */}
               <div className="space-y-2">
-                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Tipo de ausencia</label>
+                <label className="text-[12px] font-bold uppercase tracking-wider text-slate-500 px-1">Tipo de ausencia</label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
@@ -333,7 +333,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                       "h-11 rounded-[12px] border text-[14px] font-semibold transition-all flex items-center justify-center gap-2",
                       tipo === "vacaciones"
                         ? "bg-[#0066CC] border-[#0066CC] text-white shadow-[0_0_20px_rgba(0,102,204,0.3)]"
-                        : "bg-white/[0.05] border-white/[0.09] text-slate-400 hover:bg-white/[0.09]"
+                        : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
                     )}
                   >
                     <Sun className="h-4 w-4" />
@@ -346,7 +346,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                       "h-11 rounded-[12px] border text-[14px] font-semibold transition-all flex items-center justify-center gap-2",
                       tipo === "asuntos_propios"
                         ? "bg-amber-500 border-amber-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)]"
-                        : "bg-white/[0.05] border-white/[0.09] text-slate-400 hover:bg-white/[0.09]"
+                        : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
                     )}
                   >
                     <ArrowRight className="h-4 w-4" />
@@ -361,27 +361,27 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
               </div>
 
               <div className="space-y-2">
-                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Notas (opcional)</label>
+                <label className="text-[12px] font-bold uppercase tracking-wider text-slate-500 px-1">Notas (opcional)</label>
                 <Textarea
                   placeholder="Ej: Vacaciones de verano, semana de agosto..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="rounded-[12px] bg-white/[0.05] border-white/[0.09] text-slate-200 placeholder:text-slate-600 focus:bg-white/[0.08] transition-all min-h-[80px] text-[15px] p-4 resize-none"
+                  className="rounded-[12px] bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white transition-all min-h-[80px] text-[15px] p-4 resize-none"
                 />
               </div>
 
               {conflictResult && !conflictResult.valid && (
-                <div className="bg-red-500/[0.12] border border-red-500/[0.25] rounded-[20px] p-5 flex items-start gap-4 animate-in fade-in slide-in-from-top-2">
-                  <XCircle className="h-6 w-6 text-red-400 shrink-0" />
+                <div className="bg-red-50 border border-red-200 rounded-[20px] p-5 flex items-start gap-4 animate-in fade-in slide-in-from-top-2">
+                  <XCircle className="h-6 w-6 text-red-500 shrink-0" />
                   <div>
-                    <p className="text-[15px] font-bold text-red-300">Conflicto con Guardias</p>
-                    <div className="text-[13px] text-red-400/90 mt-1 space-y-1">
+                    <p className="text-[15px] font-bold text-red-700">Conflicto con Guardias</p>
+                    <div className="text-[13px] text-red-600 mt-1 space-y-1">
                       {conflictResult.conflicts.map((c, i) => (
                         <p key={i}>
                           &bull; Tienes guardia la week {c.guard_week_number} ({format(parseISO(c.guard_start_date), 'dd/MM')} al {format(parseISO(c.guard_end_date), 'dd/MM')}).
                         </p>
                       ))}
-                      <p className="font-bold text-red-300 mt-2">Reasigna tu guardia antes de pedir estas fechas.</p>
+                      <p className="font-bold text-red-700 mt-2">Reasigna tu guardia antes de pedir estas fechas.</p>
                     </div>
                   </div>
                 </div>
@@ -409,10 +409,10 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                
                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                   <Select value={staffFilter} onValueChange={setStaffFilter}>
-                    <SelectTrigger className="w-full md:w-[150px] rounded-[12px] h-10 bg-white/[0.05] border-white/[0.09] text-slate-300 text-[13px]">
+                    <SelectTrigger className="w-full md:w-[150px] rounded-[12px] h-10 bg-white border-slate-200 text-slate-700 text-[13px]">
                       <SelectValue placeholder="Trabajador" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-[16px] border-white/[0.09] shadow-xl">
+                    <SelectContent className="rounded-[16px] border-slate-100 shadow-xl">
                       <SelectItem value="all">Todo el personal</SelectItem>
                       {staff.map(s => (
                         <SelectItem key={s.id} value={s.id}>{buildFullName(s)}</SelectItem>
@@ -421,10 +421,10 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                   </Select>
 
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full md:w-[140px] rounded-[12px] h-10 bg-white/[0.05] border-white/[0.09] text-slate-300 text-[13px]">
+                    <SelectTrigger className="w-full md:w-[140px] rounded-[12px] h-10 bg-white border-slate-200 text-slate-700 text-[13px]">
                       <SelectValue placeholder="Estado" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-[16px] border-white/[0.09] shadow-xl">
+                    <SelectContent className="rounded-[16px] border-slate-100 shadow-xl">
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="approved">Aprobadas</SelectItem>
                       <SelectItem value="cancelled">Canceladas</SelectItem>
@@ -452,13 +452,13 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                     <DSCard key={v.id} className={cn("group transition-all", isCan && "opacity-60 grayscale-[0.3]")}>
                       <div className="flex justify-between items-start mb-4">
                         <div className="space-y-1">
-                          <p className="text-[15px] font-bold text-slate-100">{staffMem ? buildFullName(staffMem) : "???"}</p>
+                          <p className="text-[15px] font-bold text-slate-900">{staffMem ? buildFullName(staffMem) : "???"}</p>
                           <div className="flex items-center gap-2">
                             <span className={cn(
                               "text-[11px] font-bold px-2 py-0.5 rounded-full",
                               v.tipo === 'asuntos_propios'
-                                ? "bg-amber-500/[0.15] text-amber-300"
-                                : "bg-blue-500/[0.15] text-blue-300"
+                                ? "bg-amber-50 text-amber-700"
+                                : "bg-indigo-50 text-indigo-700"
                             )}>
                               {v.tipo === 'asuntos_propios' ? 'Asuntos propios' : 'Vacaciones'}
                             </span>
@@ -473,12 +473,12 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                         </DSBadge>
                       </div>
 
-                      <div className="flex items-center justify-between py-3 border-y border-white/[0.07] border-dashed">
-                         <div className="flex items-center gap-2 text-[14px] font-semibold text-slate-200">
-                            <CalendarIcon className="h-4 w-4 text-[#60A5FA]" />
+                      <div className="flex items-center justify-between py-3 border-y border-slate-200 border-dashed">
+                         <div className="flex items-center gap-2 text-[14px] font-semibold text-slate-800">
+                            <CalendarIcon className="h-4 w-4 text-indigo-500" />
                             {format(parseISO(v.start_date), 'd MMM')} &rarr; {format(parseISO(v.end_date), 'd MMM', {locale: es})}
                          </div>
-                         <div className="text-[13px] font-bold bg-white/[0.07] text-slate-300 py-1 px-3 rounded-full">
+                         <div className="text-[13px] font-bold bg-slate-100 text-slate-600 py-1 px-3 rounded-full">
                             {daysNum} días
                          </div>
                       </div>
@@ -503,7 +503,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
         {/* Sidebar Column */}
         <div className="lg:col-span-4 space-y-8">
           <div className="lg:sticky lg:top-12 space-y-8">
-            <div className="bg-neutral-900 rounded-[32px] p-8 text-white relative overflow-hidden group shadow-2xl">
+            <div className="rounded-[32px] p-8 text-white relative overflow-hidden group shadow-2xl" style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }}>
               <div className="relative z-10">
                 <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center mb-10 group-hover:bg-white/20 transition-colors">
                   <Sun className="h-6 w-6 text-orange-400" />
@@ -568,13 +568,13 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#0066CC]/20 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none" />
             </div>
 
-            <div className="rounded-[28px] p-6 border border-white/[0.07] flex items-start gap-4" style={{ background: "rgba(255,255,255,0.04)" }}>
-              <div className="h-10 w-10 rounded-full bg-white/[0.07] flex items-center justify-center shrink-0">
-                <AlertCircle className="h-5 w-5 text-[#60A5FA]" />
+            <div className="rounded-[28px] p-6 border border-indigo-100 bg-indigo-50 flex items-start gap-4">
+              <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                <AlertCircle className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
-                <p className="text-[14px] font-bold text-slate-200 tracking-tight uppercase">Política de Calendario</p>
-                <p className="text-[13px] text-slate-400 mt-1 leading-relaxed">
+                <p className="text-[14px] font-bold text-indigo-900 tracking-tight uppercase">Política de Calendario</p>
+                <p className="text-[13px] text-indigo-700 mt-1 leading-relaxed">
                   Las solicitudes de vacaciones están sujetas a la cobertura mínima del juzgado y no pueden solapar con periodos de guardia asignados.
                 </p>
               </div>
@@ -585,22 +585,22 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
 
       {/* Cancel confirmation dialog */}
       <AlertDialog open={cancelConfirm.open} onOpenChange={(open) => !open && setCancelConfirm({ open: false, id: null })}>
-        <AlertDialogContent className="rounded-[20px] max-w-sm" style={{ background: "#0D1628", border: "1px solid rgba(255,255,255,0.1)" }}>
+        <AlertDialogContent className="rounded-[20px] max-w-sm bg-white">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[17px] font-semibold text-white">
+            <AlertDialogTitle className="text-[17px] font-semibold text-slate-900">
               ¿Anular este periodo?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[14px] text-slate-400">
+            <AlertDialogDescription className="text-[14px] text-slate-500">
               El periodo de vacaciones quedará marcado como cancelado y ya no se mostrará como vigente. Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="rounded-xl h-10 text-[14px] bg-white/[0.07] border-white/[0.12] text-slate-300 hover:bg-white/[0.12]">
+            <AlertDialogCancel className="rounded-xl h-10 text-[14px] bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmCancelVacation}
-              className="rounded-xl h-10 text-[14px] bg-red-500/[0.2] hover:bg-red-500/[0.3] text-red-300 border border-red-500/[0.3]"
+              className="rounded-xl h-10 text-[14px] bg-red-500 hover:bg-red-600 text-white border-none"
             >
               Sí, anular
             </AlertDialogAction>

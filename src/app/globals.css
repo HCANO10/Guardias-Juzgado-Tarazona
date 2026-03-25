@@ -5,34 +5,34 @@
 
 @layer base {
   :root {
-    /* ── DARK MODE PREMIUM ─────────────────────────── */
-    --background: 222 47% 5%;        /* #060C18  deep navy */
-    --foreground: 210 40% 97%;       /* #F8FAFC  near-white */
+    /* ── MODO CLARO Y VIVO ─────────────────────────── */
+    --background: 225 60% 97%;       /* #F2F4FC  lavender-white fresco */
+    --foreground: 222 47% 11%;       /* #0F172A  casi negro */
 
-    --card: 220 40% 8%;              /* #0D1628  surface card */
-    --card-foreground: 210 40% 97%;
+    --card: 0 0% 100%;               /* #FFFFFF  tarjetas blancas */
+    --card-foreground: 222 47% 11%;
 
-    --popover: 220 40% 7%;
-    --popover-foreground: 210 40% 97%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 210 100% 40%;         /* #0066CC  brand blue */
+    --primary: 231 90% 56%;          /* #4F46E5  indigo vivo */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 35% 13%;        /* #172038  subtle surface */
-    --secondary-foreground: 215 20% 65%;
+    --secondary: 220 20% 94%;        /* #ECEEF5  gris azulado suave */
+    --secondary-foreground: 222 30% 30%;
 
-    --muted: 222 35% 11%;
-    --muted-foreground: 215 16% 52%;
+    --muted: 220 14% 90%;            /* #E4E7EF */
+    --muted-foreground: 215 16% 47%; /* #64748B  gris medio */
 
-    --accent: 199 89% 48%;           /* #06B6D4  cyan accent */
-    --accent-foreground: 222 47% 5%;
+    --accent: 264 80% 60%;           /* #8B5CF6  violeta acento */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 58%;        /* #EF4444  rojo vivo */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 25% 14%;           /* #17233A  subtle border */
-    --input: 220 35% 10%;
-    --ring: 210 100% 50%;
+    --border: 220 13% 88%;           /* #DDE2EF  borde suave */
+    --input: 220 13% 91%;
+    --ring: 231 90% 56%;
 
     --radius: 0.75rem;
   }
@@ -46,7 +46,6 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-attachment: fixed;
   }
 
   html {
@@ -60,77 +59,25 @@
     text-wrap: balance;
   }
 
-  /* Dark glassmorphism card */
-  .glass {
-    @apply bg-white/[0.05] backdrop-blur-xl border border-white/[0.08];
+  /* Tarjeta estándar */
+  .card-light {
+    @apply bg-white rounded-2xl border border-slate-100 shadow-sm;
   }
 
-  /* Stronger glass for elevated elements */
-  .glass-elevated {
-    @apply bg-white/[0.08] backdrop-blur-2xl border border-white/[0.12];
-  }
-
-  /* Subtle inner glow on interactive elements */
-  .glow-primary {
-    box-shadow: 0 0 20px rgba(0, 102, 204, 0.35);
-  }
-
-  .glow-cyan {
-    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
-  }
-
-  .glow-emerald {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-  }
-
-  /* Page ambient background glows (decorative) */
-  .ambient-glow::before {
-    content: '';
-    position: fixed;
-    top: -20%;
-    left: 10%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(0, 102, 204, 0.08) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .ambient-glow::after {
-    content: '';
-    position: fixed;
-    bottom: -10%;
-    right: 5%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
+  /* Utilidades de scroll */
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Custom scrollbar for dark mode */
-  .scrollbar-dark::-webkit-scrollbar {
-    width: 4px;
-  }
-  .scrollbar-dark::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .scrollbar-dark::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
+  /* Gradientes decorativos de fondo */
+  .page-bg-gradient {
+    background: linear-gradient(135deg, #F0F4FF 0%, #F5F0FF 40%, #FFF0F5 100%);
   }
 
-  /* Table dark overrides for shadcn/custom tables */
-  .table-dark tbody tr {
-    @apply border-white/[0.04];
+  /* Sombra de tarjeta */
+  .card-shadow {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   }
-  .table-dark tbody tr:hover {
-    @apply bg-white/[0.04];
-  }
-  .table-dark thead tr {
-    @apply bg-white/[0.04];
+  .card-shadow-hover {
+    box-shadow: 0 6px 20px rgba(79,70,229,0.12), 0 2px 6px rgba(0,0,0,0.06);
   }
 }

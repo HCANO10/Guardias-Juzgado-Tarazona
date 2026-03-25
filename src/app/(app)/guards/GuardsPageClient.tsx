@@ -127,24 +127,24 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
           ].map((cat, idx) => (
             <DSCard key={idx} className={cat.data.hasDisparity ? "ring-1 ring-red-500/30" : ""}>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-[13px] font-bold uppercase tracking-wider text-slate-400">{cat.label}</span>
+                <span className="text-[13px] font-bold uppercase tracking-wider text-slate-500">{cat.label}</span>
                 {cat.data.hasDisparity && <DSBadge variant="red">Descompensado</DSBadge>}
               </div>
               <div className="space-y-3">
                 {cat.data.counts.map(p => (
                   <div key={p.id} className="flex justify-between items-center group">
-                    <span className="text-[14px] text-slate-200 font-medium">{p.first_name}</span>
+                    <span className="text-[14px] text-slate-900 font-medium">{p.first_name}</span>
                     <div className="flex items-center gap-3">
-                      <div className="h-1.5 w-24 bg-white/[0.08] rounded-full overflow-hidden">
-                        <div 
+                      <div className="h-1.5 w-24 bg-slate-100 rounded-full overflow-hidden">
+                        <div
                           className={`h-full rounded-full ${
-                             cat.variant === 'amber' ? 'bg-amber-500' : 
+                             cat.variant === 'amber' ? 'bg-amber-500' :
                              cat.variant === 'blue' ? 'bg-[#0066CC]' : 'bg-green-500'
                           }`}
-                          style={{ width: `${Math.min((p.numGuards / 15) * 100, 100)}%` }} 
+                          style={{ width: `${Math.min((p.numGuards / 15) * 100, 100)}%` }}
                         />
                       </div>
-                      <span className="text-[13px] font-bold text-white w-4 text-right">{p.numGuards}</span>
+                      <span className="text-[13px] font-bold text-slate-900 w-4 text-right">{p.numGuards}</span>
                     </div>
                   </div>
                 ))}
@@ -155,13 +155,13 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-white/[0.06]">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100">
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <Select value={monthFilter} onValueChange={setMonthFilter}>
-            <SelectTrigger className="w-full md:w-[150px] rounded-[12px] h-11 bg-white/[0.05] border-white/[0.09] text-slate-300 text-[14px]">
+            <SelectTrigger className="w-full md:w-[150px] rounded-[12px] h-11 bg-white border-slate-200 text-slate-700 text-[14px]">
               <SelectValue placeholder="Mes" />
             </SelectTrigger>
-            <SelectContent className="rounded-[16px] border-white/[0.1] shadow-2xl">
+            <SelectContent className="rounded-[16px] border-slate-200 shadow-2xl">
               <SelectItem value="all">Todos los meses</SelectItem>
               {Array.from({length: 12}).map((_, i) => (
                 <SelectItem key={i} value={i.toString()}>{format(new Date(2025, i, 1), 'MMMM', {locale: es})}</SelectItem>
@@ -170,10 +170,10 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
           </Select>
 
           <Select value={personFilter} onValueChange={setPersonFilter}>
-            <SelectTrigger className="w-full md:w-[200px] rounded-[12px] h-11 bg-white/[0.05] border-white/[0.09] text-slate-300 text-[14px]">
+            <SelectTrigger className="w-full md:w-[200px] rounded-[12px] h-11 bg-white border-slate-200 text-slate-700 text-[14px]">
               <SelectValue placeholder="Persona" />
             </SelectTrigger>
-            <SelectContent className="rounded-[16px] border-white/[0.1] shadow-2xl">
+            <SelectContent className="rounded-[16px] border-slate-200 shadow-2xl">
               <SelectItem value="all">Todo el personal</SelectItem>
               {allStaff.map(p => (
                 <SelectItem key={p.id} value={p.id}>{buildFullName(p)}</SelectItem>
@@ -182,10 +182,10 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
           </Select>
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full md:w-[160px] rounded-[12px] h-11 bg-white/[0.05] border-white/[0.09] text-slate-300 text-[14px]">
+            <SelectTrigger className="w-full md:w-[160px] rounded-[12px] h-11 bg-white border-slate-200 text-slate-700 text-[14px]">
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
-            <SelectContent className="rounded-[16px] border-white/[0.1] shadow-2xl">
+            <SelectContent className="rounded-[16px] border-slate-200 shadow-2xl">
               <SelectItem value="all">Cualquier estado</SelectItem>
               <SelectItem value="completa">Completa</SelectItem>
               <SelectItem value="parcial">Parcial</SelectItem>
@@ -198,10 +198,10 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
       {/* List / Table Area */}
       <div className="space-y-4">
         {/* Desktop Table View */}
-        <div className="hidden md:block rounded-[28px] overflow-hidden border border-white/[0.07] backdrop-blur-xl" style={{ background: "rgba(255,255,255,0.03)" }}>
+        <div className="hidden md:block rounded-[28px] overflow-hidden border border-slate-100 backdrop-blur-xl bg-white">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="text-[12px] font-semibold uppercase tracking-wider text-slate-500 border-b border-white/[0.06]" style={{ background: "rgba(255,255,255,0.03)" }}>
+              <tr className="text-[12px] font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100 bg-slate-50">
                 <th className="px-6 py-4 w-[80px]">Nº</th>
                 <th className="px-6 py-4">Periodo</th>
                 <th className="px-6 py-4">Personal asignado</th>
@@ -209,11 +209,11 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
                 {isHeadmaster && <th className="px-6 py-4 w-[80px]"></th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-y divide-slate-100">
               {filteredGuards.length === 0 ? (
                 <tr>
                   <td colSpan={isHeadmaster ? 5 : 4} className="py-20">
-                    <EmptyState 
+                    <EmptyState
                       icon={guards.length === 0 ? CalendarIcon : Search}
                       title={guards.length === 0 ? "No hay periodos" : "Sin resultados"}
                       description="Intenta cambiar los filtros o genera nuevos periodos."
@@ -222,36 +222,36 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
                 </tr>
               ) : (
                 filteredGuards.map((g) => (
-                  <tr key={g.period_id} className="hover:bg-white/[0.04] transition-colors duration-200 group">
-                    <td className="px-6 py-4 text-[15px] font-mono text-slate-500">
+                  <tr key={g.period_id} className="hover:bg-slate-50 transition-colors duration-200 group">
+                    <td className="px-6 py-4 text-[15px] font-mono text-slate-600">
                       {g.week_number.toString().padStart(2, '0')}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3 text-[15px] font-semibold text-slate-100">
+                      <div className="flex items-center gap-3 text-[15px] font-semibold text-slate-900">
                         {format(parseISO(g.start_date), "dd MMM", { locale: es })}
-                        <ArrowRight className="h-3 w-3 text-[#86868B]" />
+                        <ArrowRight className="h-3 w-3 text-slate-500" />
                         {format(parseISO(g.end_date), "dd MMM", { locale: es })}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4 text-[15px]">
                         <div className="flex flex-col">
-                          <span className={g.auxilio ? "text-slate-200 font-medium" : "text-slate-600 italic"}>
+                          <span className={g.auxilio ? "text-slate-900 font-medium" : "text-slate-600 italic"}>
                             {g.auxilio ? g.auxilio.name : "Auxilio"}
                           </span>
-                          <span className="text-[10px] uppercase tracking-tighter text-[#86868B] font-bold">Aux</span>
+                          <span className="text-[10px] uppercase tracking-tighter text-slate-500 font-bold">Aux</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className={g.tramitador ? "text-slate-200 font-medium" : "text-slate-600 italic"}>
+                          <span className={g.tramitador ? "text-slate-900 font-medium" : "text-slate-600 italic"}>
                             {g.tramitador ? g.tramitador.name : "Tramitador"}
                           </span>
-                          <span className="text-[10px] uppercase tracking-tighter text-[#86868B] font-bold">Tra</span>
+                          <span className="text-[10px] uppercase tracking-tighter text-slate-500 font-bold">Tra</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className={g.gestor ? "text-slate-200 font-medium" : "text-slate-600 italic"}>
+                          <span className={g.gestor ? "text-slate-900 font-medium" : "text-slate-600 italic"}>
                             {g.gestor ? g.gestor.name : "Gestor"}
                           </span>
-                          <span className="text-[10px] uppercase tracking-tighter text-[#86868B] font-bold">Ges</span>
+                          <span className="text-[10px] uppercase tracking-tighter text-slate-500 font-bold">Ges</span>
                         </div>
                       </div>
                     </td>
@@ -266,9 +266,9 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
                     </td>
                     {isHeadmaster && (
                       <td className="px-6 py-4 text-right">
-                        <button 
+                        <button
                           onClick={() => handleEditClick(g)}
-                          className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-white/[0.09] transition-all duration-200 text-slate-500 hover:text-[#60A5FA]"
+                          className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition-all duration-200 text-slate-500 hover:text-indigo-600"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
@@ -288,9 +288,9 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
               <div className="flex justify-between items-start mb-5">
                 <div>
                   <div className="text-[13px] font-bold text-slate-500 uppercase tracking-wider mb-1">Semana {g.week_number}</div>
-                  <div className="text-[17px] font-semibold text-slate-100 flex items-center gap-2">
+                  <div className="text-[17px] font-semibold text-slate-900 flex items-center gap-2">
                     {format(parseISO(g.start_date), "dd MMM", { locale: es })}
-                    <ArrowRight className="h-3 w-3 text-[#86868B]" />
+                    <ArrowRight className="h-3 w-3 text-slate-500" />
                     {format(parseISO(g.end_date), "dd MMM", { locale: es })}
                   </div>
                 </div>
@@ -301,15 +301,15 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
                 )}
               </div>
 
-              <div className="space-y-3 rounded-[16px] p-4 mt-1" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="space-y-3 rounded-[16px] p-4 mt-1 bg-slate-50 border border-slate-100">
                 {[
                   { role: 'Auxilio', person: g.auxilio, variant: 'amber' as const },
                   { role: 'Tramitador/a', person: g.tramitador, variant: 'blue' as const },
                   { role: 'Gestor/a', person: g.gestor, variant: 'green' as const }
                 ].map((row, i) => (
-                  <div key={i} className="flex flex-col gap-1 border-b border-white/[0.05] last:border-0 pb-2 last:pb-0">
+                  <div key={i} className="flex flex-col gap-1 border-b border-slate-100 last:border-0 pb-2 last:pb-0">
                     <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">{row.role}</span>
-                    <span className={row.person ? "text-[15px] font-semibold text-slate-200" : "text-[15px] font-medium text-slate-600 italic"}>
+                    <span className={row.person ? "text-[15px] font-semibold text-slate-900" : "text-[15px] font-medium text-slate-600 italic"}>
                       {row.person ? row.person.name : "Pendiente de asignar"}
                     </span>
                   </div>

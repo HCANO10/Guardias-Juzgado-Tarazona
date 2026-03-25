@@ -86,13 +86,13 @@ export default async function StaffDetailPage({ params }: { params: { id: string
     <div className="space-y-10 pb-20">
       {/* Breadcrumb + Header */}
       <div className="space-y-3">
-        <nav className="flex items-center gap-1.5 text-[13px] text-[#86868B]">
-          <Link href="/staff" className="flex items-center gap-1.5 hover:text-[#0066CC] transition-colors">
+        <nav className="flex items-center gap-1.5 text-[13px] text-slate-500">
+          <Link href="/staff" className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors">
             <ArrowLeft className="h-3.5 w-3.5" />
             Personal
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-neutral-900 font-medium">
+          <span className="text-slate-800 font-medium">
             {typedStaff.first_name} {typedStaff.last_name}
           </span>
         </nav>
@@ -107,7 +107,7 @@ export default async function StaffDetailPage({ params }: { params: { id: string
         <div className="lg:col-span-4 space-y-6">
           <DSCard className="overflow-hidden p-0" padding="p-0">
             {/* Header gradient */}
-            <div className="bg-gradient-to-br from-[#0066CC] to-[#004C99] p-8 text-white relative">
+            <div className="p-8 text-white relative" style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }}>
               <div className="relative z-10 flex flex-col items-center text-center">
                 <div className="h-20 w-20 rounded-[24px] bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-[28px] font-bold shadow-2xl mb-4">
                   {initials}
@@ -134,8 +134,8 @@ export default async function StaffDetailPage({ params }: { params: { id: string
               <div className="flex items-center gap-3 text-sm">
                 <DSIconBox icon={Mail} variant="blue" size="sm" />
                 <div>
-                  <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wider">Email</p>
-                  <p className="text-gray-900 font-medium truncate">{typedStaff.email}</p>
+                  <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">Email</p>
+                  <p className="text-slate-900 font-medium truncate">{typedStaff.email}</p>
                 </div>
               </div>
 
@@ -143,8 +143,8 @@ export default async function StaffDetailPage({ params }: { params: { id: string
                 <div className="flex items-center gap-3 text-sm">
                   <DSIconBox icon={Phone} variant="green" size="sm" />
                   <div>
-                    <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wider">Teléfono</p>
-                    <a href={`tel:${typedStaff.phone}`} className="text-gray-900 font-medium hover:text-[#0066CC] transition-colors">
+                    <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">Teléfono</p>
+                    <a href={`tel:${typedStaff.phone}`} className="text-slate-900 font-medium hover:text-indigo-600 transition-colors">
                       {typedStaff.phone}
                     </a>
                   </div>
@@ -154,16 +154,16 @@ export default async function StaffDetailPage({ params }: { params: { id: string
               <div className="flex items-center gap-3 text-sm">
                 <DSIconBox icon={Briefcase} variant="indigo" size="sm" />
                 <div>
-                  <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wider">Puesto</p>
-                  <p className="text-gray-900 font-medium">{typedStaff.positions?.name || "—"}</p>
+                  <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">Puesto</p>
+                  <p className="text-slate-900 font-medium">{typedStaff.positions?.name || "—"}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 text-sm">
                 <DSIconBox icon={CalendarDays} variant="green" size="sm" />
                 <div>
-                  <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wider">Incorporación</p>
-                  <p className="text-gray-900 font-medium">
+                  <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">Incorporación</p>
+                  <p className="text-slate-900 font-medium">
                     {format(parseISO(typedStaff.start_date), "dd 'de' MMMM, yyyy", { locale: es })}
                   </p>
                 </div>
@@ -173,7 +173,7 @@ export default async function StaffDetailPage({ params }: { params: { id: string
                 <div className="flex items-center gap-3 text-sm">
                   <DSIconBox icon={CalendarDays} variant="red" size="sm" />
                   <div>
-                    <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wider">Fecha de baja</p>
+                    <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">Fecha de baja</p>
                     <p className="text-red-600 font-medium">
                       {format(parseISO(typedStaff.end_date), "dd 'de' MMMM, yyyy", { locale: es })}
                     </p>
@@ -182,12 +182,12 @@ export default async function StaffDetailPage({ params }: { params: { id: string
               )}
 
               {typedStaff.notes && (
-                <div className="pt-4 border-t border-gray-100">
+                <div className="pt-4 border-t border-slate-100">
                   <div className="flex items-start gap-3">
                     <DSIconBox icon={FileText} variant="neutral" size="sm" />
                     <div>
-                      <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wider mb-1">Notas</p>
-                      <p className="text-sm text-gray-500 italic leading-relaxed">{typedStaff.notes}</p>
+                      <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-1">Notas</p>
+                      <p className="text-sm text-slate-500 italic leading-relaxed">{typedStaff.notes}</p>
                     </div>
                   </div>
                 </div>
@@ -199,12 +199,12 @@ export default async function StaffDetailPage({ params }: { params: { id: string
           <DSCard padding="p-5">
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">{typedAssignments.length}</p>
-                <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wider mt-1">Guardias</p>
+                <p className="text-2xl font-bold text-slate-900">{typedAssignments.length}</p>
+                <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mt-1">Guardias</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">{typedVacations.filter(v => v.status === 'approved').length}</p>
-                <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wider mt-1">Vacaciones</p>
+                <p className="text-2xl font-bold text-slate-900">{typedVacations.filter(v => v.status === 'approved').length}</p>
+                <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mt-1">Vacaciones</p>
               </div>
             </div>
           </DSCard>
@@ -223,13 +223,13 @@ export default async function StaffDetailPage({ params }: { params: { id: string
               <DSCard padding="p-0" className="overflow-hidden">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-white/[0.06]" style={{ background: "rgba(255,255,255,0.03)" }}>
+                    <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 bg-slate-50">
                       <th className="px-6 py-3">Semana</th>
                       <th className="px-6 py-3">Periodo</th>
                       <th className="px-6 py-3">Estado</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-slate-100">
                     {typedAssignments.map((assignment) => {
                       const period = assignment.guard_periods
                       let status = "Pasada"
@@ -244,11 +244,11 @@ export default async function StaffDetailPage({ params }: { params: { id: string
                       }
 
                       return (
-                        <tr key={assignment.id} className="hover:bg-gray-50/50 transition-colors">
+                        <tr key={assignment.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-6 py-3.5">
                             <DSBadge variant="indigo">S{period.week_number}</DSBadge>
                           </td>
-                          <td className="px-6 py-3.5 text-sm font-medium text-gray-900">
+                          <td className="px-6 py-3.5 text-sm font-medium text-slate-900">
                             {format(parseISO(period.start_date), 'dd MMM', { locale: es })} — {format(parseISO(period.end_date), 'dd MMM yyyy', { locale: es })}
                           </td>
                           <td className="px-6 py-3.5">
@@ -263,7 +263,7 @@ export default async function StaffDetailPage({ params }: { params: { id: string
             ) : (
               <DSCard className="text-center py-12">
                 <DSIconBox icon={Shield} variant="neutral" className="mx-auto mb-3" />
-                <p className="text-sm text-gray-500">No tiene asignaciones de guardia registradas.</p>
+                <p className="text-sm text-slate-500">No tiene asignaciones de guardia registradas.</p>
               </DSCard>
             )}
           </div>
@@ -282,8 +282,8 @@ export default async function StaffDetailPage({ params }: { params: { id: string
                   return (
                     <DSCard key={vac.id} className={isCancelled ? "opacity-60 grayscale-[0.3]" : ""}>
                       <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                          <CalendarDays className="h-4 w-4 text-[#0066CC]" />
+                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                          <CalendarDays className="h-4 w-4 text-indigo-500" />
                           {format(parseISO(vac.start_date), 'dd MMM', { locale: es })} — {format(parseISO(vac.end_date), 'dd MMM yyyy', { locale: es })}
                         </div>
                         <DSBadge variant={isCancelled ? "neutral" : "green"}>
@@ -291,7 +291,7 @@ export default async function StaffDetailPage({ params }: { params: { id: string
                         </DSBadge>
                       </div>
                       {vac.notes && (
-                        <p className="text-xs text-gray-400 italic">{vac.notes}</p>
+                        <p className="text-xs text-slate-400 italic">{vac.notes}</p>
                       )}
                     </DSCard>
                   )
@@ -300,7 +300,7 @@ export default async function StaffDetailPage({ params }: { params: { id: string
             ) : (
               <DSCard className="text-center py-12">
                 <DSIconBox icon={Sun} variant="neutral" className="mx-auto mb-3" />
-                <p className="text-sm text-gray-500">No tiene periodos de vacaciones registrados.</p>
+                <p className="text-sm text-slate-500">No tiene periodos de vacaciones registrados.</p>
               </DSCard>
             )}
           </div>

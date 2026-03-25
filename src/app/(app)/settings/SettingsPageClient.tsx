@@ -158,39 +158,39 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
              <div className="flex items-center gap-3 mb-8">
                 <DSIconBox icon={Settings2} variant="blue" />
                 <div>
-                   <h3 className="text-[18px] font-bold text-neutral-900">Parámetros Globales</h3>
-                   <p className="text-[12px] text-[#86868B]">Define los valores base del funcionamiento del juzgado.</p>
+                   <h3 className="text-[18px] font-bold text-slate-900">Parámetros Globales</h3>
+                   <p className="text-[12px] text-slate-500">Define los valores base del funcionamiento del juzgado.</p>
                 </div>
              </div>
-             
+
              <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                   <label className="text-[11px] font-black uppercase text-[#86868B] px-1">Año Activo del Sistema</label>
-                   <Input 
-                      type="number" 
+                   <label className="text-[11px] font-black uppercase text-slate-500 px-1">Año Activo del Sistema</label>
+                   <Input
+                      type="number"
                       value={activeYear}
                       onChange={(e) => setActiveYear(parseInt(e.target.value) || 2026)}
-                      className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px] font-bold" 
+                      className="h-11 rounded-[12px] bg-white border-slate-200 text-slate-800 text-[15px] font-bold"
                    />
                 </div>
                 <div className="space-y-2">
-                   <label className="text-[11px] font-black uppercase text-[#86868B] px-1">Personas por Guardia</label>
-                   <div className="h-11 rounded-[12px] bg-[#F2F2F7]/30 border border-dashed border-black/[0.08] flex items-center px-4 text-[14px] font-medium text-neutral-600">
+                   <label className="text-[11px] font-black uppercase text-slate-500 px-1">Personas por Guardia</label>
+                   <div className="h-11 rounded-[12px] bg-slate-50 border border-dashed border-slate-200 flex items-center px-4 text-[14px] font-medium text-slate-600">
                       3 Miembros (Aux + Tram + Gest)
                    </div>
                 </div>
                 <div className="md:col-span-2 space-y-2">
-                   <label className="text-[11px] font-black uppercase text-[#86868B] px-1">Modelo Groq Cloud (IA)</label>
-                   <Input 
+                   <label className="text-[11px] font-black uppercase text-slate-500 px-1">Modelo Groq Cloud (IA)</label>
+                   <Input
                       value={groqModel}
                       onChange={(e) => setGroqModel(e.target.value)}
                       placeholder="llama-3.3-70b-versatile"
-                      className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]" 
+                      className="h-11 rounded-[12px] bg-white border-slate-200 text-slate-800 text-[15px]"
                    />
                 </div>
              </div>
-             
-             <div className="mt-10 pt-6 border-t border-black/[0.04] flex justify-end">
+
+             <div className="mt-10 pt-6 border-t border-slate-100 flex justify-end">
                 <DSButton onClick={handleSaveSettings} disabled={savingSettings} className="h-11 px-8">
                    {savingSettings ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                    Guardar Configuración
@@ -204,15 +204,15 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
                 <div className="flex items-center gap-3">
                    <DSIconBox icon={CalendarDays} variant="indigo" />
                    <div>
-                      <h3 className="text-[18px] font-bold text-neutral-900">Calendario Judicial</h3>
-                      <p className="text-[12px] text-[#86868B]">Genera los periodos de guardia para el año seleccionado.</p>
+                      <h3 className="text-[18px] font-bold text-slate-900">Calendario Judicial</h3>
+                      <p className="text-[12px] text-slate-500">Genera los periodos de guardia para el año seleccionado.</p>
                    </div>
                 </div>
              </div>
 
              <div className="flex flex-col md:flex-row gap-4 mb-8">
                 <Select value={yearToGenerate} onValueChange={setYearToGenerate}>
-                   <SelectTrigger className="h-11 rounded-[12px] md:w-32 bg-[#F2F2F7]/50 border-black/[0.04] font-bold">
+                   <SelectTrigger className="h-11 rounded-[12px] md:w-32 bg-white border-slate-200 text-slate-800 font-bold">
                       <SelectValue placeholder="Año" />
                    </SelectTrigger>
                    <SelectContent className="rounded-[16px]">
@@ -222,11 +222,11 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
                       <SelectItem value="2028">2028</SelectItem>
                    </SelectContent>
                 </Select>
-                <DSButton 
-                  variant="secondary" 
-                  onClick={() => handleGeneratePeriods(false)} 
+                <DSButton
+                  variant="secondary"
+                  onClick={() => handleGeneratePeriods(false)}
                   disabled={generating}
-                  className="h-11 flex-1 bg-white border-black/[0.08] text-neutral-900"
+                  className="h-11 flex-1 bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
                 >
                    {generating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CalendarDays className="h-4 w-4 mr-2" />}
                    Sincronizar Periodos Anuales
@@ -234,24 +234,24 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
              </div>
 
              {periods && periods.length > 0 && (
-               <div className="rounded-[24px] border border-black/[0.04] overflow-hidden bg-white shadow-sm">
+               <div className="rounded-[24px] border border-slate-100 overflow-hidden bg-white shadow-sm">
                   <div className="max-h-[320px] overflow-auto scrollbar-hide">
                      <table className="w-full text-left border-collapse">
-                        <thead className="bg-[#F2F2F7]/50 sticky top-0 z-10">
-                           <tr className="border-b border-black/[0.04]">
-                              <th className="px-6 py-3 text-[10px] font-black uppercase text-[#86868B]">Semana</th>
-                              <th className="px-6 py-3 text-[10px] font-black uppercase text-[#86868B]">Inicio</th>
-                              <th className="px-6 py-3 text-[10px] font-black uppercase text-[#86868B]">Fin</th>
+                        <thead className="bg-slate-50 sticky top-0 z-10">
+                           <tr className="border-b border-slate-100">
+                              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-500">Semana</th>
+                              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-500">Inicio</th>
+                              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-500">Fin</th>
                               <th className="px-6 py-3"></th>
                            </tr>
                         </thead>
-                        <tbody className="divide-y divide-black/[0.04]">
+                        <tbody className="divide-y divide-slate-100">
                            {periods.map((p) => (
-                             <tr key={p.id || p.week_number} className="hover:bg-[#F2F2F7]/30 transition-colors">
+                             <tr key={p.id || p.week_number} className="hover:bg-slate-50 transition-colors">
                                 <td className="px-6 py-3.5"><DSBadge variant="indigo">S{p.week_number}</DSBadge></td>
-                                <td className="px-6 py-3.5 text-[14px] font-medium text-neutral-800">{format(parseISO(p.start_date), 'dd MMM yyyy', { locale: es })}</td>
-                                <td className="px-6 py-3.5 text-[14px] font-medium text-neutral-800">{format(parseISO(p.end_date), 'dd MMM yyyy', { locale: es })}</td>
-                                <td className="px-6 py-3.5 text-right"><ChevronRight className="h-4 w-4 text-black/10 inline-block" /></td>
+                                <td className="px-6 py-3.5 text-[14px] font-medium text-slate-700">{format(parseISO(p.start_date), 'dd MMM yyyy', { locale: es })}</td>
+                                <td className="px-6 py-3.5 text-[14px] font-medium text-slate-700">{format(parseISO(p.end_date), 'dd MMM yyyy', { locale: es })}</td>
+                                <td className="px-6 py-3.5 text-right"><ChevronRight className="h-4 w-4 text-slate-300 inline-block" /></td>
                              </tr>
                            ))}
                         </tbody>
@@ -340,22 +340,22 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
            {/* System Info Cards */}
            <div className="space-y-4">
               <DSSectionHeading className="px-2">Estructura Judicial</DSSectionHeading>
-              <div className="bg-white rounded-[24px] p-6 border border-black/[0.04] space-y-4 shadow-sm">
+              <div className="bg-white rounded-[24px] p-6 border border-slate-100 space-y-4 shadow-sm">
                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-[#86868B] font-medium">Auxilio Judicial</span>
+                    <span className="text-[13px] text-slate-500 font-medium">Auxilio Judicial</span>
                     <DSBadge variant="blue">{systemStats.staff.aux}</DSBadge>
                  </div>
                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-[#86868B] font-medium">Tramitación</span>
+                    <span className="text-[13px] text-slate-500 font-medium">Tramitación</span>
                     <DSBadge variant="indigo">{systemStats.staff.tra}</DSBadge>
                  </div>
                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-[#86868B] font-medium">Gestión</span>
+                    <span className="text-[13px] text-slate-500 font-medium">Gestión</span>
                     <DSBadge variant="purple">{systemStats.staff.ges}</DSBadge>
                  </div>
-                 <div className="flex items-center justify-between pt-4 border-t border-black/[0.04]">
-                    <span className="text-[14px] text-neutral-900 font-bold">Total Asignaturas</span>
-                    <span className="text-[14px] font-black text-[#0066CC]">{systemStats.assignments.total}</span>
+                 <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <span className="text-[14px] text-slate-900 font-bold">Total Asignaturas</span>
+                    <span className="text-[14px] font-black text-indigo-600">{systemStats.assignments.total}</span>
                  </div>
               </div>
            </div>
@@ -364,7 +364,7 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
 
       {/* Confirmation Dialog */}
       <Dialog open={confirmDialog.open} onOpenChange={(open: boolean) => !open && setConfirmDialog({ open: false, data: null })}>
-        <DialogContent className="rounded-[32px] border-none shadow-2xl p-0 overflow-hidden max-w-md">
+        <DialogContent className="rounded-[32px] border-none shadow-2xl p-0 overflow-hidden max-w-md bg-white">
            <div className="bg-red-50 p-8 border-b border-red-100 flex items-center gap-4">
               <DSIconBox icon={AlertTriangle} variant="red" className="bg-white" />
               <div>
@@ -372,14 +372,14 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
                  <DialogDescription className="text-red-700 font-medium">Sobreescritura de calendario judicial detectada.</DialogDescription>
               </div>
            </div>
-           
+
            <div className="p-8 space-y-6">
-              <p className="text-[15px] text-neutral-600 leading-relaxed font-medium">
+              <p className="text-[15px] text-slate-700 leading-relaxed font-medium">
                  Ya existen periodos para el año <span className="font-black text-red-600">{yearToGenerate}</span>. Continuar borrará todas las asignaciones de guardia existentes permanentemente.
               </p>
-              
-              <div className="p-5 rounded-[20px] bg-red-100/50 border border-red-200">
-                 <p className="text-[12px] font-bold text-red-900 leading-tight">
+
+              <div className="p-5 rounded-[20px] bg-red-50 border border-red-200">
+                 <p className="text-[12px] font-bold text-red-800 leading-tight">
                     ESTA ACCIÓN NO SE PUEDE DESHACER. TODAS LAS GUARDIAS PROGRAMADAS SE PERDERÁN.
                  </p>
               </div>

@@ -163,10 +163,10 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
   if (loading || roleLoading) {
     return (
       <div className="space-y-10 animate-pulse">
-        <div className="h-20 bg-white/[0.06] rounded-[24px]" />
+        <div className="h-20 bg-slate-100 rounded-[24px]" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-48 bg-white/[0.06] rounded-[24px]" />
+            <div key={i} className="h-48 bg-slate-100 rounded-[24px]" />
           ))}
         </div>
       </div>
@@ -187,22 +187,22 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-white/[0.07]">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100">
         <div className="flex flex-wrap items-center gap-3 w-full">
           <div className="relative flex-1 md:max-w-xs">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
             <Input
               placeholder="Buscar por nombre..."
-              className="pl-10 h-11 rounded-[12px] bg-white/[0.05] border-white/[0.09] text-slate-200 placeholder:text-slate-500 text-[15px] focus:ring-[#0066CC]/20"
+              className="pl-10 h-11 rounded-[12px] bg-white border-slate-200 text-slate-700 placeholder:text-slate-400 text-[15px] focus:ring-[#0066CC]/20"
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
           <Select value={positionFilter} onValueChange={setPositionFilter}>
-            <SelectTrigger className="w-full md:w-[200px] h-11 rounded-[12px] bg-white/[0.05] border-white/[0.09] text-slate-300 text-[15px]">
+            <SelectTrigger className="w-full md:w-[200px] h-11 rounded-[12px] bg-white border-slate-200 text-slate-700 text-[15px]">
               <SelectValue placeholder="Puesto" />
             </SelectTrigger>
-            <SelectContent className="rounded-[16px] border-white/[0.09] shadow-xl">
+            <SelectContent className="rounded-[16px] border-slate-100 shadow-xl">
               <SelectItem value="all">Todos los puestos</SelectItem>
               {positions.map(p => (
                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -211,10 +211,10 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
           </Select>
           {isHeadmaster && (
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[150px] h-11 rounded-[12px] bg-white/[0.05] border-white/[0.09] text-slate-300 text-[15px]">
+              <SelectTrigger className="w-full md:w-[150px] h-11 rounded-[12px] bg-white border-slate-200 text-slate-700 text-[15px]">
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
-              <SelectContent className="rounded-[16px] border-white/[0.09] shadow-xl">
+              <SelectContent className="rounded-[16px] border-slate-100 shadow-xl">
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="active">Activos</SelectItem>
                 <SelectItem value="inactive">Inactivos</SelectItem>
@@ -240,7 +240,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
             return (
               <DSCard key={staff.id} className={cn("group transition-all duration-300 hover:scale-[1.02]", !staff.is_active && "opacity-60 grayscale-[0.3]")}>
                 <div className="flex justify-between items-start mb-6">
-                  <div className="h-12 w-12 rounded-[16px] bg-white/[0.08] flex items-center justify-center text-white font-black text-sm border border-white/[0.08]">
+                  <div className="h-12 w-12 rounded-[16px] bg-indigo-50 flex items-center justify-center text-indigo-700 font-black text-sm border border-indigo-100">
                     {initials}
                   </div>
                   <div className="flex flex-col items-end gap-2">
@@ -254,7 +254,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                 </div>
 
                 <div className="space-y-1 mb-6">
-                  <h4 className="text-[17px] font-extrabold text-slate-100 tracking-tight group-hover:text-[#60A5FA] transition-colors">
+                  <h4 className="text-[17px] font-extrabold text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">
                     {buildFullName(staff)}
                   </h4>
                   <div className="flex flex-col gap-1.5 pt-2">
@@ -269,7 +269,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/[0.07] flex items-center justify-between">
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-tight text-slate-500">
                     <CalendarIcon className="h-3.5 w-3.5" />
                     {format(parseISO(staff.start_date), 'MMM yyyy', { locale: es })}
@@ -278,11 +278,11 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
                   {isHeadmaster ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/[0.07] text-slate-400 hover:bg-white/[0.14] hover:text-white transition-all">
+                        <button className="h-8 w-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all">
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-[16px] border-white/[0.09] shadow-2xl p-1.5 w-48">
+                      <DropdownMenuContent align="end" className="rounded-[16px] border-slate-100 shadow-2xl p-1.5 w-48">
                         <DropdownMenuItem onClick={() => router.push(`/staff/${staff.id}`)} className="rounded-[10px] gap-2 py-2.5">
                           <Eye className="h-4 w-4" /> Ver Ficha
                         </DropdownMenuItem>
@@ -341,12 +341,12 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
 
       {/* Action Dialog */}
       <Dialog open={confirmDialog.open} onOpenChange={(open) => !open && setConfirmDialog({ ...confirmDialog, open: false })}>
-        <DialogContent className="rounded-[32px] border-white/[0.09] shadow-2xl p-8 max-w-md" style={{ background: "#0D1628" }}>
+        <DialogContent className="rounded-[32px] border-slate-100 shadow-2xl p-8 max-w-md bg-white">
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-[22px] font-bold text-white">
+            <DialogTitle className="text-[22px] font-bold text-slate-900">
               {confirmDialog.type === 'deactivate' ? '¿Dar de baja?' : '¿Reactivar trabajador?'}
             </DialogTitle>
-            <DialogDescription className="text-[15px] text-slate-400 mt-2">
+            <DialogDescription className="text-[15px] text-slate-500 mt-2">
               {confirmDialog.type === 'deactivate' 
                 ? `Dar de baja a ${confirmDialog.staff?.first_name} desactivará su acceso y liberará sus guardias automáticamente.`
                 : `¿Reactivar a ${confirmDialog.staff?.first_name}? Recuperará su acceso a la plataforma.`}
@@ -370,12 +370,12 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
 
       {/* Role Dialog */}
       <Dialog open={roleDialog.open} onOpenChange={(open) => !open && setRoleDialog({ ...roleDialog, open: false })}>
-        <DialogContent className="rounded-[32px] border-white/[0.09] shadow-2xl p-8 max-w-md" style={{ background: "#0D1628" }}>
+        <DialogContent className="rounded-[32px] border-slate-100 shadow-2xl p-8 max-w-md bg-white">
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-[22px] font-bold text-white">
+            <DialogTitle className="text-[22px] font-bold text-slate-900">
               {roleDialog.newRole === 'headmaster' ? '👑 Hacer Administrador' : '👤 Quitar Administrador'}
             </DialogTitle>
-            <DialogDescription className="text-[15px] text-slate-400 mt-2">
+            <DialogDescription className="text-[15px] text-slate-500 mt-2">
               {roleDialog.newRole === 'headmaster'
                 ? `¿Dar permisos totales a ${roleDialog.staff ? buildFullName(roleDialog.staff) : ''}?`
                 : `¿Quitar permisos de administración a ${roleDialog.staff ? buildFullName(roleDialog.staff) : ''}?`}

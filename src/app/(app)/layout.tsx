@@ -8,20 +8,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const userInitials = user?.email ? user.email.substring(0, 2).toUpperCase() : "??"
 
   return (
-    <div className="min-h-screen font-sans selection:bg-[#0066CC]/20" style={{ background: "linear-gradient(135deg, #060C18 0%, #0A1025 50%, #060E1C 100%)" }}>
-      {/* Ambient background glows — purely decorative */}
+    <div className="min-h-screen font-sans selection:bg-indigo-100" style={{ background: "linear-gradient(135deg, #EEF2FF 0%, #F5F0FF 40%, #FFF0F8 100%)" }}>
+      {/* Decorative color blobs — muy suaves, sin agobiar */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
-        <div className="absolute -top-[20%] left-[10%] w-[600px] h-[600px] rounded-full bg-[#0066CC]/[0.06] blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[5%] w-[500px] h-[500px] rounded-full bg-[#06B6D4]/[0.04] blur-[100px]" />
-        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] rounded-full bg-[#6366F1]/[0.03] blur-[80px]" />
+        <div className="absolute -top-[10%] left-[5%] w-[500px] h-[500px] rounded-full bg-indigo-300/[0.08] blur-[100px]" />
+        <div className="absolute bottom-[-5%] right-[5%] w-[400px] h-[400px] rounded-full bg-violet-300/[0.08] blur-[80px]" />
+        <div className="absolute top-[50%] left-[40%] w-[300px] h-[300px] rounded-full bg-pink-300/[0.06] blur-[80px]" />
       </div>
 
       {/* Mobile top bar */}
       <MobileNav userEmail={user?.email} userInitials={userInitials} />
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:fixed md:flex md:w-[260px] md:h-screen md:flex-col z-30"
-        style={{ background: "linear-gradient(180deg, #08101E 0%, #060C18 100%)", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
+      <aside className="hidden md:fixed md:flex md:w-[260px] md:h-screen md:flex-col z-30 bg-white border-r border-slate-100 shadow-[1px_0_8px_rgba(0,0,0,0.04)]">
         <AppSidebar userEmail={user?.email} />
       </aside>
 

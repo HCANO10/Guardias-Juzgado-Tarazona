@@ -22,8 +22,8 @@ import { Search } from 'lucide-react'
 // ─────────────────────────────────────────────
 describe('tokens', () => {
   it('tiene colores primarios definidos', () => {
-    expect(tokens.colors.primary).toBe('#0066CC')
-    expect(tokens.colors.accent).toBe('#E42313')
+    expect(tokens.colors.primary).toBe('#4F46E5')
+    expect(tokens.colors.violet).toBe('#7C3AED')
   })
 
   it('tiene fuentes definidas', () => {

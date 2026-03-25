@@ -228,21 +228,21 @@ export default function DashboardPageClient({
                 padding="px-4 py-3.5"
                 className="flex items-center gap-3 group cursor-pointer"
               >
-                <div className="h-9 w-9 rounded-[10px] bg-blue-500/[0.15] flex items-center justify-center flex-shrink-0">
+                <div className="h-9 w-9 rounded-[10px] bg-indigo-50 flex items-center justify-center flex-shrink-0">
                   <Sparkles
-                    className="h-4 w-4 text-[#0066CC]"
+                    className="h-4 w-4 text-indigo-600"
                     strokeWidth={2}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-200">
+                  <p className="text-sm font-medium text-slate-900">
                     Generar con IA
                   </p>
                   <p className="text-xs text-slate-500">
                     Asignación automática
                   </p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-[#0066CC] transition-colors" />
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
               </DSCard>
             </Link>
 
@@ -251,19 +251,19 @@ export default function DashboardPageClient({
                 padding="px-4 py-3.5"
                 className="flex items-center gap-3 group cursor-pointer"
               >
-                <div className="h-9 w-9 rounded-[10px] bg-emerald-500/[0.15] flex items-center justify-center flex-shrink-0">
+                <div className="h-9 w-9 rounded-[10px] bg-emerald-50 flex items-center justify-center flex-shrink-0">
                   <UserPlus
                     className="h-4 w-4 text-emerald-600"
                     strokeWidth={2}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-200">
+                  <p className="text-sm font-medium text-slate-900">
                     Nuevo Personal
                   </p>
                   <p className="text-xs text-slate-500">Añadir trabajador</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-emerald-600 transition-colors" />
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-600 transition-colors" />
               </DSCard>
             </Link>
 
@@ -272,21 +272,21 @@ export default function DashboardPageClient({
                 padding="px-4 py-3.5"
                 className="flex items-center gap-3 group cursor-pointer"
               >
-                <div className="h-9 w-9 rounded-[10px] bg-amber-500/[0.15] flex items-center justify-center flex-shrink-0">
+                <div className="h-9 w-9 rounded-[10px] bg-amber-50 flex items-center justify-center flex-shrink-0">
                   <Sun
                     className="h-4 w-4 text-amber-600"
                     strokeWidth={2}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-200">
+                  <p className="text-sm font-medium text-slate-900">
                     Vacaciones
                   </p>
                   <p className="text-xs text-slate-500">
                     Solicitar o revisar
                   </p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-amber-600 transition-colors" />
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-amber-600 transition-colors" />
               </DSCard>
             </Link>
           </div>
@@ -318,11 +318,11 @@ export default function DashboardPageClient({
                 ].map((cat) => (
                   <div key={cat.label} className="flex items-center gap-3">
                     <span className={`h-2 w-2 rounded-full ${cat.color}`} />
-                    <span className="text-sm text-slate-400 flex-1">
+                    <span className="text-sm text-slate-600 flex-1">
                       {cat.label}
                     </span>
                     <span
-                      className="text-sm font-semibold text-slate-200"
+                      className="text-sm font-semibold text-slate-900"
                       style={{ fontFamily: tokens.fonts.heading }}
                     >
                       {cat.count}
@@ -346,18 +346,18 @@ export default function DashboardPageClient({
           background: transparent;
         }
         .dashboard-calendar .fc-col-header-cell {
-          background: rgba(255,255,255,0.03);
+          background: #f1f5f9;
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           padding: 8px 0;
           color: #64748b;
-          border-color: rgba(255,255,255,0.06) !important;
+          border-color: #e2e8f0 !important;
         }
         .dashboard-calendar .fc-daygrid-day-number {
           font-size: 13px;
           font-weight: 500;
-          color: #cbd5e1;
+          color: #334155;
           border: none;
         }
         .dashboard-calendar .fc-daygrid-day {
@@ -365,10 +365,10 @@ export default function DashboardPageClient({
         }
         .dashboard-calendar .fc-scrollgrid-sync-table td,
         .dashboard-calendar .fc-scrollgrid-sync-table th {
-          border-color: rgba(255,255,255,0.05) !important;
+          border-color: #e2e8f0 !important;
         }
         .dashboard-calendar .fc-daygrid-day.fc-day-today {
-          background: rgba(0,102,204,0.08) !important;
+          background: rgba(79, 70, 229, 0.06) !important;
         }
       `}</style>
     </div>

@@ -209,13 +209,13 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-black/[0.04]">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100">
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <Select value={scopeFilter} onValueChange={setScopeFilter}>
-            <SelectTrigger className="w-full md:w-[200px] rounded-[12px] h-11 bg-white border-black/[0.08] text-[15px]">
+            <SelectTrigger className="w-full md:w-[200px] rounded-[12px] h-11 bg-white border-slate-200 text-slate-700 text-[15px]">
               <SelectValue placeholder="Ámbito" />
             </SelectTrigger>
-            <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
+            <SelectContent className="rounded-[16px] border-slate-100 shadow-xl">
               <SelectItem value="all">Todos los ámbitos</SelectItem>
               <SelectItem value="nacional">Nacional</SelectItem>
               <SelectItem value="aragon">Aragón</SelectItem>
@@ -225,10 +225,10 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
           </Select>
 
           <Select value={yearFilter} onValueChange={setYearFilter}>
-            <SelectTrigger className="w-full md:w-[150px] rounded-[12px] h-11 bg-white border-black/[0.08] text-[15px]">
+            <SelectTrigger className="w-full md:w-[150px] rounded-[12px] h-11 bg-white border-slate-200 text-slate-700 text-[15px]">
               <SelectValue placeholder="Año" />
             </SelectTrigger>
-            <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
+            <SelectContent className="rounded-[16px] border-slate-100 shadow-xl">
               <SelectItem value="all">Todos los años</SelectItem>
               {years.map(year => (
                 <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
@@ -253,21 +253,21 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
             return (
               <DSCard key={holiday.id} className="group hover:scale-[1.02] transition-all duration-300">
                 <div className="flex justify-between items-start mb-4">
-                  <div className="h-10 w-10 flex items-center justify-center rounded-[12px] bg-[#F2F2F7] text-neutral-900 font-bold text-[13px] border border-black/[0.04]">
+                  <div className="h-10 w-10 flex items-center justify-center rounded-[12px] bg-indigo-50 text-indigo-700 font-bold text-[13px] border border-indigo-100">
                     {format(parseISO(holiday.date), 'dd')}
                   </div>
                   <DSBadge variant={scope.variant}>{scope.label}</DSBadge>
                 </div>
 
                 <div className="space-y-1 mb-6">
-                  <p className="text-[17px] font-semibold text-neutral-900 leading-tight min-h-[44px]">{holiday.name}</p>
-                  <p className="text-[13px] text-[#86868B] font-medium capitalize">
+                  <p className="text-[17px] font-semibold text-slate-900 leading-tight min-h-[44px]">{holiday.name}</p>
+                  <p className="text-[13px] text-slate-500 font-medium capitalize">
                     {format(parseISO(holiday.date), "MMMM 'de' yyyy", { locale: es })}
                   </p>
                 </div>
 
                 {isHeadmaster && (
-                  <div className="flex items-center gap-2 pt-4 border-t border-black/[0.04]">
+                  <div className="flex items-center gap-2 pt-4 border-t border-slate-100">
                     <DSButton 
                       variant="secondary" 
                       className="flex-1 h-9 text-[12px] rounded-[10px]"
@@ -294,29 +294,29 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
 
       {/* Form Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden">
-          <div className="h-2 bg-[#0066CC] w-full" />
+        <DialogContent className="sm:max-w-[425px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden bg-white">
+          <div className="h-2 bg-indigo-600 w-full" />
           <div className="p-8">
             <DialogHeader className="mb-6">
-              <DialogTitle className="text-[24px] font-bold text-neutral-900">
+              <DialogTitle className="text-[24px] font-bold text-slate-900">
                 {editingHoliday ? 'Editar Festivo' : 'Añadir Nuevo Festivo'}
               </DialogTitle>
-              <DialogDescription className="text-[15px] text-[#86868B]">
+              <DialogDescription className="text-[15px] text-slate-500">
                 Define la fecha y el ámbito del día no laborable.
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="space-y-6 py-2">
               <div className="space-y-2">
-                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Fecha</label>
+                <label className="text-[12px] font-bold uppercase tracking-wider text-slate-500 px-1">Fecha</label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="w-full flex items-center px-4 h-11 rounded-[12px] bg-[#F2F2F7]/50 border border-black/[0.04] text-[15px] text-neutral-900">
-                      <CalendarIcon className="mr-2 h-4 w-4 text-[#0066CC]" />
+                    <button className="w-full flex items-center px-4 h-11 rounded-[12px] bg-slate-50 border border-slate-200 text-[15px] text-slate-700">
+                      <CalendarIcon className="mr-2 h-4 w-4 text-indigo-600" />
                       {formData.date ? format(formData.date, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="p-0 rounded-[24px] border-black/[0.08] shadow-2xl overflow-hidden" align="start">
+                  <PopoverContent className="p-0 rounded-[24px] border-slate-200 shadow-2xl overflow-hidden" align="start">
                     <Calendar
                       mode="single"
                       selected={formData.date}
@@ -330,22 +330,22 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
               </div>
 
               <div className="space-y-2">
-                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Nombre</label>
-                <Input 
-                  value={formData.name} 
+                <label className="text-[12px] font-bold uppercase tracking-wider text-slate-500 px-1">Nombre</label>
+                <Input
+                  value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Ej: Navidad, Todos los Santos..."
-                  className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] focus:bg-white text-[15px] px-4"
+                  className="h-11 rounded-[12px] bg-slate-50 border-slate-200 focus:bg-white text-slate-800 text-[15px] px-4"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">Ámbito</label>
+                <label className="text-[12px] font-bold uppercase tracking-wider text-slate-500 px-1">Ámbito</label>
                 <Select value={formData.scope} onValueChange={(val) => setFormData(prev => ({ ...prev, scope: val as Holiday['scope'] }))}>
-                  <SelectTrigger className="h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]">
+                  <SelectTrigger className="h-11 rounded-[12px] bg-slate-50 border-slate-200 text-slate-700 text-[15px]">
                     <SelectValue placeholder="Seleccionar ámbito" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
+                  <SelectContent className="rounded-[16px] border-slate-100 shadow-xl">
                     <SelectItem value="nacional">Nacional</SelectItem>
                     <SelectItem value="aragon">Aragón</SelectItem>
                     <SelectItem value="zaragoza_provincia">Zaragoza Prov.</SelectItem>
@@ -370,15 +370,15 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
 
       {/* Delete Confirmation */}
       <AlertDialog open={isDelOpen} onOpenChange={setIsDelOpen}>
-        <AlertDialogContent className="rounded-[32px] border-none shadow-2xl p-8">
+        <AlertDialogContent className="rounded-[32px] border-none shadow-2xl p-8 bg-white">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[22px] font-bold text-neutral-900">¿Eliminar festivo?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[15px] text-[#86868B] mt-2">
+            <AlertDialogTitle className="text-[22px] font-bold text-slate-900">¿Eliminar festivo?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[15px] text-slate-500 mt-2">
               Esta acción no se puede deshacer. Los cálculos de guardias y vacaciones podrían verse afectados.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8 gap-3">
-            <AlertDialogCancel disabled={loading} className="rounded-[14px] h-11 border-none bg-[#F2F2F7] text-neutral-900 font-semibold hover:bg-black/[0.05]">
+            <AlertDialogCancel disabled={loading} className="rounded-[14px] h-11 border-slate-200 bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200">
               Cancelar
             </AlertDialogCancel>
             <DSButton 

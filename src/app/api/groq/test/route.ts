@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import { NextResponse } from 'next/server'
 import { requireHeadmaster } from '@/lib/auth/require-role'
 import { callGroq } from '@/lib/groq/client'

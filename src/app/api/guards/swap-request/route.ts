@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 // POST /api/guards/swap-request
 // Any authenticated worker can create a swap request.
 // The headmaster can accept/execute directly from their admin panel;

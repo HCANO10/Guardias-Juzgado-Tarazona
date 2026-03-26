@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 // PATCH /api/guards/swap-request/[id]
 // Accept, reject (requested person) or cancel (requester) a swap request.
 

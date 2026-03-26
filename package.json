@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:pages": "npx @cloudflare/next-on-pages@1",
-    "preview:pages": "npx wrangler pages dev .vercel/output/static --compatibility-flag=nodejs_compat",
+    "build:pages": "npx @opennextjs/cloudflare build",
+    "preview:pages": "npx wrangler dev --port 3001",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
@@ -56,6 +56,7 @@
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.16",
+    "@opennextjs/cloudflare": "^1.17.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

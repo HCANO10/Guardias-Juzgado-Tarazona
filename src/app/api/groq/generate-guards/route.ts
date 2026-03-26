@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Note: eslint-disable kept for Supabase nested relation casts (positions.guard_role, staff.positions)
 // These are inherent to Supabase's JS client typing limitations with deep joins.

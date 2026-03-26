@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:pages": "npx @opennextjs/cloudflare build && cp .open-next/worker.js .open-next/assets/_worker.js",
+    "build:pages": "npx @opennextjs/cloudflare build && mv .open-next/worker.js .open-next/_worker.js",
     "preview:pages": "npx wrangler dev --port 3001",
     "start": "next start",
     "lint": "next lint",

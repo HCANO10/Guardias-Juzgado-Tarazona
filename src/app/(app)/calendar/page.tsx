@@ -1,13 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
-import dynamic from 'next/dynamic'
-import { CalendarSkeleton } from "@/components/calendar/CalendarSkeleton"
+import { UnifiedCalendar } from "@/components/calendar/CalendarClientWrapper"
 import { ExportPDFButton } from "@/components/calendar/ExportPDFButton"
 import { DSPageHeader } from "@/lib/design-system"
-
-const UnifiedCalendar = dynamic(
-  () => import('@/components/calendar/UnifiedCalendar'),
-  { ssr: false, loading: () => <CalendarSkeleton /> }
-)
 
 interface StaffPosition {
   guard_role: string | null;

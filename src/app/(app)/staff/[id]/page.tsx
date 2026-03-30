@@ -276,7 +276,6 @@ export default async function StaffDetailPage({ params }: { params: { id: string
                 </div>
               </>
             ) : (
-            ) : (
               <DSCard className="text-center py-12">
                 <DSIconBox icon={Shield} variant="neutral" className="mx-auto mb-3" />
                 <p className="text-sm text-slate-500">No tiene asignaciones de guardia registradas.</p>

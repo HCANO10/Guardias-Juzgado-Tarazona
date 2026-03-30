@@ -154,7 +154,7 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
         <div className="lg:col-span-8 space-y-10">
           
           {/* General Settings */}
-          <DSCard className="p-8">
+          <DSCard className="p-5 md:p-8">
              <div className="flex items-center gap-3 mb-8">
                 <DSIconBox icon={Settings2} variant="blue" />
                 <div>
@@ -199,7 +199,7 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
           </DSCard>
 
           {/* Calendar Generator */}
-          <DSCard className="p-8">
+          <DSCard className="p-5 md:p-8">
              <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                    <DSIconBox icon={CalendarDays} variant="indigo" />
@@ -239,19 +239,19 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
                      <table className="w-full text-left border-collapse">
                         <thead className="bg-slate-50 sticky top-0 z-10">
                            <tr className="border-b border-slate-100">
-                              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-500">Semana</th>
-                              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-500">Inicio</th>
-                              <th className="px-6 py-3 text-[10px] font-black uppercase text-slate-500">Fin</th>
-                              <th className="px-6 py-3"></th>
+                              <th className="px-3 md:px-6 py-3 text-[10px] font-black uppercase text-slate-500">Semana</th>
+                              <th className="px-3 md:px-6 py-3 text-[10px] font-black uppercase text-slate-500">Inicio</th>
+                              <th className="px-3 md:px-6 py-3 text-[10px] font-black uppercase text-slate-500">Fin</th>
+                              <th className="px-3 md:px-6 py-3"></th>
                            </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                            {periods.map((p) => (
                              <tr key={p.id || p.week_number} className="hover:bg-slate-50 transition-colors">
-                                <td className="px-6 py-3.5"><DSBadge variant="indigo">S{p.week_number}</DSBadge></td>
-                                <td className="px-6 py-3.5 text-[14px] font-medium text-slate-700">{format(parseISO(p.start_date), 'dd MMM yyyy', { locale: es })}</td>
-                                <td className="px-6 py-3.5 text-[14px] font-medium text-slate-700">{format(parseISO(p.end_date), 'dd MMM yyyy', { locale: es })}</td>
-                                <td className="px-6 py-3.5 text-right"><ChevronRight className="h-4 w-4 text-slate-300 inline-block" /></td>
+                                <td className="px-3 md:px-6 py-3.5"><DSBadge variant="indigo">S{p.week_number}</DSBadge></td>
+                                <td className="px-3 md:px-6 py-3.5 text-[13px] md:text-[14px] font-medium text-slate-700">{format(parseISO(p.start_date), 'dd MMM yyyy', { locale: es })}</td>
+                                <td className="px-3 md:px-6 py-3.5 text-[13px] md:text-[14px] font-medium text-slate-700">{format(parseISO(p.end_date), 'dd MMM yyyy', { locale: es })}</td>
+                                <td className="px-3 md:px-6 py-3.5 text-right"><ChevronRight className="h-4 w-4 text-slate-300 inline-block" /></td>
                              </tr>
                            ))}
                         </tbody>
@@ -266,7 +266,7 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
         <div className="lg:col-span-4 space-y-10">
            
            {/* System Health Card */}
-           <DSCard dark hover={false} className="shadow-2xl relative overflow-hidden" padding="p-8">
+           <DSCard dark hover={false} className="shadow-2xl relative overflow-hidden" padding="p-5 md:p-8">
               <div className="relative z-10 space-y-6">
                  <div className="flex items-center justify-between">
                     <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center">

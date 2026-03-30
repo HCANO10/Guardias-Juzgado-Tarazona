@@ -138,14 +138,14 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
   return (
     <div className="space-y-8">
       <DSCard className="p-6 md:p-8">
-        <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
+        <div className="flex flex-col lg:flex-row gap-4 md:gap-6 items-start lg:items-center justify-between">
           <div className="flex flex-wrap gap-6 items-center">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">
                 <Users className="h-3.5 w-3.5" /> Filtrar Personal
               </div>
               <Select value={personFilter} onValueChange={setPersonFilter}>
-                <SelectTrigger className="w-[220px] h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]">
+                <SelectTrigger className="w-full sm:w-[220px] h-11 rounded-[12px] bg-[#F2F2F7]/50 border-black/[0.04] text-[15px]">
                   <SelectValue placeholder="Cualquier persona" />
                 </SelectTrigger>
                 <SelectContent className="rounded-[16px] border-black/[0.08] shadow-xl">
@@ -161,7 +161,7 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
               <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-[#86868B] px-1">
                 <Layers className="h-3.5 w-3.5" /> Capas Visibles
               </div>
-              <div className="flex items-center gap-4 h-11 px-4 rounded-[12px] bg-[#F2F2F7]/50 border border-black/[0.04]">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 min-h-[44px] px-3 sm:px-4 py-2 sm:py-0 sm:h-11 rounded-[12px] bg-[#F2F2F7]/50 border border-black/[0.04]">
                 <div className="flex items-center gap-2">
                   <Checkbox 
                     id="guards" 
@@ -261,6 +261,16 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
           box-shadow: none !important;
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
           margin-left: 4px !important;
+        }
+        @media (max-width: 640px) {
+          .fc .fc-toolbar { flex-wrap: wrap !important; gap: 8px !important; }
+          .fc .fc-toolbar-title { font-size: 0.95rem !important; }
+          .fc .fc-button { padding: 6px 8px !important; font-size: 0.75rem !important; margin-left: 2px !important; }
+          .fc .fc-dayGridWeek-button { display: none !important; }
+          .fc th { padding: 6px 0 !important; font-size: 10px !important; }
+          .fc-daygrid-day-number { font-size: 0.7rem !important; padding: 4px !important; }
+          .fc-dayGridMonth-view .fc-event { margin: 1px 2px !important; }
+          .fc .fc-event-title { font-size: 10px !important; }
         }
         .fc .fc-button:hover {
           background: #e5e5ea !important;

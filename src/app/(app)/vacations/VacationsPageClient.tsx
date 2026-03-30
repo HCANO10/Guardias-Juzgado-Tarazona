@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useRef } from "react"
+import React, { useState, useMemo, useRef } from "react"
 import { buildFullName } from "@/lib/staff/normalize"
 import { useRole } from "@/hooks/use-role"
 import { useToast } from "@/hooks/use-toast"
@@ -104,6 +104,13 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
 
   // Confirmation dialog for cancellation
   const [cancelConfirm, setCancelConfirm] = useState<{ open: boolean; id: string | null }>({ open: false, id: null })
+  const [calMonths, setCalMonths] = useState(1)
+  React.useEffect(() => {
+    const check = () => setCalMonths(window.innerWidth >= 640 ? 2 : 1)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
   const cancellingRef = useRef(false)
 
   // Filter states
@@ -306,14 +313,14 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                         )}
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 rounded-[24px] border-slate-200 shadow-2xl overflow-hidden" align="start">
+                    <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] p-0 rounded-[24px] border-slate-200 shadow-2xl overflow-hidden" align="start">
                       <Calendar
                         initialFocus
                         mode="range"
                         defaultMonth={dateRange.from}
                         selected={{ from: dateRange.from, to: dateRange.to }}
                         onSelect={(range) => { setDateRange({ from: range?.from, to: range?.to }); setConflictResult(null); }}
-                        numberOfMonths={2}
+                        numberOfMonths={calMonths}
                         locale={es}
                         className="p-4"
                       />

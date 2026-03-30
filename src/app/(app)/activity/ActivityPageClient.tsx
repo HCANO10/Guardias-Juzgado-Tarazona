@@ -132,7 +132,7 @@ export default function ActivityPageClient() {
           title="Registro de Actividad"
           subtitle="Historial de acciones realizadas en el sistema."
         />
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-row sm:flex-col sm:items-end items-center gap-2 sm:gap-1">
           <button
             onClick={() => fetchFirst(typeFilter)}
             disabled={loading}
@@ -150,10 +150,10 @@ export default function ActivityPageClient() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3">
-        <Filter className="h-4 w-4 text-slate-400" />
+      <div className="flex flex-wrap items-center gap-3">
+        <Filter className="h-4 w-4 text-slate-400 shrink-0" />
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[200px] rounded-xl h-10 bg-white border-slate-200 text-slate-700 text-[14px]">
+          <SelectTrigger className="w-full sm:w-[200px] rounded-xl h-10 bg-white border-slate-200 text-slate-700 text-[14px]">
             <SelectValue placeholder="Tipo de entidad" />
           </SelectTrigger>
           <SelectContent className="rounded-[16px] border-slate-100 shadow-xl">

@@ -341,7 +341,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
 
       {/* Action Dialog */}
       <Dialog open={confirmDialog.open} onOpenChange={(open) => !open && setConfirmDialog({ ...confirmDialog, open: false })}>
-        <DialogContent className="rounded-[32px] border-slate-100 shadow-2xl p-8 max-w-md bg-white">
+        <DialogContent className="rounded-[32px] border-slate-100 shadow-2xl p-5 md:p-8 max-w-[95vw] md:max-w-md bg-white">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-[22px] font-bold text-slate-900">
               {confirmDialog.type === 'deactivate' ? '¿Dar de baja?' : '¿Reactivar trabajador?'}
@@ -370,7 +370,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
 
       {/* Role Dialog */}
       <Dialog open={roleDialog.open} onOpenChange={(open) => !open && setRoleDialog({ ...roleDialog, open: false })}>
-        <DialogContent className="rounded-[32px] border-slate-100 shadow-2xl p-8 max-w-md bg-white">
+        <DialogContent className="rounded-[32px] border-slate-100 shadow-2xl p-5 md:p-8 max-w-[95vw] md:max-w-md bg-white">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-[22px] font-bold text-slate-900">
               {roleDialog.newRole === 'headmaster' ? '👑 Hacer Administrador' : '👤 Quitar Administrador'}

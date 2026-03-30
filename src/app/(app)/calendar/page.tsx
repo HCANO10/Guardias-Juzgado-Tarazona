@@ -63,7 +63,7 @@ export default async function CalendarPage() {
   })
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-6 overflow-x-hidden">
       <DSPageHeader
         title="Calendario Unificado"
         subtitle="Guardias, vacaciones y festivos en una vista integrada."

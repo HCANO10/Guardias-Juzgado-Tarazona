@@ -73,9 +73,9 @@ export function GuardDeleteDialog({ open, onOpenChange, activeYear, onSuccess }:
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
-      <DialogContent className="sm:max-w-[480px] rounded-2xl p-0 overflow-hidden">
+      <DialogContent className="max-w-[95vw] sm:max-w-[480px] rounded-2xl p-0 overflow-hidden">
         <div className="h-2 bg-red-500 w-full" />
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
           <DialogHeader>
             <DialogTitle className="text-[22px] font-bold text-neutral-900 flex items-center">
               <Trash2 className="mr-2 h-6 w-6 text-red-500" />
@@ -186,15 +186,15 @@ export function GuardDeleteDialog({ open, onOpenChange, activeYear, onSuccess }:
             </DSAlert>
           </div>
 
-          <DialogFooter>
-            <DSButton variant="secondary" onClick={handleClose} disabled={deleting}>
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
+            <DSButton variant="secondary" onClick={handleClose} disabled={deleting} className="w-full sm:w-auto">
               Cancelar
             </DSButton>
             <DSButton
               variant="primary"
               onClick={handleDelete}
               disabled={!canDelete}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto"
             >
               {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Trash2 className="mr-2 h-4 w-4" />

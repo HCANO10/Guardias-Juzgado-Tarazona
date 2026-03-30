@@ -294,7 +294,7 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
 
       {/* Form Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden bg-white">
+        <DialogContent className="max-w-[95vw] sm:max-w-[425px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden bg-white">
           <div className="h-2 bg-indigo-600 w-full" />
           <div className="p-8">
             <DialogHeader className="mb-6">
@@ -370,7 +370,7 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
 
       {/* Delete Confirmation */}
       <AlertDialog open={isDelOpen} onOpenChange={setIsDelOpen}>
-        <AlertDialogContent className="rounded-[32px] border-none shadow-2xl p-8 bg-white">
+        <AlertDialogContent className="rounded-[32px] border-none shadow-2xl p-5 md:p-8 max-w-[95vw] md:max-w-md bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-[22px] font-bold text-slate-900">¿Eliminar festivo?</AlertDialogTitle>
             <AlertDialogDescription className="text-[15px] text-slate-500 mt-2">

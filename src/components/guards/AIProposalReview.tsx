@@ -160,11 +160,11 @@ export function AIProposalReview({ open, onOpenChange, activeYear, onSuccess, st
   return (
     <Dialog open={open} onOpenChange={(val: boolean) => !val && handleClose()}>
       <DialogContent className={step === 3
-        ? "sm:max-w-[900px] h-[85vh] flex flex-col rounded-[28px] border-none shadow-2xl p-0 overflow-hidden"
-        : "sm:max-w-[480px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden"
+        ? "max-w-[95vw] sm:max-w-[900px] h-[85vh] flex flex-col rounded-[28px] border-none shadow-2xl p-0 overflow-hidden"
+        : "max-w-[95vw] sm:max-w-[480px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden"
       }>
         <div className="h-2 bg-[#0066CC] w-full" />
-        <div className={step === 3 ? "p-8 flex flex-col flex-1 overflow-hidden" : "p-8"}>
+        <div className={step === 3 ? "p-5 sm:p-8 flex flex-col flex-1 overflow-hidden" : "p-5 sm:p-8"}>
 
           <DialogHeader>
             <DialogTitle className="text-[22px] font-bold text-neutral-900 flex items-center">
@@ -283,7 +283,7 @@ export function AIProposalReview({ open, onOpenChange, activeYear, onSuccess, st
                )}
 
                {/* Distribution Stats */}
-               <div className="grid grid-cols-3 gap-2">
+               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                  {['auxilio_distribution', 'tramitador_distribution', 'gestor_distribution'].map((key) => {
                    const dist = proposal.statistics?.[key] || {}
                    const label = key.split('_')[0].toUpperCase()
@@ -331,17 +331,17 @@ export function AIProposalReview({ open, onOpenChange, activeYear, onSuccess, st
             </div>
           )}
 
-          <DialogFooter className={step === 3 ? "mt-4" : ""}>
+          <DialogFooter className={`flex-col-reverse sm:flex-row gap-2 ${step === 3 ? "mt-4" : ""}`}>
             {step === 1 && (
                <>
-                 <DSButton variant="secondary" onClick={handleClose}>Cancelar</DSButton>
-                 <DSButton variant="primary" onClick={handleGenerate} disabled={!!(startDate && endDate && startDate >= endDate)}><Bot className="mr-2 h-4 w-4"/> Generar propuesta</DSButton>
+                 <DSButton variant="secondary" onClick={handleClose} className="w-full sm:w-auto">Cancelar</DSButton>
+                 <DSButton variant="primary" onClick={handleGenerate} disabled={!!(startDate && endDate && startDate >= endDate)} className="w-full sm:w-auto"><Bot className="mr-2 h-4 w-4"/> Generar propuesta</DSButton>
                </>
             )}
             {step === 3 && (
                <>
-                 <DSButton variant="secondary" onClick={handleClose} disabled={saving}>Descartar</DSButton>
-                 <DSButton variant="primary" onClick={handleApply} disabled={saving || (validation?.errors?.length ?? 0) > 0}>
+                 <DSButton variant="secondary" onClick={handleClose} disabled={saving} className="w-full sm:w-auto">Descartar</DSButton>
+                 <DSButton variant="primary" onClick={handleApply} disabled={saving || (validation?.errors?.length ?? 0) > 0} className="w-full sm:w-auto">
                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                    Aplicar propuesta
                  </DSButton>

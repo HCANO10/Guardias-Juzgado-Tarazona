@@ -510,7 +510,7 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
         {/* Sidebar Column */}
         <div className="lg:col-span-4 space-y-8">
           <div className="lg:sticky lg:top-12 space-y-8">
-            <div className="rounded-[32px] p-8 text-white relative overflow-hidden group shadow-2xl" style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }}>
+            <div className="rounded-[32px] p-5 md:p-8 text-white relative overflow-hidden group shadow-2xl" style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }}>
               <div className="relative z-10">
                 <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center mb-10 group-hover:bg-white/20 transition-colors">
                   <Sun className="h-6 w-6 text-orange-400" />
@@ -523,15 +523,15 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                       <p className="text-[28px] font-bold tracking-tight">{selectedStaffStats.name}</p>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white/5 p-5 rounded-[24px] border border-white/10">
-                        <p className="text-[11px] text-white/40 uppercase font-bold mb-1">Días Usados</p>
-                        <p className="text-[32px] font-bold">{selectedStaffStats.usedDays}</p>
-                        <div className="mt-2 text-[11px] font-bold text-orange-400 uppercase tracking-tighter">Año {new Date().getFullYear()}</div>
+                    <div className="grid grid-cols-2 gap-3 md:gap-4">
+                      <div className="bg-white/5 p-4 md:p-5 rounded-[24px] border border-white/10">
+                        <p className="text-[10px] md:text-[11px] text-white/40 uppercase font-bold mb-1">Días Usados</p>
+                        <p className="text-[26px] md:text-[32px] font-bold">{selectedStaffStats.usedDays}</p>
+                        <div className="mt-2 text-[10px] md:text-[11px] font-bold text-orange-400 uppercase tracking-tighter">Año {new Date().getFullYear()}</div>
                       </div>
-                      <div className="bg-white/5 p-5 rounded-[24px] border border-white/10">
-                        <p className="text-[11px] text-white/40 uppercase font-bold mb-1">Restantes</p>
-                        <p className="text-[32px] font-bold text-[#34C759]">{Math.max(0, 22 - selectedStaffStats.usedDays)}</p>
+                      <div className="bg-white/5 p-4 md:p-5 rounded-[24px] border border-white/10">
+                        <p className="text-[10px] md:text-[11px] text-white/40 uppercase font-bold mb-1">Restantes</p>
+                        <p className="text-[26px] md:text-[32px] font-bold text-[#34C759]">{Math.max(0, 22 - selectedStaffStats.usedDays)}</p>
                         <div className="mt-2 h-1 w-full bg-white/10 rounded-full overflow-hidden">
                            <div 
                              className="h-full bg-[#34C759]" 

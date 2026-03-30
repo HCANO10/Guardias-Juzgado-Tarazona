@@ -107,7 +107,7 @@ export default async function StaffDetailPage({ params }: { params: { id: string
         <div className="lg:col-span-4 space-y-6">
           <DSCard className="overflow-hidden p-0" padding="p-0">
             {/* Header gradient */}
-            <div className="p-8 text-white relative" style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }}>
+            <div className="p-6 md:p-8 text-white relative" style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }}>
               <div className="relative z-10 flex flex-col items-center text-center">
                 <div className="h-20 w-20 rounded-[24px] bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-[28px] font-bold shadow-2xl mb-4">
                   {initials}
@@ -220,46 +220,62 @@ export default async function StaffDetailPage({ params }: { params: { id: string
             </div>
 
             {typedAssignments.length > 0 ? (
-              <DSCard padding="p-0" className="overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 bg-slate-50">
-                      <th className="px-6 py-3">Semana</th>
-                      <th className="px-6 py-3">Periodo</th>
-                      <th className="px-6 py-3">Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {typedAssignments.map((assignment) => {
-                      const period = assignment.guard_periods
-                      let status = "Pasada"
-                      let badgeVariant: "neutral" | "blue" | "green" = "neutral"
-
-                      if (period.start_date <= today && period.end_date >= today) {
-                        status = "Activa"
-                        badgeVariant = "green"
-                      } else if (period.start_date > today) {
-                        status = "Futura"
-                        badgeVariant = "blue"
-                      }
-
-                      return (
-                        <tr key={assignment.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-6 py-3.5">
-                            <DSBadge variant="indigo">S{period.week_number}</DSBadge>
-                          </td>
-                          <td className="px-6 py-3.5 text-sm font-medium text-slate-900">
-                            {format(parseISO(period.start_date), 'dd MMM', { locale: es })} — {format(parseISO(period.end_date), 'dd MMM yyyy', { locale: es })}
-                          </td>
-                          <td className="px-6 py-3.5">
-                            <DSBadge variant={badgeVariant}>{status}</DSBadge>
-                          </td>
+              <>
+                {/* Desktop table */}
+                <DSCard padding="p-0" className="overflow-hidden hidden sm:block">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 bg-slate-50">
+                          <th className="px-6 py-3">Semana</th>
+                          <th className="px-6 py-3">Periodo</th>
+                          <th className="px-6 py-3">Estado</th>
                         </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </DSCard>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {typedAssignments.map((assignment) => {
+                          const period = assignment.guard_periods
+                          let status = "Pasada"
+                          let badgeVariant: "neutral" | "blue" | "green" = "neutral"
+                          if (period.start_date <= today && period.end_date >= today) { status = "Activa"; badgeVariant = "green" }
+                          else if (period.start_date > today) { status = "Futura"; badgeVariant = "blue" }
+                          return (
+                            <tr key={assignment.id} className="hover:bg-slate-50 transition-colors">
+                              <td className="px-6 py-3.5"><DSBadge variant="indigo">S{period.week_number}</DSBadge></td>
+                              <td className="px-6 py-3.5 text-sm font-medium text-slate-900">{format(parseISO(period.start_date), 'dd MMM', { locale: es })} — {format(parseISO(period.end_date), 'dd MMM yyyy', { locale: es })}</td>
+                              <td className="px-6 py-3.5"><DSBadge variant={badgeVariant}>{status}</DSBadge></td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </DSCard>
+                {/* Mobile cards */}
+                <div className="sm:hidden space-y-3">
+                  {typedAssignments.map((assignment) => {
+                    const period = assignment.guard_periods
+                    let status = "Pasada"
+                    let badgeVariant: "neutral" | "blue" | "green" = "neutral"
+                    if (period.start_date <= today && period.end_date >= today) { status = "Activa"; badgeVariant = "green" }
+                    else if (period.start_date > today) { status = "Futura"; badgeVariant = "blue" }
+                    return (
+                      <DSCard key={assignment.id} padding="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <DSBadge variant="indigo">S{period.week_number}</DSBadge>
+                            <span className="text-sm font-medium text-slate-900">
+                              {format(parseISO(period.start_date), 'dd MMM', { locale: es })} — {format(parseISO(period.end_date), 'dd MMM', { locale: es })}
+                            </span>
+                          </div>
+                          <DSBadge variant={badgeVariant}>{status}</DSBadge>
+                        </div>
+                      </DSCard>
+                    )
+                  })}
+                </div>
+              </>
+            ) : (
             ) : (
               <DSCard className="text-center py-12">
                 <DSIconBox icon={Shield} variant="neutral" className="mx-auto mb-3" />

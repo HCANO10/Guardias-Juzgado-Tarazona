@@ -346,13 +346,13 @@ export function ExportPDFButton({ guards, vacations, holidays }: ExportPDFButton
         </DSButton>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[520px] p-5 rounded-[20px] shadow-2xl border-slate-200" align="end">
+      <PopoverContent className="w-[min(520px,calc(100vw-2rem))] p-4 md:p-5 rounded-[20px] shadow-2xl border-slate-200" align="end">
         <div className="flex items-center gap-2 mb-4">
           <Calendar className="h-4 w-4 text-indigo-500" />
           <p className="text-[13px] font-bold text-slate-800">Selecciona el rango de fechas</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-5 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 mb-5">
           <div className="bg-slate-50 rounded-xl p-3">
             <MonthPicker label="Desde" value={fromDate} onChange={handleFromChange} />
           </div>

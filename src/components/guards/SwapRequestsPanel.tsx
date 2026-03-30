@@ -125,21 +125,21 @@ export function SwapRequestsPanel({ currentStaffId, requests }: Props) {
                 </div>
 
                 {/* Swap visualization */}
-                <div className="flex items-center gap-3 text-[13px]">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-[12px]">
                   <div className="flex-1 bg-white rounded-[12px] p-3 border border-amber-200 text-center">
                     <p className="text-[10px] font-black uppercase tracking-wide text-amber-700 mb-0.5">
                       Ofrece su guardia
                     </p>
-                    <p className="font-bold text-slate-900">
+                    <p className="font-bold text-slate-900 break-words">
                       {formatWeek(r.period_requester)}
                     </p>
                   </div>
-                  <ArrowLeftRight className="h-4 w-4 text-slate-400 shrink-0" />
+                  <ArrowLeftRight className="h-4 w-4 text-slate-400 shrink-0 self-center rotate-90 sm:rotate-0" />
                   <div className="flex-1 bg-indigo-50 rounded-[12px] p-3 border border-indigo-200 text-center">
                     <p className="text-[10px] font-black uppercase tracking-wide text-indigo-700 mb-0.5">
                       Quiere tu guardia
                     </p>
-                    <p className="font-bold text-indigo-900">
+                    <p className="font-bold text-indigo-900 break-words">
                       {formatWeek(r.period_requested)}
                     </p>
                   </div>
@@ -208,15 +208,15 @@ export function SwapRequestsPanel({ currentStaffId, requests }: Props) {
                   <DSBadge variant="blue">Esperando</DSBadge>
                 </div>
 
-                <div className="flex items-center gap-3 text-[13px]">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-[12px]">
                   <div className="flex-1 bg-indigo-50 rounded-[12px] p-3 border border-indigo-200 text-center">
                     <p className="text-[10px] font-black uppercase tracking-wide text-indigo-700 mb-0.5">Tu guardia</p>
-                    <p className="font-bold text-indigo-900">{formatWeek(r.period_requester)}</p>
+                    <p className="font-bold text-indigo-900 break-words">{formatWeek(r.period_requester)}</p>
                   </div>
-                  <ArrowLeftRight className="h-4 w-4 text-slate-400 shrink-0" />
+                  <ArrowLeftRight className="h-4 w-4 text-slate-400 shrink-0 self-center rotate-90 sm:rotate-0" />
                   <div className="flex-1 bg-white rounded-[12px] p-3 border border-blue-200 text-center">
                     <p className="text-[10px] font-black uppercase tracking-wide text-blue-700 mb-0.5">Su guardia</p>
-                    <p className="font-bold text-slate-900">{formatWeek(r.period_requested)}</p>
+                    <p className="font-bold text-slate-900 break-words">{formatWeek(r.period_requested)}</p>
                   </div>
                 </div>
 

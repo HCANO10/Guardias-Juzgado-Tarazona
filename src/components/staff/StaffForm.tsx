@@ -137,9 +137,9 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto rounded-[28px] border-none shadow-2xl p-0 overflow-hidden">
+      <DialogContent className="max-w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto rounded-[28px] border-none shadow-2xl p-0 overflow-hidden">
         <div className="h-2 bg-[#0066CC] w-full" />
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
         <DialogHeader>
           <DialogTitle className="text-[22px] font-bold text-neutral-900">{isEditing ? 'Editar Trabajador' : 'Nuevo Trabajador'}</DialogTitle>
           <DialogDescription className="text-[15px] text-[#86868B]">

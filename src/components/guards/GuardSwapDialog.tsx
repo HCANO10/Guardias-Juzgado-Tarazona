@@ -136,9 +136,9 @@ export function GuardSwapDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="sm:max-w-[480px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden">
+      <DialogContent className="max-w-[95vw] sm:max-w-[480px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden">
         <div className="h-2 bg-[#0066CC] w-full" />
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
           <DialogHeader>
             <DialogTitle className="text-[22px] font-bold text-neutral-900 flex items-center gap-2">
               <ArrowLeftRight className="h-5 w-5 text-[#0066CC]" />
@@ -227,14 +227,14 @@ export function GuardSwapDialog({
 
             {/* Visual swap summary */}
             {selectedPeriod && selectedStaff && (
-              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-[16px] border border-slate-200 text-[13px]">
-                <div className="flex-1 text-center">
+              <div className="flex flex-row items-center gap-2 p-3 bg-slate-50 rounded-[16px] border border-slate-200 text-[12px]">
+                <div className="flex-1 text-center min-w-0">
                   <p className="font-bold text-indigo-700">Tú cedes</p>
                   <p className="text-slate-800 font-semibold">Sem. {weekNumber}</p>
                 </div>
                 <ArrowLeftRight className="h-4 w-4 text-slate-400 shrink-0" />
-                <div className="flex-1 text-center">
-                  <p className="font-bold text-emerald-700">
+                <div className="flex-1 text-center min-w-0">
+                  <p className="font-bold text-emerald-700 truncate">
                     {selectedStaff.first_name} cede
                   </p>
                   <p className="text-slate-800 font-semibold">
@@ -264,11 +264,12 @@ export function GuardSwapDialog({
               Se enviará un aviso por email al compañero/a para que lo acepte o rechace. El intercambio solo se ejecutará si lo acepta.
             </p>
 
-            <div className="flex justify-end gap-2 pt-1">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-1">
               <DSButton
                 variant="secondary"
                 onClick={handleClose}
                 disabled={loading}
+                className="sm:w-auto w-full"
               >
                 Cancelar
               </DSButton>
@@ -281,6 +282,7 @@ export function GuardSwapDialog({
                   !selectedPeriodId ||
                   loadingPeriods
                 }
+                className="sm:w-auto w-full"
               >
                 {loading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -191,7 +191,7 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
              </div>
 
              <div className="mt-10 pt-6 border-t border-slate-100 flex justify-end">
-                <DSButton onClick={handleSaveSettings} disabled={savingSettings} className="h-11 px-8">
+                <DSButton onClick={handleSaveSettings} disabled={savingSettings} className="h-11 w-full sm:w-auto sm:px-8">
                    {savingSettings ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                    Guardar Configuración
                 </DSButton>
@@ -235,7 +235,7 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
 
              {periods && periods.length > 0 && (
                <div className="rounded-[24px] border border-slate-100 overflow-hidden bg-white shadow-sm">
-                  <div className="max-h-[320px] overflow-auto scrollbar-hide">
+                  <div className="max-h-[320px] overflow-auto scrollbar-hide overflow-x-auto">
                      <table className="w-full text-left border-collapse">
                         <thead className="bg-slate-50 sticky top-0 z-10">
                            <tr className="border-b border-slate-100">
@@ -364,7 +364,7 @@ export default function SettingsPageClient({ initialSettings, initialPeriods, sy
 
       {/* Confirmation Dialog */}
       <Dialog open={confirmDialog.open} onOpenChange={(open: boolean) => !open && setConfirmDialog({ open: false, data: null })}>
-        <DialogContent className="rounded-[32px] border-none shadow-2xl p-0 overflow-hidden max-w-md bg-white">
+        <DialogContent className="rounded-[32px] border-none shadow-2xl p-0 overflow-hidden max-w-[95vw] md:max-w-md bg-white">
            <div className="bg-red-50 p-8 border-b border-red-100 flex items-center gap-4">
               <DSIconBox icon={AlertTriangle} variant="red" className="bg-white" />
               <div>

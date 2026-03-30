@@ -30,7 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main content */}
-      <main className="relative z-10 md:pl-[260px] pt-14 md:pt-0 min-h-screen">
+      <main className="relative z-10 md:pl-[260px] pt-14 md:pt-0 min-h-screen overflow-x-hidden">
         <div className="px-4 py-6 md:px-8 md:py-8 lg:px-12 lg:py-10 max-w-[1400px] mx-auto animate-fade-in">
           {children}
         </div>

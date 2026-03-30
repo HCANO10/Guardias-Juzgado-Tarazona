@@ -135,12 +135,12 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
           subtitle={`Planificación y seguimiento de turnos para el juzgado (${activeYear})`}
         />
         {isHeadmaster && (
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <DSButton variant="secondary" onClick={() => setDeleteOpen(true)} className="flex items-center gap-2 text-red-500 hover:text-red-600 border-red-200 hover:border-red-300">
-              <Trash2 className="h-4 w-4" /> Borrar guardias
+              <Trash2 className="h-4 w-4" /> <span className="hidden sm:inline">Borrar guardias</span><span className="sm:hidden">Borrar</span>
             </DSButton>
             <DSButton onClick={() => setAiReviewOpen(true)} className="flex items-center gap-2">
-              <Bot className="h-4 w-4" /> Generar con IA
+              <Bot className="h-4 w-4" /> <span className="hidden sm:inline">Generar con IA</span><span className="sm:hidden">Generar IA</span>
             </DSButton>
           </div>
         )}

@@ -277,23 +277,23 @@ export function ProfilePageClient({
           {/* Main Info Card */}
           <DSCard className="overflow-hidden p-0">
              <div className="bg-gradient-to-r from-[#0066CC] to-[#004C99] p-8 text-white relative">
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-8">
-                  <div className="h-24 w-24 rounded-[32px] bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-[32px] font-black shadow-2xl">
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
+                  <div className="h-20 w-20 md:h-24 md:w-24 rounded-[28px] md:rounded-[32px] bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-[28px] md:text-[32px] font-black shadow-2xl flex-shrink-0">
                     {staffData.first_name[0]}{staffData.last_name[0]}
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <h2 className="text-[28px] font-extrabold tracking-tight">{staffData.first_name} {staffData.last_name}</h2>
-                      <DSBadge variant="blue" className="bg-white/10 text-white border-white/20">Activo</DSBadge>
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-xl md:text-[28px] font-extrabold tracking-tight truncate">{staffData.first_name} {staffData.last_name}</h2>
+                      <DSBadge variant="blue" className="bg-white/10 text-white border-white/20 shrink-0">Activo</DSBadge>
                     </div>
-                    <p className="text-white/70 text-[16px] font-medium flex items-center gap-2">
-                      <Briefcase className="h-4 w-4" /> {staffData.positions?.name || 'Personal'}
+                    <p className="text-white/70 text-[14px] md:text-[16px] font-medium flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 shrink-0" /> {staffData.positions?.name || 'Personal'}
                     </p>
                   </div>
-                  <DSButton 
-                    variant="secondary" 
+                  <DSButton
+                    variant="secondary"
                     onClick={() => setEditOpen(true)}
-                    className="md:ml-auto h-11 px-6 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                    className="self-start md:ml-auto h-10 md:h-11 px-4 md:px-6 bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm"
                   >
                     <Edit className="mr-2 h-4 w-4" /> Editar Perfil
                   </DSButton>
@@ -301,11 +301,11 @@ export function ProfilePageClient({
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-32 -mt-32 pointer-events-none" />
              </div>
              
-             <div className="p-8 grid md:grid-cols-2 gap-8">
+             <div className="p-5 md:p-8 grid md:grid-cols-2 gap-6 md:gap-8">
                 <div className="space-y-1.5 pt-1">
                    <p className="text-[11px] font-black uppercase tracking-widest text-slate-500">Correo Institucional</p>
-                   <p className="text-[17px] font-bold text-slate-800 flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-[#60A5FA]" /> {staffData.email}
+                   <p className="text-[15px] md:text-[17px] font-bold text-slate-800 flex items-center gap-2 break-all">
+                      <Mail className="h-4 w-4 text-[#60A5FA] shrink-0" /> <span className="min-w-0 truncate">{staffData.email}</span>
                    </p>
                 </div>
                 <div className="space-y-1.5 pt-1 border-slate-100 md:border-l md:pl-8">
@@ -424,7 +424,7 @@ export function ProfilePageClient({
                 </div>
              </div>
 
-             <div className="p-6 rounded-[24px] bg-slate-50 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-6">
+             <div className="p-4 md:p-6 rounded-[24px] bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 md:gap-6">
                 <div className="flex items-center gap-4">
                    <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-200">
                       <svg width="20" height="20" viewBox="0 0 18 18">
@@ -457,7 +457,7 @@ export function ProfilePageClient({
            <div className="lg:sticky lg:top-12 space-y-10">
               
               {/* Annual Stats */}
-              <div style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }} className="rounded-[32px] p-8 text-white relative overflow-hidden group shadow-2xl">
+              <div style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }} className="rounded-[32px] p-5 md:p-8 text-white relative overflow-hidden group shadow-2xl">
                  <div className="relative z-10 space-y-8">
                     <div className="flex items-center justify-between">
                        <DSIconBox icon={Activity} variant="indigo" className="bg-white/10 text-indigo-400" />
@@ -568,7 +568,7 @@ export function ProfilePageClient({
 
       {/* Edit Modal */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="rounded-[32px] border-none shadow-2xl p-0 overflow-hidden max-w-md bg-white">
+        <DialogContent className="rounded-[32px] border-none shadow-2xl p-0 overflow-hidden max-w-[95vw] md:max-w-md bg-white">
            <div className="bg-slate-50 p-8 border-b border-slate-100">
               <DialogHeader>
                 <DialogTitle className="text-[24px] font-bold text-slate-900 tracking-tight">Editar Perfil</DialogTitle>

@@ -8,10 +8,11 @@ import {
   Users,
   CircleCheck,
   AlertTriangle,
-  Calendar as CalendarIcon,
   ArrowRight,
   Sparkles,
   UserPlus,
+  ArrowLeftRight,
+  UserCircle,
 } from "lucide-react"
 import Link from "next/link"
 import { format, parseISO } from "date-fns"
@@ -26,6 +27,7 @@ import {
   DSAlert,
   tokens,
 } from "@/lib/design-system"
+import { useRole } from "@/hooks/use-role"
 
 const UnifiedCalendar = dynamic(
   () => import("@/components/calendar/UnifiedCalendar"),
@@ -87,6 +89,7 @@ export default function DashboardPageClient({
   currentUserStaffId,
 }: DashboardPageClientProps) {
   const router = useRouter()
+  const { isHeadmaster } = useRole()
 
   // Auto-refresh each 5 minutes
   useEffect(() => {
@@ -223,72 +226,139 @@ export default function DashboardPageClient({
           <div className="space-y-3">
             <DSSectionHeading>Acciones Rápidas</DSSectionHeading>
 
-            <Link href="/guards">
-              <DSCard
-                padding="px-4 py-3.5"
-                className="flex items-center gap-3 group cursor-pointer"
-              >
-                <div className="h-9 w-9 rounded-[10px] bg-indigo-50 flex items-center justify-center flex-shrink-0">
-                  <Sparkles
-                    className="h-4 w-4 text-indigo-600"
-                    strokeWidth={2}
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900">
-                    Generar con IA
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Asignación automática
-                  </p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-              </DSCard>
-            </Link>
+            {isHeadmaster ? (
+              <>
+                <Link href="/guards">
+                  <DSCard
+                    padding="px-4 py-3.5"
+                    className="flex items-center gap-3 group cursor-pointer"
+                  >
+                    <div className="h-9 w-9 rounded-[10px] bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="h-4 w-4 text-indigo-600" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900">Generar con IA</p>
+                      <p className="text-xs text-slate-500">Asignación automática</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                  </DSCard>
+                </Link>
 
-            <Link href="/staff">
-              <DSCard
-                padding="px-4 py-3.5"
-                className="flex items-center gap-3 group cursor-pointer"
-              >
-                <div className="h-9 w-9 rounded-[10px] bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                  <UserPlus
-                    className="h-4 w-4 text-emerald-600"
-                    strokeWidth={2}
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900">
-                    Nuevo Personal
-                  </p>
-                  <p className="text-xs text-slate-500">Añadir trabajador</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-600 transition-colors" />
-              </DSCard>
-            </Link>
+                <Link href="/staff">
+                  <DSCard
+                    padding="px-4 py-3.5"
+                    className="flex items-center gap-3 group cursor-pointer"
+                  >
+                    <div className="h-9 w-9 rounded-[10px] bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                      <UserPlus className="h-4 w-4 text-emerald-600" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900">Nuevo Personal</p>
+                      <p className="text-xs text-slate-500">Añadir trabajador</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+                  </DSCard>
+                </Link>
 
-            <Link href="/vacations">
-              <DSCard
-                padding="px-4 py-3.5"
-                className="flex items-center gap-3 group cursor-pointer"
-              >
-                <div className="h-9 w-9 rounded-[10px] bg-amber-50 flex items-center justify-center flex-shrink-0">
-                  <Sun
-                    className="h-4 w-4 text-amber-600"
-                    strokeWidth={2}
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900">
-                    Vacaciones
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Solicitar o revisar
-                  </p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-amber-600 transition-colors" />
-              </DSCard>
-            </Link>
+                <Link href="/vacations">
+                  <DSCard
+                    padding="px-4 py-3.5"
+                    className="flex items-center gap-3 group cursor-pointer"
+                  >
+                    <div className="h-9 w-9 rounded-[10px] bg-amber-50 flex items-center justify-center flex-shrink-0">
+                      <Sun className="h-4 w-4 text-amber-600" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900">Vacaciones</p>
+                      <p className="text-xs text-slate-500">Solicitar o revisar</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-amber-600 transition-colors" />
+                  </DSCard>
+                </Link>
+
+                <Link href="/guards">
+                  <DSCard
+                    padding="px-4 py-3.5"
+                    className="flex items-center gap-3 group cursor-pointer"
+                  >
+                    <div className="h-9 w-9 rounded-[10px] bg-blue-50 flex items-center justify-center flex-shrink-0">
+                      <Shield className="h-4 w-4 text-blue-600" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900">Ver Guardias</p>
+                      <p className="text-xs text-slate-500">Gestión de guardias</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                  </DSCard>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/guards">
+                  <DSCard
+                    padding="px-4 py-3.5"
+                    className="flex items-center gap-3 group cursor-pointer"
+                  >
+                    <div className="h-9 w-9 rounded-[10px] bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                      <Shield className="h-4 w-4 text-indigo-600" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900">Ver mis Guardias</p>
+                      <p className="text-xs text-slate-500">Mis semanas asignadas</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                  </DSCard>
+                </Link>
+
+                <Link href="/vacations">
+                  <DSCard
+                    padding="px-4 py-3.5"
+                    className="flex items-center gap-3 group cursor-pointer"
+                  >
+                    <div className="h-9 w-9 rounded-[10px] bg-amber-50 flex items-center justify-center flex-shrink-0">
+                      <Sun className="h-4 w-4 text-amber-600" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900">Solicitar Vacaciones</p>
+                      <p className="text-xs text-slate-500">Gestionar permisos</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-amber-600 transition-colors" />
+                  </DSCard>
+                </Link>
+
+                <Link href="/intercambios">
+                  <DSCard
+                    padding="px-4 py-3.5"
+                    className="flex items-center gap-3 group cursor-pointer"
+                  >
+                    <div className="h-9 w-9 rounded-[10px] bg-purple-50 flex items-center justify-center flex-shrink-0">
+                      <ArrowLeftRight className="h-4 w-4 text-purple-600" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900">Solicitar Intercambio</p>
+                      <p className="text-xs text-slate-500">Cambiar turno de guardia</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-purple-600 transition-colors" />
+                  </DSCard>
+                </Link>
+
+                <Link href="/profile">
+                  <DSCard
+                    padding="px-4 py-3.5"
+                    className="flex items-center gap-3 group cursor-pointer"
+                  >
+                    <div className="h-9 w-9 rounded-[10px] bg-slate-100 flex items-center justify-center flex-shrink-0">
+                      <UserCircle className="h-4 w-4 text-slate-600" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900">Mi Perfil</p>
+                      <p className="text-xs text-slate-500">Configuración personal</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                  </DSCard>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Quick Stats */}

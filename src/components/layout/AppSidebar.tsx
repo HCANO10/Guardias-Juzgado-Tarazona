@@ -12,6 +12,7 @@ import {
   UserCircle,
   ClipboardList,
   Scale,
+  ArrowLeftRight,
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
@@ -32,12 +33,13 @@ import {
 const navSections = {
   headmaster: [
     { label: "PRINCIPAL", items: [
-      { title: "Dashboard",    url: "/dashboard",  icon: LayoutDashboard },
-      { title: "Guardias",     url: "/guards",     icon: Shield },
-      { title: "Personal",     url: "/staff",      icon: Users },
-      { title: "Vacaciones",   url: "/vacations",  icon: Sun },
-      { title: "Calendario",   url: "/calendar",   icon: Calendar },
-      { title: "Festivos",     url: "/holidays",   icon: Star },
+      { title: "Dashboard",    url: "/dashboard",      icon: LayoutDashboard },
+      { title: "Guardias",     url: "/guards",         icon: Shield },
+      { title: "Personal",     url: "/staff",          icon: Users },
+      { title: "Vacaciones",   url: "/vacations",      icon: Sun },
+      { title: "Intercambios", url: "/intercambios",   icon: ArrowLeftRight },
+      { title: "Calendario",   url: "/calendar",       icon: Calendar },
+      { title: "Festivos",     url: "/holidays",       icon: Star },
     ]},
     { label: "ADMINISTRACIÓN", items: [
       { title: "Actividad",    url: "/activity",   icon: ClipboardList },
@@ -47,13 +49,14 @@ const navSections = {
   ],
   worker: [
     { label: "PRINCIPAL", items: [
-      { title: "Dashboard",    url: "/dashboard",  icon: LayoutDashboard },
-      { title: "Guardias",     url: "/guards",     icon: Shield },
-      { title: "Personal",     url: "/staff",      icon: Users },
-      { title: "Vacaciones",   url: "/vacations",  icon: Sun },
-      { title: "Calendario",   url: "/calendar",   icon: Calendar },
-      { title: "Festivos",     url: "/holidays",   icon: Star },
-      { title: "Mi Perfil",    url: "/profile",    icon: UserCircle },
+      { title: "Dashboard",    url: "/dashboard",      icon: LayoutDashboard },
+      { title: "Guardias",     url: "/guards",         icon: Shield },
+      { title: "Personal",     url: "/staff",          icon: Users },
+      { title: "Vacaciones",   url: "/vacations",      icon: Sun },
+      { title: "Intercambios", url: "/intercambios",   icon: ArrowLeftRight },
+      { title: "Calendario",   url: "/calendar",       icon: Calendar },
+      { title: "Festivos",     url: "/holidays",       icon: Star },
+      { title: "Mi Perfil",    url: "/profile",        icon: UserCircle },
     ]},
   ],
 }

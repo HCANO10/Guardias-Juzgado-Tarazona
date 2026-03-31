@@ -249,7 +249,7 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
               month: 'Mes',
               week: 'Semana'
             }}
-            firstDay={1}
+            firstDay={5}
             height="auto"
             dayMaxEvents={true}
             eventContent={(arg) => {

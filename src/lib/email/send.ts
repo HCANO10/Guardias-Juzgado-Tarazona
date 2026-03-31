@@ -119,6 +119,165 @@ function emailLayout(headerContent: string, bodyContent: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Template: Notificación de cambio de email
+// ─────────────────────────────────────────────────────────────
+
+export async function sendEmailChangeNotification(
+  oldEmail: string,
+  newEmail: string,
+  userName: string
+): Promise<void> {
+  // Email al nuevo correo: confirmar que el cambio se ha aplicado
+  const headerNew = `
+    <p style="margin:0;display:inline-block;background:rgba(255,255,255,0.15);color:#E0E7FF;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;">
+      ✉️ &nbsp;Cambio de correo electrónico
+    </p>`
+
+  const bodyNew = `
+    <p style="margin:0 0 6px;color:#1E293B;font-size:22px;font-weight:700;letter-spacing:-0.3px;">
+      Tu correo ha sido actualizado
+    </p>
+    <p style="margin:0 0 28px;color:#64748B;font-size:15px;line-height:1.6;">
+      Hola <strong style="color:#1E293B;">${userName}</strong>, te confirmamos que tu dirección de correo electrónico ha sido cambiada correctamente.
+    </p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1.5px solid #E2E8F0;border-radius:16px;overflow:hidden;margin-bottom:28px;">
+      <tr style="background:#F8FAFC;">
+        <td width="50%" style="padding:12px 18px;border-bottom:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
+          <p style="margin:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94A3B8;">Correo anterior</p>
+        </td>
+        <td width="50%" style="padding:12px 18px;border-bottom:1px solid #E2E8F0;">
+          <p style="margin:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94A3B8;">Nuevo correo</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:18px;border-right:1px solid #E2E8F0;vertical-align:top;">
+          <p style="margin:0;font-size:14px;color:#64748B;font-weight:500;word-break:break-all;">${oldEmail}</p>
+        </td>
+        <td style="padding:18px;background:#EEF2FF;vertical-align:top;">
+          <p style="margin:0;font-size:14px;font-weight:700;color:#4F46E5;word-break:break-all;">${newEmail}</p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0 0 0;color:#64748B;font-size:14px;line-height:1.7;background:#F1F5F9;border-radius:12px;padding:14px 18px;">
+      💡 &nbsp;A partir de ahora utiliza <strong style="color:#1E293B;">${newEmail}</strong> para iniciar sesión en el sistema de guardias.
+    </p>`
+
+  await sendEmail({
+    to: newEmail,
+    subject: "Tu correo electrónico ha sido actualizado — Juzgado Tarazona",
+    html: emailLayout(headerNew, bodyNew),
+  })
+
+  // Email al correo antiguo: aviso de seguridad
+  const headerOld = `
+    <p style="margin:0;display:inline-block;background:rgba(255,255,255,0.15);color:#FEE2E2;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;">
+      🔔 &nbsp;Aviso de seguridad
+    </p>`
+
+  const bodyOld = `
+    <p style="margin:0 0 6px;color:#1E293B;font-size:22px;font-weight:700;letter-spacing:-0.3px;">
+      Tu correo ha sido cambiado
+    </p>
+    <p style="margin:0 0 28px;color:#64748B;font-size:15px;line-height:1.6;">
+      Hola <strong style="color:#1E293B;">${userName}</strong>, te informamos de que la dirección de correo asociada a tu cuenta ha sido modificada.
+    </p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+      <tr>
+        <td style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:16px;padding:20px 22px;">
+          <table role="presentation" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:28px;vertical-align:top;padding-right:16px;line-height:1;">⚠️</td>
+              <td style="vertical-align:top;">
+                <p style="margin:0 0 5px;font-size:17px;font-weight:700;color:#991B1B;">¿No fuiste tú?</p>
+                <p style="margin:0;font-size:14px;color:#B91C1C;line-height:1.6;opacity:0.85;">
+                  Si no has realizado este cambio, contacta inmediatamente con el administrador del sistema.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0;color:#64748B;font-size:14px;line-height:1.7;background:#F1F5F9;border-radius:12px;padding:14px 18px;">
+      El nuevo correo de acceso es: <strong style="color:#1E293B;">${newEmail}</strong>
+    </p>`
+
+  await sendEmail({
+    to: oldEmail,
+    subject: "Aviso: Tu correo electrónico ha sido cambiado — Juzgado Tarazona",
+    html: emailLayout(headerOld, bodyOld),
+  })
+}
+
+// ─────────────────────────────────────────────────────────────
+// Template: Notificación de cambio de contraseña
+// ─────────────────────────────────────────────────────────────
+
+export async function sendPasswordChangeNotification(
+  email: string,
+  userName: string
+): Promise<void> {
+  const header = `
+    <p style="margin:0;display:inline-block;background:rgba(255,255,255,0.15);color:#FEE2E2;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;">
+      🔒 &nbsp;Cambio de contraseña
+    </p>`
+
+  const body = `
+    <p style="margin:0 0 6px;color:#1E293B;font-size:22px;font-weight:700;letter-spacing:-0.3px;">
+      Tu contraseña ha sido cambiada
+    </p>
+    <p style="margin:0 0 28px;color:#64748B;font-size:15px;line-height:1.6;">
+      Hola <strong style="color:#1E293B;">${userName}</strong>, tu contraseña de acceso al sistema de guardias judiciales ha sido actualizada correctamente.
+    </p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+      <tr>
+        <td style="background:#DCFCE7;border:1.5px solid #BBF7D0;border-radius:16px;padding:20px 22px;">
+          <table role="presentation" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:28px;vertical-align:top;padding-right:16px;line-height:1;">✅</td>
+              <td style="vertical-align:top;">
+                <p style="margin:0 0 5px;font-size:17px;font-weight:700;color:#166534;">Contraseña actualizada</p>
+                <p style="margin:0;font-size:14px;color:#166534;line-height:1.6;opacity:0.85;">
+                  El cambio se ha aplicado correctamente. Ya puedes iniciar sesión con tu nueva contraseña.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:0;">
+      <tr>
+        <td style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:16px;padding:20px 22px;">
+          <table role="presentation" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:28px;vertical-align:top;padding-right:16px;line-height:1;">⚠️</td>
+              <td style="vertical-align:top;">
+                <p style="margin:0 0 5px;font-size:17px;font-weight:700;color:#991B1B;">¿No fuiste tú?</p>
+                <p style="margin:0;font-size:14px;color:#B91C1C;line-height:1.6;opacity:0.85;">
+                  Si no has realizado este cambio, contacta inmediatamente con el administrador del sistema para proteger tu cuenta.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>`
+
+  await sendEmail({
+    to: email,
+    subject: "Tu contraseña ha sido cambiada — Juzgado Tarazona",
+    html: emailLayout(header, body),
+  })
+}
+
+// ─────────────────────────────────────────────────────────────
 // Template: Solicitud de intercambio (para el destinatario)
 // ─────────────────────────────────────────────────────────────
 

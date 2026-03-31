@@ -116,18 +116,45 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
     // 3. Festivos (Ambar/Azul/Naranja)
     if (showHolidays) {
       holidays.forEach(h => {
-        let color = '#0066CC'; // Local
-        if (h.scope === 'nacional') color = '#FF9500';
-        if (h.scope === 'aragon') color = '#FF3B30';
+        let bgColor = '#FEF3C7';
+        let borderColor = '#F59E0B';
+        let textColor = '#92400E';
+        if (h.scope === 'aragon') {
+          bgColor = '#FFF7ED';
+          borderColor = '#F97316';
+          textColor = '#9A3412';
+        } else if (h.scope === 'zaragoza_provincia') {
+          bgColor = '#EFF6FF';
+          borderColor = '#3B82F6';
+          textColor = '#1E3A8A';
+        } else if (h.scope === 'tarazona') {
+          bgColor = '#EEF2FF';
+          borderColor = '#6366F1';
+          textColor = '#312E81';
+        }
 
+        // Fondo de color para marcar el día
+        allEvents.push({
+          id: `holiday-bg-${h.id}`,
+          title: '',
+          start: h.date,
+          allDay: true,
+          display: 'background',
+          backgroundColor: bgColor,
+          extendedProps: { type: 'holiday' }
+        });
+
+        // Evento visible con el nombre del festivo
         allEvents.push({
           id: `holiday-${h.id}`,
           title: `🎉 ${h.name}`,
           start: h.date,
           allDay: true,
-          display: 'background',
-          backgroundColor: `${color}15`, // Very light background
-          extendedProps: { type: 'holiday', scopeColor: color }
+          backgroundColor: bgColor,
+          borderColor: borderColor,
+          textColor: textColor,
+          classNames: ['holiday-event'],
+          extendedProps: { type: 'holiday', scope: h.scope }
         });
       });
     }
@@ -227,6 +254,21 @@ export default function UnifiedCalendar({ guards, vacations, holidays, staff }: 
             dayMaxEvents={true}
             eventContent={(arg) => {
               if (arg.event.display === 'background') return null;
+              const isHoliday = arg.event.extendedProps?.type === 'holiday';
+              if (isHoliday) {
+                return (
+                  <div
+                    className="px-1.5 py-0.5 text-[10px] rounded-[4px] overflow-hidden text-ellipsis whitespace-nowrap font-semibold border"
+                    style={{
+                      backgroundColor: arg.event.backgroundColor ?? '#FEF3C7',
+                      borderColor: arg.event.borderColor ?? '#F59E0B',
+                      color: arg.event.textColor ?? '#92400E',
+                    }}
+                  >
+                    {arg.event.title}
+                  </div>
+                );
+              }
               return (
                 <div className="px-2 py-1 text-[11px] rounded-[6px] shadow-sm transform hover:scale-[1.02] transition-transform overflow-hidden text-ellipsis whitespace-nowrap font-bold flex items-center gap-1.5 border-none">
                   {arg.event.title}

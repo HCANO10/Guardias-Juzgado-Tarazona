@@ -319,7 +319,22 @@ export function ExportPDFButton({ guards, vacations, holidays }: ExportPDFButton
         ? `calendario_${fromStr}.pdf`
         : `calendario_${fromStr}_${toStr}.pdf`
 
-      doc.save(filename)
+      const pdfOutput = doc.output('arraybuffer')
+      const blob = new Blob([pdfOutput], { type: 'application/pdf' })
+      const url = URL.createObjectURL(blob)
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      if (isIOS) {
+        window.open(url, '_blank')
+        setTimeout(() => URL.revokeObjectURL(url), 1000)
+      } else {
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        setTimeout(() => URL.revokeObjectURL(url), 100)
+      }
     } catch (err) {
       console.error('Error exportando PDF:', err)
       alert('Error al generar el PDF. Inténtalo de nuevo.')

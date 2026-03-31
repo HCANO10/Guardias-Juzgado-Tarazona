@@ -185,9 +185,14 @@ export function ProfilePageClient({
     }
     setChangingPwd(true)
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPwd })
-      if (error) throw error
-      toast({ title: "Contraseña actualizada" })
+      const resp = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPwd }),
+      })
+      const result = await resp.json() as { error?: string }
+      if (!resp.ok) throw new Error(result.error)
+      toast({ title: "Contraseña actualizada", description: "Te hemos enviado un aviso a tu correo." })
       setNewPwd(""); setConfirmPwd("")
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Error desconocido"

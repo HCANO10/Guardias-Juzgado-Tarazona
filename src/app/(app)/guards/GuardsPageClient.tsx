@@ -105,15 +105,25 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
       if (monthStart !== monthFilter && monthEnd !== monthFilter) return false
     }
     if (personFilter !== "all") {
-      const hasPerson = g.auxilio?.id === personFilter || 
-                        g.tramitador?.id === personFilter || 
+      const hasPerson = g.auxilio?.id === personFilter ||
+                        g.tramitador?.id === personFilter ||
                         g.gestor?.id === personFilter
       if (!hasPerson) return false
     }
     if (statusFilter !== "all") {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const start = new Date(g.start_date)
+      const isFuture = start > today
+
+      // "completa": los 3 roles cubiertos
       if (statusFilter === "completa" && g.coverage !== 3) return false
+      // "parcial": 1 o 2 roles asignados (independientemente de si es futura o no)
       if (statusFilter === "parcial" && (g.coverage === 0 || g.coverage === 3)) return false
-      if (statusFilter === "vacia" && g.coverage !== 0) return false
+      // "sin_cubrir": 0 roles asignados
+      if (statusFilter === "sin_cubrir" && g.coverage !== 0) return false
+      // "programada": guardia futura con los 3 roles asignados
+      if (statusFilter === "programada" && !(isFuture && g.coverage === 3)) return false
     }
     return true
   })
@@ -217,9 +227,10 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
             </SelectTrigger>
             <SelectContent className="rounded-[16px] border-slate-200 shadow-2xl">
               <SelectItem value="all">Cualquier estado</SelectItem>
+              <SelectItem value="programada">Programada</SelectItem>
               <SelectItem value="completa">Completa</SelectItem>
               <SelectItem value="parcial">Parcial</SelectItem>
-              <SelectItem value="vacia">Sin cubrir</SelectItem>
+              <SelectItem value="sin_cubrir">Sin cubrir</SelectItem>
             </SelectContent>
           </Select>
         </div>

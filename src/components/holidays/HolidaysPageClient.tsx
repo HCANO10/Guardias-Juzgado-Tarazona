@@ -34,17 +34,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Edit2, Trash2, CalendarIcon, Loader2, Search, ArrowRight, Shield, MapPin } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Plus, Edit2, Trash2, CalendarIcon, Loader2, Search, Shield } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useRole } from '@/hooks/use-role';
-import { 
-  DSCard, 
-  DSBadge, 
-  DSIconBox, 
-  DSPageHeader, 
-  DSSectionHeading, 
-  DSButton 
+import {
+  DSBadge,
+  DSPageHeader,
+  DSButton
 } from '@/lib/design-system';
 
 export interface Holiday {
@@ -187,13 +183,30 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
 
   const getScopeInfo = (scope: Holiday['scope']) => {
     switch (scope) {
-      case 'nacional': return { label: 'España', variant: 'amber' as const };
+      case 'nacional': return { label: 'Nacional', variant: 'amber' as const };
       case 'aragon': return { label: 'Aragón', variant: 'orange' as const };
       case 'zaragoza_provincia': return { label: 'Provincia', variant: 'blue' as const };
       case 'tarazona': return { label: 'Local', variant: 'indigo' as const };
       default: return { label: scope, variant: 'neutral' as const };
     }
   };
+
+  // Agrupar festivos por mes
+  const groupedByMonth = useMemo(() => {
+    const groups: { key: string; label: string; holidays: Holiday[] }[] = [];
+    const map = new Map<string, Holiday[]>();
+    for (const h of filteredHolidays) {
+      const key = h.date.slice(0, 7); // 'yyyy-MM'
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(h);
+    }
+    for (const [key, items] of map.entries()) {
+      const label = format(parseISO(key + '-01'), "MMMM yyyy", { locale: es });
+      const capitalized = label.charAt(0).toUpperCase() + label.slice(1);
+      groups.push({ key, label: capitalized, holidays: items });
+    }
+    return groups;
+  }, [filteredHolidays]);
 
   return (
     <div className="space-y-10 pb-20">
@@ -238,57 +251,74 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="space-y-6">
         {filteredHolidays.length === 0 ? (
-          <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4 py-20">
-            <EmptyState 
+          <div className="py-20">
+            <EmptyState
               icon={holidays.length === 0 ? Shield : Search}
               title={holidays.length === 0 ? "No hay festivos" : "Sin resultados"}
               description="Añade nuevos festivos o cambia los filtros de búsqueda."
             />
           </div>
         ) : (
-          filteredHolidays.map((holiday) => {
-            const scope = getScopeInfo(holiday.scope);
-            return (
-              <DSCard key={holiday.id} className="group hover:scale-[1.02] transition-all duration-300">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="h-10 w-10 flex items-center justify-center rounded-[12px] bg-indigo-50 text-indigo-700 font-bold text-[13px] border border-indigo-100">
-                    {format(parseISO(holiday.date), 'dd')}
-                  </div>
-                  <DSBadge variant={scope.variant}>{scope.label}</DSBadge>
-                </div>
+          groupedByMonth.map(({ key, label, holidays: monthHolidays }) => (
+            <div key={key}>
+              {/* Cabecera de mes */}
+              <div className="bg-slate-50 rounded-lg px-4 py-2 mb-1">
+                <h3 className="text-[13px] font-bold uppercase tracking-wider text-slate-500">{label}</h3>
+              </div>
 
-                <div className="space-y-1 mb-6">
-                  <p className="text-[17px] font-semibold text-slate-900 leading-tight min-h-[44px]">{holiday.name}</p>
-                  <p className="text-[13px] text-slate-500 font-medium capitalize">
-                    {format(parseISO(holiday.date), "MMMM 'de' yyyy", { locale: es })}
-                  </p>
-                </div>
+              {/* Filas de festivos */}
+              <div className="divide-y divide-slate-100">
+                {monthHolidays.map((holiday) => {
+                  const scope = getScopeInfo(holiday.scope);
+                  return (
+                    <div
+                      key={holiday.id}
+                      className="flex items-center justify-between py-2.5 px-2 hover:bg-slate-50/60 rounded-lg transition-colors"
+                    >
+                      {/* Fecha */}
+                      <span className="w-28 shrink-0 text-[13px] font-medium text-slate-500 capitalize">
+                        {format(parseISO(holiday.date), "EEE dd MMM", { locale: es })}
+                      </span>
 
-                {isHeadmaster && (
-                  <div className="flex items-center gap-2 pt-4 border-t border-slate-100">
-                    <DSButton 
-                      variant="secondary" 
-                      className="flex-1 h-9 text-[12px] rounded-[10px]"
-                      onClick={() => handleOpenDialog(holiday)}
-                    >
-                      <Edit2 className="h-3.5 w-3.5 mr-1.5" /> Editar
-                    </DSButton>
-                    <button 
-                      onClick={() => {
-                        setDeletingHolidayId(holiday.id);
-                        setIsDelOpen(true);
-                      }}
-                      className="h-9 w-9 flex items-center justify-center rounded-[10px] bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
-              </DSCard>
-            )
-          })
+                      {/* Nombre */}
+                      <span className="flex-1 text-[15px] font-semibold text-slate-900 px-3 truncate">
+                        {holiday.name}
+                      </span>
+
+                      {/* Badge ámbito + acciones */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <DSBadge variant={scope.variant} className="text-[11px]">{scope.label}</DSBadge>
+
+                        {isHeadmaster && (
+                          <>
+                            <button
+                              onClick={() => handleOpenDialog(holiday)}
+                              className="h-8 w-8 flex items-center justify-center rounded-[8px] bg-slate-100 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all"
+                              title="Editar"
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setDeletingHolidayId(holiday.id);
+                                setIsDelOpen(true);
+                              }}
+                              className="h-8 w-8 flex items-center justify-center rounded-[8px] bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))
         )}
       </div>
 

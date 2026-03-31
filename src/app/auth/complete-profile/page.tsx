@@ -94,11 +94,21 @@ export default function CompleteProfilePage() {
 
       if (existing) {
         document.cookie = 'staff-profile-status=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-        router.push('/dashboard')
+        router.replace('/dashboard')
         return
       }
 
-      // Cargar puestos y staff sin vincular en paralelo
+      // Determinar proveedor de autenticación
+      const provider = user.app_metadata?.provider as string | undefined
+
+      // Si el proveedor es email (contraseña), el perfil ya debería estar vinculado
+      // en el momento del registro → redirigir al dashboard directamente
+      if (provider !== 'google') {
+        router.replace('/dashboard')
+        return
+      }
+
+      // Proveedor Google: cargar puestos y staff pendiente de vincular en paralelo
       const [posRes, unlRes] = await Promise.all([
         fetch('/api/auth/positions'),
         fetch('/api/auth/unlinked-staff'),
@@ -106,9 +116,16 @@ export default function CompleteProfilePage() {
       const posData = await posRes.json() as { positions?: Position[] }
       const unlData = await unlRes.json() as { staff?: UnlinkedStaffMember[] }
       if (posData.positions) setPositions(posData.positions)
-      if (unlData.staff) setUnlinkedStaff(unlData.staff)
+      const unlinked = unlData.staff ?? []
+      if (unlData.staff) setUnlinkedStaff(unlinked)
 
-      setStep('choose')
+      if (unlinked.length > 0) {
+        // Existen perfiles pre-creados sin vincular → mostrar flujo de vinculación
+        setStep('choose')
+      } else {
+        // No hay perfiles pendientes → flujo de nuevo registro
+        setStep('new')
+      }
     }
     init()
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -427,10 +444,12 @@ export default function CompleteProfilePage() {
                   </Label>
                 </div>
                 <div className="flex gap-3">
-                  <DSButton type="button" variant="secondary" className="flex-1 h-12" onClick={() => setStep('choose')}>
-                    Volver
-                  </DSButton>
-                  <DSButton type="submit" className="flex-1 h-12 text-[15px] font-semibold" disabled={isNewLoading}>
+                  {unlinkedStaff.length > 0 && (
+                    <DSButton type="button" variant="secondary" className="flex-1 h-12" onClick={() => setStep('choose')}>
+                      Volver
+                    </DSButton>
+                  )}
+                  <DSButton type="submit" className={`h-12 text-[15px] font-semibold ${unlinkedStaff.length > 0 ? 'flex-1' : 'w-full'}`} disabled={isNewLoading}>
                     {isNewLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Guardando…</> : "Guardar y continuar"}
                   </DSButton>
                 </div>

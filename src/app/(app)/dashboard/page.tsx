@@ -158,16 +158,6 @@ export default async function DashboardPage() {
     }
   })
 
-  // Only show events for current user in the mini calendar on dashboard?
-  // User asked for "Solo mostrar eventos del usuario actual"
-  const myCalendarGuards = calendarGuards?.filter(g =>
-    g.auxilio?.id === currentStaff?.id ||
-    g.tramitador?.id === currentStaff?.id ||
-    g.gestor?.id === currentStaff?.id
-  ) || []
-
-  const myCalendarVacations = allVacations?.filter(v => v.staff_id === currentStaff?.id) || []
-
   return (
     <DashboardPageClient
       stats={{
@@ -184,9 +174,9 @@ export default async function DashboardPage() {
         alerts
       }}
       calendarData={{
-        guards: myCalendarGuards,
-        vacations: myCalendarVacations,
-        holidays: holidays || [], // Holidays are shown for everyone
+        guards: calendarGuards || [],
+        vacations: allVacations || [],
+        holidays: holidays || [],
         staff: activeStaff
       }}
       currentUserStaffId={currentStaff?.id || null}

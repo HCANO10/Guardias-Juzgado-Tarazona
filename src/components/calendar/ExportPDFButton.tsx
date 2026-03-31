@@ -45,6 +45,8 @@ interface ExportPDFButtonProps {
   vacations: PDFVacation[]
   holidays: PDFHoliday[]
   staff: PDFStaffMember[]
+  /** If set, the PDF will show this person's name instead of "Todos los trabajadores" */
+  filterLabel?: string
 }
 
 function MonthPicker({
@@ -118,7 +120,7 @@ function MonthPicker({
   )
 }
 
-export function ExportPDFButton({ guards, vacations, holidays }: ExportPDFButtonProps) {
+export function ExportPDFButton({ guards, vacations, holidays, filterLabel }: ExportPDFButtonProps) {
   const [exporting, setExporting] = useState(false)
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [fromDate, setFromDate] = useState<Date>(() => {
@@ -189,7 +191,7 @@ export function ExportPDFButton({ guards, vacations, holidays }: ExportPDFButton
         doc.setFontSize(9)
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(100, 100, 100)
-        doc.text(`Juzgado de Tarazona · Rango: ${rangeLabel} · Todos los trabajadores`, 148, 20, { align: 'center' })
+        doc.text(`Juzgado de Tarazona · Rango: ${rangeLabel} · ${filterLabel ?? 'Todos los trabajadores'}`, 148, 20, { align: 'center' })
 
         // Línea separadora
         doc.setDrawColor(220, 220, 230)
@@ -390,7 +392,7 @@ export function ExportPDFButton({ guards, vacations, holidays }: ExportPDFButton
         <DSButton className="w-full h-10 text-[14px] font-semibold gap-2" onClick={handleExport} disabled={exporting}>
           {exporting
             ? <><Loader2 className="h-4 w-4 animate-spin" />Generando PDF…</>
-            : <><FileDown className="h-4 w-4" />Exportar {rangeText} · Todos los trabajadores</>
+            : <><FileDown className="h-4 w-4" />Exportar {rangeText}{filterLabel ? ` · ${filterLabel}` : ' · Todos'}</>
           }
         </DSButton>
       </PopoverContent>

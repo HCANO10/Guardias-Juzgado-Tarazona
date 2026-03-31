@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
 import { UnifiedCalendar } from "@/components/calendar/CalendarClientWrapper"
-import { ExportPDFButton } from "@/components/calendar/ExportPDFButton"
 import { DSPageHeader } from "@/lib/design-system"
 
 interface StaffPosition {
@@ -67,14 +66,6 @@ export default async function CalendarPage() {
       <DSPageHeader
         title="Calendario Unificado"
         subtitle="Guardias, vacaciones y festivos en una vista integrada."
-        actions={
-          <ExportPDFButton
-            guards={formattedGuards || []}
-            vacations={vacations || []}
-            holidays={holidays || []}
-            staff={staff || []}
-          />
-        }
       />
 
       <UnifiedCalendar
@@ -82,6 +73,7 @@ export default async function CalendarPage() {
         vacations={vacations || []}
         holidays={holidays || []}
         staff={staff || []}
+        showExport
       />
     </div>
   )

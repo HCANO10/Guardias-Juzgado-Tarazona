@@ -215,6 +215,7 @@ export default function DashboardPageClient({
                 vacations={calendarData.vacations}
                 holidays={calendarData.holidays}
                 staff={calendarData.staff}
+                defaultPersonFilter={currentUserStaffId ?? undefined}
               />
             </div>
           </DSCard>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -13,7 +14,12 @@ import {
   DSBadge
 } from '@/lib/design-system';
 import { Layers, Users } from 'lucide-react';
-import { ExportPDFButton } from './ExportPDFButton';
+
+// Loaded only on the client to avoid SSR hydration issues with date-dependent state
+const ExportPDFButton = dynamic(
+  () => import('./ExportPDFButton').then(m => ({ default: m.ExportPDFButton })),
+  { ssr: false },
+);
 
 /**
  * Adds 1 day to a YYYY-MM-DD string using LOCAL calendar arithmetic.

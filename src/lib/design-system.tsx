@@ -236,23 +236,31 @@ export function DSSectionHeading({
 // ============================================
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost"
 
-export function DSButton({
-  children,
-  onClick,
-  variant = "primary",
-  className = "",
-  disabled = false,
-  type = "button",
-  size = "md",
-}: {
-  children: React.ReactNode
-  onClick?: () => void
-  variant?: ButtonVariant
-  className?: string
-  disabled?: boolean
-  type?: "button" | "submit" | "reset"
-  size?: "sm" | "md" | "lg"
-}) {
+export const DSButton = React.forwardRef<
+  HTMLButtonElement,
+  {
+    children: React.ReactNode
+    onClick?: React.MouseEventHandler<HTMLButtonElement>
+    variant?: ButtonVariant
+    className?: string
+    disabled?: boolean
+    type?: "button" | "submit" | "reset"
+    size?: "sm" | "md" | "lg"
+    [key: string]: unknown
+  }
+>(function DSButton(
+  {
+    children,
+    onClick,
+    variant = "primary",
+    className = "",
+    disabled = false,
+    type = "button",
+    size = "md",
+    ...rest
+  },
+  ref,
+) {
   const variants: Record<ButtonVariant, string> = {
     primary:
       "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm hover:shadow-[0_4px_12px_rgba(79,70,229,0.3)] active:scale-[0.98]",
@@ -272,15 +280,17 @@ export function DSButton({
 
   return (
     <button
+      ref={ref}
       type={type}
       onClick={onClick}
       disabled={disabled}
       className={`font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 ${sizes[size]} ${variants[variant]} ${className}`}
+      {...rest}
     >
       {children}
     </button>
   )
-}
+})
 
 // ============================================
 // METRIC CARD — Colores vivos

@@ -155,35 +155,50 @@ export function ExportPDFButton({ guards, vacations, holidays, filterLabel }: Ex
       const { jsPDF } = await import('jspdf')
       const autoTable = (await import('jspdf-autotable')).default
 
-      const doc = new (jsPDF as unknown as new (opts: Record<string, string>) => InstanceType<typeof jsPDF>)({
+      type DocType = InstanceType<typeof jsPDF>
+      const doc = new (jsPDF as unknown as new (opts: Record<string, string>) => DocType)({
         orientation: 'landscape',
         unit: 'mm',
         format: 'a4',
       })
 
-      const fromLabel = format(fromDate, 'MMMM yyyy', { locale: es }).toUpperCase()
-      const toLabel = format(toDate, 'MMMM yyyy', { locale: es }).toUpperCase()
-      const rangeLabel = fromDate.getTime() === toDate.getTime()
-        ? fromLabel
-        : `${fromLabel} — ${toLabel}`
+      const generatedAt = format(new Date(), "dd/MM/yyyy 'a las' HH:mm", { locale: es })
+      const personLabel = filterLabel ?? 'Todos los trabajadores'
 
-      // Obtener todos los meses en el rango
+      const fromLabel = format(fromDate, 'MMMM yyyy', { locale: es }).toUpperCase()
+      const toLabel   = format(toDate,   'MMMM yyyy', { locale: es }).toUpperCase()
+      const rangeLabel = fromDate.getTime() === toDate.getTime() ? fromLabel : `${fromLabel} — ${toLabel}`
+
       const months = eachMonthOfInterval({ start: fromDate, end: toDate })
 
-      let isFirstPage = true
+      // Week starts on Friday: col index 0=Fri,1=Sat,2=Sun,3=Mon,4=Tue,5=Wed,6=Thu
+      const DAY_NAMES = ['VIE', 'SÁB', 'DOM', 'LUN', 'MAR', 'MIÉ', 'JUE']
+      const DAY_JS    = [5, 6, 0, 1, 2, 3, 4] // JS getDay() values for each column
+
+      const drawFooter = (d: DocType, pageNum: number) => {
+        d.setFontSize(7)
+        d.setFont('helvetica', 'italic')
+        d.setTextColor(160, 160, 160)
+        d.text(
+          `Generado el ${generatedAt} · Juzgado de Tarazona · Pág. ${pageNum}`,
+          148, 205, { align: 'center' },
+        )
+      }
+
+      let pageNum = 0
 
       for (const monthDate of months) {
-        const year = monthDate.getFullYear()
-        const month = monthDate.getMonth()
+        const year     = monthDate.getFullYear()
+        const month    = monthDate.getMonth()
         const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`
         const monthName = format(monthDate, 'MMMM yyyy', { locale: es }).toUpperCase()
 
-        if (!isFirstPage) {
-          doc.addPage()
-        }
-        isFirstPage = false
+        // ════════════════════════════════════════════════════════════════
+        // PAGE 1 OF MONTH: DATA TABLES
+        // ════════════════════════════════════════════════════════════════
+        if (pageNum > 0) doc.addPage()
+        pageNum++
 
-        // ── Cabecera de página ────────────────────────────────────────────
         doc.setFontSize(14)
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(30, 30, 30)
@@ -191,17 +206,15 @@ export function ExportPDFButton({ guards, vacations, holidays, filterLabel }: Ex
         doc.setFontSize(9)
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(100, 100, 100)
-        doc.text(`Juzgado de Tarazona · Rango: ${rangeLabel} · ${filterLabel ?? 'Todos los trabajadores'}`, 148, 20, { align: 'center' })
-
-        // Línea separadora
+        doc.text(`Juzgado de Tarazona · Rango: ${rangeLabel} · ${personLabel}`, 148, 20, { align: 'center' })
         doc.setDrawColor(220, 220, 230)
         doc.line(10, 23, 287, 23)
 
-        // ── 1. GUARDIAS del mes ──────────────────────────────────────────
-        const monthGuards = guards.filter((g) => {
-          const startMonth = g.start_date?.slice(0, 7)
-          const endMonth = g.end_date?.slice(0, 7)
-          return startMonth === monthStr || endMonth === monthStr
+        // Guards table
+        const monthGuards = guards.filter(g => {
+          const sm = g.start_date?.slice(0, 7)
+          const em = g.end_date?.slice(0, 7)
+          return sm === monthStr || em === monthStr
         })
 
         doc.setFontSize(10)
@@ -213,52 +226,43 @@ export function ExportPDFButton({ guards, vacations, holidays, filterLabel }: Ex
           startY: 33,
           head: [['Semana', 'Inicio', 'Fin', 'Gestor/a', 'Tramitador/a', 'Auxilio']],
           body: monthGuards.length > 0
-            ? monthGuards.map((g) => [
+            ? monthGuards.map(g => [
                 `Sem. ${g.week_number ?? '?'}`,
                 formatDate(g.start_date),
                 formatDate(g.end_date),
-                g.gestor ? `${g.gestor.first_name} ${g.gestor.last_name}` : '—',
+                g.gestor     ? `${g.gestor.first_name} ${g.gestor.last_name}`     : '—',
                 g.tramitador ? `${g.tramitador.first_name} ${g.tramitador.last_name}` : '—',
-                g.auxilio ? `${g.auxilio.first_name} ${g.auxilio.last_name}` : '—',
+                g.auxilio    ? `${g.auxilio.first_name} ${g.auxilio.last_name}`    : '—',
               ])
             : [['—', '—', '—', '—', '—', 'Sin guardias en este mes']],
           headStyles: { fillColor: [220, 38, 38], textColor: 255, fontStyle: 'bold', fontSize: 8 },
           bodyStyles: { fontSize: 8 },
           alternateRowStyles: { fillColor: [254, 242, 242] },
-          columnStyles: {
-            0: { cellWidth: 18 },
-            1: { cellWidth: 24 },
-            2: { cellWidth: 24 },
-            3: { cellWidth: 55 },
-            4: { cellWidth: 55 },
-            5: { cellWidth: 55 },
-          },
+          columnStyles: { 0:{cellWidth:18}, 1:{cellWidth:24}, 2:{cellWidth:24}, 3:{cellWidth:55}, 4:{cellWidth:55}, 5:{cellWidth:55} },
           margin: { left: 10, right: 10 },
         })
 
-        // ── 2. VACACIONES Y ASUNTOS PROPIOS ──────────────────────────────
+        // Vacations table
         const monthStart = new Date(year, month, 1)
-        const monthEnd = new Date(year, month, getDaysInMonth(monthDate))
-
-        const monthVacations = vacations.filter((v) => {
+        const monthEnd   = new Date(year, month, getDaysInMonth(monthDate))
+        const monthVacations = vacations.filter(v => {
           if (!v.start_date || !v.end_date) return false
-          const vStart = new Date(v.start_date + 'T00:00:00')
-          const vEnd = new Date(v.end_date + 'T00:00:00')
-          return vStart <= monthEnd && vEnd >= monthStart
+          const vs = new Date(v.start_date + 'T00:00:00')
+          const ve = new Date(v.end_date   + 'T00:00:00')
+          return vs <= monthEnd && ve >= monthStart
         })
 
-        const lastGuardY = ((doc as unknown as Record<string, { finalY?: number }>).lastAutoTable?.finalY ?? 50) + 7
-
+        const afterGuardsY = ((doc as unknown as Record<string, {finalY?: number}>).lastAutoTable?.finalY ?? 50) + 7
         doc.setFontSize(10)
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(30, 30, 30)
-        doc.text('VACACIONES Y ASUNTOS PROPIOS', 10, lastGuardY)
+        doc.text('VACACIONES Y ASUNTOS PROPIOS', 10, afterGuardsY)
 
         autoTable(doc, {
-          startY: lastGuardY + 3,
+          startY: afterGuardsY + 3,
           head: [['Personal', 'Tipo', 'Inicio', 'Fin']],
           body: monthVacations.length > 0
-            ? monthVacations.map((v) => [
+            ? monthVacations.map(v => [
                 v.staff ? `${v.staff.first_name} ${v.staff.last_name}` : '—',
                 tipoLabel(v.tipo),
                 formatDate(v.start_date),
@@ -268,29 +272,22 @@ export function ExportPDFButton({ guards, vacations, holidays, filterLabel }: Ex
           headStyles: { fillColor: [22, 163, 74], textColor: 255, fontStyle: 'bold', fontSize: 8 },
           bodyStyles: { fontSize: 8 },
           alternateRowStyles: { fillColor: [240, 253, 244] },
-          columnStyles: {
-            0: { cellWidth: 80 },
-            1: { cellWidth: 40 },
-            2: { cellWidth: 30 },
-            3: { cellWidth: 30 },
-          },
+          columnStyles: { 0:{cellWidth:80}, 1:{cellWidth:40}, 2:{cellWidth:30}, 3:{cellWidth:30} },
           margin: { left: 10, right: 10 },
         })
 
-        // ── 3. FESTIVOS ──────────────────────────────────────────────────
-        const monthHolidays = holidays.filter((h) => h.date?.slice(0, 7) === monthStr)
-
+        // Holidays table
+        const monthHolidays = holidays.filter(h => h.date?.slice(0, 7) === monthStr)
         if (monthHolidays.length > 0) {
-          const lastVacY = ((doc as unknown as Record<string, { finalY?: number }>).lastAutoTable?.finalY ?? 100) + 7
+          const afterVacY = ((doc as unknown as Record<string, {finalY?: number}>).lastAutoTable?.finalY ?? 100) + 7
           doc.setFontSize(10)
           doc.setFont('helvetica', 'bold')
           doc.setTextColor(30, 30, 30)
-          doc.text('FESTIVOS', 10, lastVacY)
-
+          doc.text('FESTIVOS', 10, afterVacY)
           autoTable(doc, {
-            startY: lastVacY + 3,
+            startY: afterVacY + 3,
             head: [['Fecha', 'Festivo', 'Ámbito']],
-            body: monthHolidays.map((h) => [
+            body: monthHolidays.map(h => [
               h.date ? format(new Date(h.date + 'T00:00:00'), 'dd/MM/yyyy') : '—',
               h.name || '—',
               h.scope ? h.scope.charAt(0).toUpperCase() + h.scope.slice(1) : '—',
@@ -302,17 +299,225 @@ export function ExportPDFButton({ guards, vacations, holidays, filterLabel }: Ex
           })
         }
 
-        // ── Pie de página ────────────────────────────────────────────────
-        const pageCount = (doc as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages()
-        doc.setFontSize(7)
-        doc.setFont('helvetica', 'italic')
-        doc.setTextColor(160, 160, 160)
-        doc.text(
-          `Generado el ${format(new Date(), "dd/MM/yyyy 'a las' HH:mm", { locale: es })} · Juzgado de Tarazona · Pág. ${pageCount}`,
-          148,
-          200,
-          { align: 'center' },
-        )
+        drawFooter(doc, pageNum)
+
+        // ════════════════════════════════════════════════════════════════
+        // PAGE 2 OF MONTH: VISUAL CALENDAR GRID
+        // ════════════════════════════════════════════════════════════════
+        doc.addPage()
+        pageNum++
+
+        // Header
+        doc.setFontSize(16)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(20, 20, 40)
+        doc.text(monthName, 148, 13, { align: 'center' })
+        doc.setFontSize(8)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(120, 120, 140)
+        doc.text(`${personLabel} · Juzgado de Tarazona`, 148, 19, { align: 'center' })
+        doc.setDrawColor(200, 200, 220)
+        doc.line(10, 21, 287, 21)
+
+        const CAL_LEFT   = 10
+        const CAL_TOP    = 23
+        const CAL_WIDTH  = 277
+        const COL_W      = CAL_WIDTH / 7
+        const HDR_H      = 7
+
+        const daysInMonth   = getDaysInMonth(monthDate)
+        const firstDayJS    = new Date(year, month, 1).getDay()
+        const firstCol      = DAY_JS.indexOf(firstDayJS)
+        const numRows       = Math.ceil((firstCol + daysInMonth) / 7)
+        const ROW_H         = (205 - CAL_TOP - HDR_H) / numRows
+
+        // Column header row
+        for (let c = 0; c < 7; c++) {
+          const x = CAL_LEFT + c * COL_W
+          const weekend = c === 1 || c === 2
+          doc.setFillColor(...(weekend ? [232,232,242] : [220,228,255]) as [number,number,number])
+          doc.setDrawColor(190, 195, 215)
+          doc.rect(x, CAL_TOP, COL_W, HDR_H, 'FD')
+          doc.setFontSize(7.5)
+          doc.setFont('helvetica', 'bold')
+          doc.setTextColor(weekend ? 130 : 50, weekend ? 130 : 60, weekend ? 160 : 160)
+          doc.text(DAY_NAMES[c], x + COL_W / 2, CAL_TOP + HDR_H - 1.8, { align: 'center' })
+        }
+
+        // Build per-day data
+        interface DayInfo {
+          guard:     PDFGuard | null
+          guardIsFirstVisible: boolean
+          vacations: PDFVacation[]
+          holidays:  PDFHoliday[]
+          weekend:   boolean
+        }
+        const dayInfo: Record<number, DayInfo> = {}
+        for (let d = 1; d <= daysInMonth; d++) {
+          const col = DAY_JS.indexOf(new Date(year, month, d).getDay())
+          dayInfo[d] = { guard: null, guardIsFirstVisible: false, vacations: [], holidays: [], weekend: col === 1 || col === 2 }
+        }
+
+        for (const g of monthGuards) {
+          const gStart = new Date(g.start_date + 'T00:00:00')
+          const gEnd   = new Date(g.end_date   + 'T00:00:00')
+          let isFirstVisible = true
+          for (let d = 1; d <= daysInMonth; d++) {
+            const day = new Date(year, month, d)
+            if (day >= gStart && day <= gEnd) {
+              dayInfo[d].guard = g
+              if (isFirstVisible) {
+                dayInfo[d].guardIsFirstVisible = true
+                isFirstVisible = false
+              }
+            }
+          }
+        }
+
+        for (const v of monthVacations) {
+          const vStart = new Date(v.start_date + 'T00:00:00')
+          const vEnd   = new Date(v.end_date   + 'T00:00:00')
+          for (let d = 1; d <= daysInMonth; d++) {
+            const day = new Date(year, month, d)
+            if (day >= vStart && day <= vEnd) dayInfo[d].vacations.push(v)
+          }
+        }
+
+        for (const h of monthHolidays) {
+          const hd = parseInt(h.date.slice(8, 10), 10)
+          if (hd >= 1 && hd <= daysInMonth) dayInfo[hd].holidays.push(h)
+        }
+
+        // Draw empty leading cells
+        for (let c = 0; c < firstCol; c++) {
+          const x = CAL_LEFT + c * COL_W
+          const y = CAL_TOP + HDR_H
+          doc.setFillColor(242, 242, 248)
+          doc.setDrawColor(205, 210, 225)
+          doc.rect(x, y, COL_W, ROW_H, 'FD')
+        }
+
+        // Draw day cells
+        for (let d = 1; d <= daysInMonth; d++) {
+          const cellIdx = firstCol + d - 1
+          const row     = Math.floor(cellIdx / 7)
+          const col     = cellIdx % 7
+          const x       = CAL_LEFT + col * COL_W
+          const y       = CAL_TOP + HDR_H + row * ROW_H
+          const info    = dayInfo[d]
+
+          // Base background
+          const bg: [number,number,number] = info.weekend ? [246,245,252] : [255,255,255]
+          doc.setFillColor(...bg)
+          doc.setDrawColor(205, 210, 225)
+          doc.rect(x, y, COL_W, ROW_H, 'FD')
+
+          // Holiday tint (full cell)
+          if (info.holidays.length > 0) {
+            const h = info.holidays[0]
+            const tint: [number,number,number] =
+              h.scope === 'aragon'            ? [255, 247, 235] :
+              h.scope === 'zaragoza_provincia'? [235, 244, 255] :
+              h.scope === 'tarazona'          ? [238, 234, 255] :
+                                               [255, 251, 225]
+            doc.setFillColor(...tint)
+            doc.rect(x + 0.4, y + 0.4, COL_W - 0.8, ROW_H - 0.8, 'F')
+          }
+
+          // Guard bar — 4.5mm tall across the top
+          if (info.guard) {
+            doc.setFillColor(220, 38, 38)
+            doc.rect(x, y, COL_W, 4.5, 'F')
+            // Label on first visible cell of this guard this month
+            if (info.guardIsFirstVisible) {
+              const g    = info.guard
+              const remainCols = 7 - col  // guard always Fri→Thu so = 7 when starts Fri
+              const parts = [
+                g.auxilio    ? `A: ${g.auxilio.first_name}`    : null,
+                g.tramitador ? `T: ${g.tramitador.first_name}` : null,
+                g.gestor     ? `G: ${g.gestor.first_name}`     : null,
+              ].filter(Boolean).join('   ')
+              doc.setFontSize(5.2)
+              doc.setFont('helvetica', 'bold')
+              doc.setTextColor(255, 255, 255)
+              doc.text(parts, x + 1.5, y + 3.1, { maxWidth: remainCols * COL_W - 3 })
+            }
+          }
+
+          // Vacation bar — 3mm tall below guard bar (or at top if no guard)
+          if (info.vacations.length > 0) {
+            const barY = y + (info.guard ? 5.2 : 0.5)
+            doc.setFillColor(34, 197, 94)
+            doc.rect(x + 0.4, barY, COL_W - 0.8, 3, 'F')
+
+            // Name on first day of each vacation
+            const firstVac = info.vacations[0]
+            const fvStart  = new Date(firstVac.start_date + 'T00:00:00')
+            const isFirstVacDay = fvStart.getMonth() === month && fvStart.getDate() === d
+            if ((isFirstVacDay || d === 1) && firstVac.staff) {
+              doc.setFontSize(4.8)
+              doc.setFont('helvetica', 'bold')
+              doc.setTextColor(255, 255, 255)
+              doc.text(firstVac.staff.first_name, x + 1.5, barY + 2.2, { maxWidth: COL_W - 3 })
+            }
+          }
+
+          // Day number — bottom right
+          doc.setFontSize(9)
+          doc.setFont('helvetica', 'bold')
+          doc.setTextColor(info.weekend ? 150 : 35, info.weekend ? 140 : 40, info.weekend ? 175 : 70)
+          doc.text(String(d), x + COL_W - 2, y + ROW_H - 2, { align: 'right' })
+
+          // Holiday name — bottom left, small italic
+          if (info.holidays.length > 0) {
+            const h = info.holidays[0]
+            const tc: [number,number,number] =
+              h.scope === 'aragon'            ? [154, 52, 18]  :
+              h.scope === 'zaragoza_provincia'? [30, 58, 138]  :
+              h.scope === 'tarazona'          ? [49, 46, 129]  :
+                                               [133, 77, 14]
+            doc.setFontSize(5)
+            doc.setFont('helvetica', 'italic')
+            doc.setTextColor(...tc)
+            doc.text(h.name, x + 1.5, y + ROW_H - 2.5, { maxWidth: COL_W - 10 })
+          }
+        }
+
+        // Draw empty trailing cells to complete last row
+        const totalCells   = firstCol + daysInMonth
+        const filledInLast = totalCells % 7
+        if (filledInLast !== 0) {
+          for (let c = filledInLast; c < 7; c++) {
+            const x = CAL_LEFT + c * COL_W
+            const y = CAL_TOP + HDR_H + (numRows - 1) * ROW_H
+            doc.setFillColor(242, 242, 248)
+            doc.setDrawColor(205, 210, 225)
+            doc.rect(x, y, COL_W, ROW_H, 'FD')
+          }
+        }
+
+        // Legend
+        const legendY = CAL_TOP + HDR_H + numRows * ROW_H + 3
+        const items: [number,number,number,string][] = [
+          [220, 38,  38,  'Guardia'],
+          [34,  197, 94,  'Vacaciones'],
+          [253, 230, 138, 'Festivo nacional'],
+          [253, 215, 180, 'Festivo regional'],
+          [191, 219, 254, 'Festivo local'],
+        ]
+        let lx = CAL_LEFT
+        for (const [r, g, b, label] of items) {
+          doc.setFillColor(r, g, b)
+          doc.setDrawColor(180, 180, 180)
+          doc.rect(lx, legendY, 4.5, 3, 'FD')
+          doc.setFontSize(6.5)
+          doc.setFont('helvetica', 'normal')
+          doc.setTextColor(60, 60, 60)
+          doc.text(label, lx + 5.5, legendY + 2.4)
+          lx += doc.getTextWidth(label) + 12
+        }
+
+        drawFooter(doc, pageNum)
       }
 
       const fromStr = format(fromDate, 'yyyy-MM')

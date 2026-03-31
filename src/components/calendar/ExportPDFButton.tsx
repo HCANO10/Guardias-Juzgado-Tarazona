@@ -181,7 +181,7 @@ export function ExportPDFButton({ guards, vacations, holidays, filterLabel }: Ex
         d.setTextColor(160, 160, 160)
         d.text(
           `Generado el ${generatedAt} · Juzgado de Tarazona · Pág. ${pageNum}`,
-          148, 205, { align: 'center' },
+          148, 207, { align: 'center' },
         )
       }
 
@@ -329,7 +329,9 @@ export function ExportPDFButton({ guards, vacations, holidays, filterLabel }: Ex
         const firstDayJS    = new Date(year, month, 1).getDay()
         const firstCol      = DAY_JS.indexOf(firstDayJS)
         const numRows       = Math.ceil((firstCol + daysInMonth) / 7)
-        const ROW_H         = (205 - CAL_TOP - HDR_H) / numRows
+        // Page is 210mm tall. Reserve 14mm at bottom for legend (5mm) + footer (5mm) + margin.
+        const GRID_BOTTOM   = 196
+        const ROW_H         = (GRID_BOTTOM - CAL_TOP - HDR_H) / numRows
 
         // Column header row
         for (let c = 0; c < 7; c++) {

@@ -107,6 +107,10 @@ export const authUpdateEmailSchema = z.object({
   newEmail: emailField,
 })
 
+export const authChangePasswordSchema = z.object({
+  password: passwordField,
+})
+
 // ============================================================
 // Vacations schemas
 // ============================================================

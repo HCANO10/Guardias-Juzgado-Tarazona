@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { validateBody } from '@/lib/validators/api'
+import { validateBody, apiError } from '@/lib/validators/api'
 import { authRegisterSchema } from '@/lib/validators/schemas'
 import { normalizeStaffData } from '@/lib/staff/normalize'
 
@@ -85,8 +85,7 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error al crear la cuenta'
     console.error('Error en registro:', error)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

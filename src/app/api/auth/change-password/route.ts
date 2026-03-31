@@ -3,16 +3,18 @@ export const dynamic = "force-dynamic"
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAuth } from '@/lib/auth/require-role'
+import { validateBody, apiError } from '@/lib/validators/api'
+import { authChangePasswordSchema } from '@/lib/validators/schemas'
 import { sendPasswordChangeNotification } from '@/lib/email/send'
 
 export async function POST(request: NextRequest) {
   const auth = await requireAuth()
   if (!auth.success) return auth.response
 
-  const body = await request.json() as { password?: string }
-  if (!body.password || body.password.length < 8) {
-    return NextResponse.json({ error: 'La contraseña debe tener al menos 8 caracteres' }, { status: 400 })
-  }
+  const validation = await validateBody(request, authChangePasswordSchema)
+  if (!validation.success) return validation.response
+
+  const { password } = validation.data
 
   try {
     const adminClient = createAdminClient()
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
     // Actualizar contraseña
     const { error: updateError } = await adminClient.auth.admin.updateUserById(
       auth.userId,
-      { password: body.password }
+      { password }
     )
     if (updateError) {
       return NextResponse.json({ error: 'Error al actualizar la contraseña' }, { status: 500 })
@@ -51,7 +53,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

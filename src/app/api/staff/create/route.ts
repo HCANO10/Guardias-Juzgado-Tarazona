@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic"
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireHeadmaster } from '@/lib/auth/require-role'
-import { validateBody } from '@/lib/validators/api'
+import { validateBody, apiError } from '@/lib/validators/api'
 import { staffCreateSchema } from '@/lib/validators/schemas'
 
 export async function POST(request: NextRequest) {
@@ -69,8 +69,7 @@ export async function POST(request: NextRequest) {
       message: `Usuario creado: ${first_name} ${last_name} (${email}). Contraseña: ${userPassword}`,
     })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno al crear usuario'
     console.error('Error creando usuario:', error)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

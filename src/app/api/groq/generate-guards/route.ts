@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"
 // These are inherent to Supabase's JS client typing limitations with deep joins.
 import { NextRequest, NextResponse } from 'next/server'
 import { requireHeadmaster } from '@/lib/auth/require-role'
-import { validateBody } from '@/lib/validators/api'
+import { validateBody, apiError } from '@/lib/validators/api'
 import { groqGenerateGuardsSchema } from '@/lib/validators/schemas'
 import { callGroq } from '@/lib/groq/client'
 import { buildSystemPrompt, buildUserPrompt, PromptData } from '@/lib/groq/prompts'
@@ -270,8 +270,7 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno contactando con Groq'
     console.error("Error groq-generate:", error)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireHeadmaster } from '@/lib/auth/require-role'
-import { validateBody } from '@/lib/validators/api'
+import { validateBody, apiError } from '@/lib/validators/api'
 import { groqApplyProposalSchema } from '@/lib/validators/schemas'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -90,8 +90,7 @@ export async function POST(request: NextRequest) {
       message: `Se han aplicado ${assignments.length} semanas (${inserts.length} asignaciones) correctamente.`,
     })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno al aplicar propuesta'
     console.error('Error apply-proposal:', error)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic"
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAuth } from '@/lib/auth/require-role'
-import { validateBody, validateQuery } from '@/lib/validators/api'
+import { validateBody, validateQuery, apiError } from '@/lib/validators/api'
 import { activityCreateSchema, activityQuerySchema } from '@/lib/validators/schemas'
 
 export async function GET(request: NextRequest) {
@@ -38,8 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: data || [] })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }
 
@@ -63,7 +62,6 @@ export async function POST(request: NextRequest) {
     if (error) throw error
     return NextResponse.json({ success: true, data })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

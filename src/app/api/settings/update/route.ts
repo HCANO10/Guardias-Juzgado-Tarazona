@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireHeadmaster } from '@/lib/auth/require-role'
-import { validateBody } from '@/lib/validators/api'
+import { validateBody, apiError } from '@/lib/validators/api'
 import { settingsUpdateSchema } from '@/lib/validators/schemas'
 import { setSetting } from '@/lib/settings'
 
@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno al actualizar settings'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

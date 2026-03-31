@@ -1,3 +1,4 @@
+import { apiError } from '@/lib/validators/api'
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
@@ -28,8 +29,7 @@ export async function POST() {
       model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
     })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error de conexión'
     console.error('Groq Test Error:', error)
-    return NextResponse.json({ connected: false, error: message }, { status: 500 })
+    return apiError(error)
   }
 }

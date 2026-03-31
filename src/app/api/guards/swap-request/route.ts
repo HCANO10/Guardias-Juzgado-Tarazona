@@ -1,3 +1,4 @@
+import { apiError } from '@/lib/validators/api'
 export const dynamic = "force-dynamic"
 
 // POST /api/guards/swap-request
@@ -160,8 +161,7 @@ export async function POST(request: NextRequest) {
       message: "Solicitud enviada. Se ha notificado al compañero por email.",
     })
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Error interno"
     console.error("[swap-request POST]", error)
-    return NextResponse.json({ error: msg }, { status: 500 })
+    return apiError(error)
   }
 }

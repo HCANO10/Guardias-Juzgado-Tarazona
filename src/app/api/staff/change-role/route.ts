@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic"
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireHeadmaster } from '@/lib/auth/require-role'
-import { validateBody } from '@/lib/validators/api'
+import { validateBody, apiError } from '@/lib/validators/api'
 import { staffChangeRoleSchema } from '@/lib/validators/schemas'
 
 export async function POST(request: NextRequest) {
@@ -49,7 +49,6 @@ export async function POST(request: NextRequest) {
       message: `Rol actualizado a ${new_role === 'headmaster' ? 'Headmaster' : 'Trabajador'}`,
     })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic"
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAuth } from '@/lib/auth/require-role'
-import { validateBody } from '@/lib/validators/api'
+import { validateBody, apiError } from '@/lib/validators/api'
 import { authUpdateEmailSchema } from '@/lib/validators/schemas'
 import { sendEmailChangeNotification } from '@/lib/email/send'
 
@@ -73,8 +73,7 @@ export async function POST(request: NextRequest) {
       message: 'Email actualizado correctamente. Por favor, usa tu nuevo email la próxima vez que inicies sesión.',
     })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno del servidor'
     console.error('Unexpected error updating email:', error)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

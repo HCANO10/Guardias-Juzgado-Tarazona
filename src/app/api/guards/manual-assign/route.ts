@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireHeadmaster } from '@/lib/auth/require-role'
-import { validateBody } from '@/lib/validators/api'
+import { validateBody, apiError } from '@/lib/validators/api'
 import { guardManualAssignSchema } from '@/lib/validators/schemas'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -131,7 +131,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, message: 'Guardia actualizada correctamente' })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

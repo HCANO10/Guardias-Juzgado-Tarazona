@@ -1,3 +1,4 @@
+import { apiError } from '@/lib/validators/api'
 export const dynamic = "force-dynamic"
 
 // PATCH /api/guards/swap-request/[id]
@@ -226,8 +227,7 @@ export async function PATCH(
       message: messages[newStatus],
     })
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Error interno"
     console.error("[swap-request PATCH]", error)
-    return NextResponse.json({ error: msg }, { status: 500 })
+    return apiError(error)
   }
 }

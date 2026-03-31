@@ -1,3 +1,4 @@
+import { apiError } from '@/lib/validators/api'
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
@@ -46,7 +47,6 @@ export async function GET() {
       status: issues.length === 0 ? '✅ Todo correcto' : '⚠️ Hay problemas por resolver',
     })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error interno'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError(error)
   }
 }

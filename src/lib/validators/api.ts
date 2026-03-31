@@ -4,6 +4,17 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 
 /**
+ * Returns a safe 500 error response that never leaks internal error details.
+ * Logs the real error server-side only.
+ */
+export function apiError(error: unknown, context?: string): NextResponse {
+  const msg = error instanceof Error ? error.message : String(error)
+  // Log to server only — never sent to client
+  console.error(`[API error]${context ? ` ${context}` : ''}:`, msg)
+  return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+}
+
+/**
  * Validates a request body against a Zod schema.
  * Returns the parsed data or a NextResponse with 400 status.
  */

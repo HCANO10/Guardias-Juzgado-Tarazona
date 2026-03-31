@@ -73,12 +73,13 @@ export default async function DashboardPage() {
         guard_periods!inner(week_number, start_date, end_date)
       `)
       .eq('staff_id', currentStaff.id)
-      .gte('guard_periods.start_date', today)
-      .order('guard_periods.start_date')
-      .limit(1)
+      .order('guard_period_id', { ascending: true })
 
     if (myGuards && myGuards.length > 0) {
-      nextGuard = (myGuards[0] as unknown as { guard_periods: GuardPeriodInfo }).guard_periods
+      const future = (myGuards as unknown as { guard_periods: GuardPeriodInfo }[])
+        .filter(g => g.guard_periods?.start_date >= today)
+        .sort((a, b) => a.guard_periods.start_date.localeCompare(b.guard_periods.start_date))
+      if (future.length > 0) nextGuard = future[0].guard_periods
     }
   }
 

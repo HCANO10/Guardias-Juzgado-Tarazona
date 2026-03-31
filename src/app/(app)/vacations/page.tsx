@@ -37,12 +37,14 @@ export default async function VacationsPage() {
         guard_periods!inner(week_number, start_date, end_date)
       `)
       .eq('staff_id', currentUserStaff.id)
-      .gte('guard_periods.start_date', new Date().toISOString().split('T')[0])
-      .order('guard_periods.start_date')
-      .limit(1)
+      .order('guard_period_id', { ascending: true })
 
+    const today = new Date().toISOString().split('T')[0]
     if (assignments && assignments.length > 0) {
-      nextGuard = (assignments[0] as unknown as { guard_periods: GuardPeriodInfo }).guard_periods
+      const future = (assignments as unknown as { guard_periods: GuardPeriodInfo }[])
+        .filter(a => a.guard_periods?.start_date >= today)
+        .sort((a, b) => a.guard_periods.start_date.localeCompare(b.guard_periods.start_date))
+      if (future.length > 0) nextGuard = future[0].guard_periods
     }
   }
 

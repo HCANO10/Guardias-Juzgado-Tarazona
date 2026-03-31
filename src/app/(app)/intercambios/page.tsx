@@ -51,9 +51,7 @@ export default async function IntercambiosPage() {
        guard_periods!inner(id, week_number, start_date, end_date)`
     )
     .eq("staff_id", currentStaff.id)
-    .gte("guard_periods.start_date", today)
-    .order("guard_periods.start_date")
-    .limit(10)
+    .order("guard_period_id", { ascending: true })
 
   // Fetch same-role staff for the swap dialog
   const { data: myStaffFull } = await supabase
@@ -100,9 +98,10 @@ export default async function IntercambiosPage() {
   }
 
   const requests = (rawRequests ?? []) as unknown as SwapRequestRaw[]
-  const upcomingGuards = ((myGuards ?? []) as unknown as MyGuardRow[]).map(
-    (g) => g.guard_periods
-  )
+  const upcomingGuards = ((myGuards ?? []) as unknown as MyGuardRow[])
+    .filter((g) => g.guard_periods?.start_date && g.guard_periods.start_date >= today)
+    .slice(0, 10)
+    .map((g) => g.guard_periods)
 
   return (
     <IntercambiosPageClient

@@ -124,6 +124,13 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
       if (statusFilter === "sin_cubrir" && g.coverage !== 0) return false
       // "programada": guardia futura con los 3 roles asignados
       if (statusFilter === "programada" && !(isFuture && g.coverage === 3)) return false
+      // "activa": guardia en curso con los 3 roles asignados
+      if (statusFilter === "activa") {
+        const end = new Date(g.end_date)
+        const startDate = new Date(g.start_date)
+        const isCurrent = startDate <= today && today <= end
+        if (!(isCurrent && g.coverage === 3)) return false
+      }
     }
     return true
   })
@@ -227,6 +234,7 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
             </SelectTrigger>
             <SelectContent className="rounded-[16px] border-slate-200 shadow-2xl">
               <SelectItem value="all">Cualquier estado</SelectItem>
+              <SelectItem value="activa">Activa</SelectItem>
               <SelectItem value="programada">Programada</SelectItem>
               <SelectItem value="completa">Completa</SelectItem>
               <SelectItem value="parcial">Parcial</SelectItem>

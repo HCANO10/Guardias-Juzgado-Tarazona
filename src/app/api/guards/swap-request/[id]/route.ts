@@ -15,10 +15,18 @@ import { es } from "date-fns/locale"
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await requireAuth()
   if (!auth.success) return auth.response
+
+  const { id } = await params
+
+  // Validar que el parámetro de ruta es un UUID válido antes de usarlo en DB
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRegex.test(id)) {
+    return NextResponse.json({ error: 'ID de solicitud inválido' }, { status: 400 })
+  }
 
   const validation = await validateBody(request, guardSwapRequestRespondSchema)
   if (!validation.success) return validation.response
@@ -36,7 +44,7 @@ export async function PATCH(
          period_id_requester, period_id_requested,
          message`
       )
-      .eq("id", params.id)
+      .eq("id", id)
       .single()
 
     if (fetchErr || !swapReq) {
@@ -55,7 +63,7 @@ export async function PATCH(
 
     const isRequester = swapReq.requester_id === auth.staffId
     const isRequested = swapReq.requested_id === auth.staffId
-    const isHeadmaster = auth.role === "headmaster"
+    const isHeadmaster = auth.role === "headmaster" || auth.role === "admin"
 
     // Authorization per action
     if (action === "cancel" && !isRequester && !isHeadmaster) {
@@ -97,7 +105,7 @@ export async function PATCH(
         await admin
           .from("guard_swap_requests")
           .update({ status: "cancelled" })
-          .eq("id", params.id)
+          .eq("id", id)
         return NextResponse.json(
           {
             error:
@@ -134,14 +142,14 @@ export async function PATCH(
     await admin
       .from("guard_swap_requests")
       .update({ status: newStatus })
-      .eq("id", params.id)
+      .eq("id", id)
 
     // ── LOG ───────────────────────────────────────────────────
     try {
       await admin.from("activity_log").insert({
         action: `guard_swap_request_${newStatus}`,
         entity_type: "guard_swap_request",
-        entity_id: params.id,
+        entity_id: id,
         details: {
           requesterId: swapReq.requester_id,
           requestedId: swapReq.requested_id,

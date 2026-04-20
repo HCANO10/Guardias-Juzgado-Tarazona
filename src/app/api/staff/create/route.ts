@@ -6,6 +6,14 @@ import { requireHeadmaster } from '@/lib/auth/require-role'
 import { validateBody, apiError } from '@/lib/validators/api'
 import { staffCreateSchema } from '@/lib/validators/schemas'
 
+/** Genera una contraseña temporal segura (16 chars, mezcla de mayúsculas, minúsculas, dígitos y símbolos) */
+function generateTempPassword(): string {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%'
+  const array = new Uint32Array(16)
+  crypto.getRandomValues(array)
+  return Array.from(array, (n) => chars[n % chars.length]).join('')
+}
+
 export async function POST(request: NextRequest) {
   const auth = await requireHeadmaster()
   if (!auth.success) return auth.response
@@ -17,7 +25,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const adminClient = createAdminClient()
-    const userPassword = password || 'Tarazona123456'
+    // Si el headmaster no proporciona contraseña, generamos una aleatoria segura
+    const userPassword = password || generateTempPassword()
 
     // 1. Crear usuario en Supabase Auth
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
@@ -66,7 +75,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       staff: staffData,
-      message: `Usuario creado: ${first_name} ${last_name} (${email}). Contraseña: ${userPassword}`,
+      // La contraseña se devuelve una única vez para que el headmaster la comunique al trabajador.
+      // No se almacena en ningún log del servidor.
+      temporaryPassword: userPassword,
+      message: `Usuario ${first_name} ${last_name} (${email}) creado correctamente.`,
     })
   } catch (error: unknown) {
     console.error('Error creando usuario:', error)

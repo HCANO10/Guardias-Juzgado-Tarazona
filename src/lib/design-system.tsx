@@ -238,15 +238,10 @@ type ButtonVariant = "primary" | "secondary" | "danger" | "ghost"
 
 export const DSButton = React.forwardRef<
   HTMLButtonElement,
-  {
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
     children: React.ReactNode
-    onClick?: React.MouseEventHandler<HTMLButtonElement>
     variant?: ButtonVariant
-    className?: string
-    disabled?: boolean
-    type?: "button" | "submit" | "reset"
     size?: "sm" | "md" | "lg"
-    [key: string]: unknown
   }
 >(function DSButton(
   {

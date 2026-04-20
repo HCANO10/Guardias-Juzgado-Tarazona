@@ -49,14 +49,15 @@ interface Vacation {
   notes?: string
 }
 
-export default async function StaffDetailPage({ params }: { params: { id: string } }) {
+export default async function StaffDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]
 
   const { data: staff, error } = await supabase
     .from('staff')
     .select('*, positions(name, guard_role)')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error || !staff) {

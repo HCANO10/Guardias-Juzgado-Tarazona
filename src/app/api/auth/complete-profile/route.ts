@@ -2,14 +2,13 @@ export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { requireAuth } from '@/lib/auth/require-role'
 import { validateBody, apiError } from '@/lib/validators/api'
 import { authCompleteProfileSchema } from '@/lib/validators/schemas'
 import { normalizeStaffData } from '@/lib/staff/normalize'
 
 export async function POST(request: NextRequest) {
-  // Note: requireAuth expects a staff record, but during profile completion it might not exist yet.
-  // So we do manual auth check here.
+  // requireAuth no se usa aquí porque durante la completación del perfil
+  // el registro en staff todavía puede no existir.
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
   const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -37,11 +36,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Puesto no válido' }, { status: 400 })
     }
 
-    const { data: existingStaff } = await adminClient
-      .from('staff')
-      .select('id')
-      .eq('auth_user_id', user.id)
+    // Reconciliación: busca por auth_user_id O por email (perfil pre-creado)
+    // Evita crear un registro duplicado cuando el usuario ya tenía un placeholder manual.
+    const { data: reconciliationRaw } = await adminClient
+      .rpc('reconcile_staff_identity', {
+        p_auth_user_id: user.id,
+        p_email: user.email ?? '',
+      })
       .single()
+
+    const reconciliation = reconciliationRaw as { staff_id: string | null; was_linked: boolean } | null
+    const existingStaffId: string | null = reconciliation?.staff_id ?? null
 
     const staffData = normalizeStaffData({
       auth_user_id: user.id,
@@ -51,17 +56,19 @@ export async function POST(request: NextRequest) {
     })
 
     let result
-    if (existingStaff) {
+    if (existingStaffId) {
+      // Actualiza el registro existente (ya fue enlazado por reconcile_staff_identity)
       const { data: updatedStaff, error: updateError } = await adminClient
         .from('staff')
         .update(staffData)
-        .eq('id', existingStaff.id)
+        .eq('id', existingStaffId)
         .select('*, positions(name)')
         .single()
 
       if (updateError) throw updateError
-      result = { success: true, staff: updatedStaff, updated: true }
+      result = { success: true, staff: updatedStaff, updated: true, linked: reconciliation?.was_linked ?? false }
     } else {
+      // Email totalmente nuevo → insertar
       const { data: insertedStaff, error: staffError } = await adminClient
         .from('staff')
         .insert(staffData)
@@ -69,7 +76,7 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (staffError) throw staffError
-      result = { success: true, staff: insertedStaff, updated: false }
+      result = { success: true, staff: insertedStaff, updated: false, linked: false }
     }
 
     // Actualizar metadata de Auth

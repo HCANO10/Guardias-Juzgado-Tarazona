@@ -16,6 +16,11 @@ export async function POST(request: NextRequest) {
 
   const { staff_id, start_date, end_date } = validation.data
 
+  // Workers can only validate their own schedule; headmaster/admin can validate any
+  if (staff_id !== auth.staffId && auth.role !== 'headmaster' && auth.role !== 'admin') {
+    return NextResponse.json({ error: 'No autorizado para validar vacaciones de otro trabajador' }, { status: 403 })
+  }
+
   try {
     const result = await checkVacationGuardConflict(auth.supabase, staff_id, start_date, end_date)
     return NextResponse.json(result)

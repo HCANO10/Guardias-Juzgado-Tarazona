@@ -26,15 +26,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Debes seleccionar un puesto de trabajo válido' }, { status: 400 })
     }
 
-    // Verificar email duplicado
+    // Verificar si existe un perfil pre-creado con este email (auth_user_id IS NULL)
+    // Caso: el headmaster creó el placeholder antes de que el usuario se registrara.
     const { data: existingStaff } = await adminClient
       .from('staff')
-      .select('id')
-      .eq('email', email)
+      .select('id, auth_user_id')
+      .ilike('email', email)
       .single()
 
     if (existingStaff) {
-      return NextResponse.json({ error: 'Ya existe un usuario registrado con ese email' }, { status: 409 })
+      if (existingStaff.auth_user_id !== null) {
+        // Ya tiene cuenta de Auth → duplicado real
+        return NextResponse.json(
+          { error: 'Ya existe un usuario registrado con ese email' },
+          { status: 409 }
+        )
+      }
+      // auth_user_id IS NULL → perfil pre-creado: crear Auth y enlazar
     }
 
     // Crear usuario en Auth
@@ -59,20 +67,41 @@ export async function POST(request: NextRequest) {
 
     if (!authData.user) throw new Error('No se pudo crear el usuario')
 
-    // Insertar staff con datos normalizados
-    const staffData = normalizeStaffData({
-      auth_user_id: authData.user.id,
-      first_name, last_name, second_last_name,
-      email, phone, position_id, notes: null,
-    })
+    if (existingStaff?.auth_user_id === null) {
+      // Enlazar el perfil pre-creado con el nuevo UUID de Auth
+      const { error: linkError } = await adminClient
+        .from('staff')
+        .update({
+          auth_user_id: authData.user.id,
+          first_name,
+          last_name,
+          second_last_name: second_last_name || null,
+          phone: phone || null,
+          position_id,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingStaff.id)
 
-    const { error: staffError } = await adminClient
-      .from('staff')
-      .insert(staffData)
+      if (linkError) {
+        await adminClient.auth.admin.deleteUser(authData.user.id)
+        throw linkError
+      }
+    } else {
+      // Usuario nuevo → insertar staff
+      const staffData = normalizeStaffData({
+        auth_user_id: authData.user.id,
+        first_name, last_name, second_last_name,
+        email, phone, position_id, notes: null,
+      })
 
-    if (staffError) {
-      await adminClient.auth.admin.deleteUser(authData.user.id)
-      throw staffError
+      const { error: staffError } = await adminClient
+        .from('staff')
+        .insert(staffData)
+
+      if (staffError) {
+        await adminClient.auth.admin.deleteUser(authData.user.id)
+        throw staffError
+      }
     }
 
     return NextResponse.json({

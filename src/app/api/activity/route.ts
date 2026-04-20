@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { requireAuth } from '@/lib/auth/require-role'
+import { requireAuth, requireHeadmaster } from '@/lib/auth/require-role'
 import { validateBody, validateQuery, apiError } from '@/lib/validators/api'
 import { activityCreateSchema, activityQuerySchema } from '@/lib/validators/schemas'
 
@@ -43,8 +43,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // FIX: This route previously had NO authentication check
-  const auth = await requireAuth()
+  // Only headmaster/admin can write activity log entries directly via API.
+  // Internal server code uses the admin client and bypasses this endpoint.
+  const auth = await requireHeadmaster()
   if (!auth.success) return auth.response
 
   const validation = await validateBody(request, activityCreateSchema)
@@ -53,9 +54,11 @@ export async function POST(request: NextRequest) {
   try {
     const adminClient = createAdminClient()
 
+    // Always use the authenticated user's staffId as performed_by — never trust the request body.
+    const { performed_by: _ignored, ...safeData } = validation.data
     const { data, error } = await adminClient
       .from('activity_log')
-      .insert(validation.data)
+      .insert({ ...safeData, performed_by: auth.staffId })
       .select()
       .single()
 

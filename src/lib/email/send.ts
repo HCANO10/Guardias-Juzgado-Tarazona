@@ -3,6 +3,19 @@
  * Email helper using Resend REST API with polished HTML templates.
  */
 
+/**
+ * Escapa caracteres HTML en strings de usuario para prevenir XSS en emails.
+ * Siempre aplica a cualquier dato introducido por el usuario antes de inyectarlo en HTML.
+ */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 interface EmailOptions {
   to: string
   subject: string
@@ -138,7 +151,7 @@ export async function sendEmailChangeNotification(
       Tu correo ha sido actualizado
     </p>
     <p style="margin:0 0 28px;color:#64748B;font-size:15px;line-height:1.6;">
-      Hola <strong style="color:#1E293B;">${userName}</strong>, te confirmamos que tu dirección de correo electrónico ha sido cambiada correctamente.
+      Hola <strong style="color:#1E293B;">${escapeHtml(userName)}</strong>, te confirmamos que tu dirección de correo electrónico ha sido cambiada correctamente.
     </p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1.5px solid #E2E8F0;border-radius:16px;overflow:hidden;margin-bottom:28px;">
@@ -152,16 +165,16 @@ export async function sendEmailChangeNotification(
       </tr>
       <tr>
         <td style="padding:18px;border-right:1px solid #E2E8F0;vertical-align:top;">
-          <p style="margin:0;font-size:14px;color:#64748B;font-weight:500;word-break:break-all;">${oldEmail}</p>
+          <p style="margin:0;font-size:14px;color:#64748B;font-weight:500;word-break:break-all;">${escapeHtml(oldEmail)}</p>
         </td>
         <td style="padding:18px;background:#EEF2FF;vertical-align:top;">
-          <p style="margin:0;font-size:14px;font-weight:700;color:#4F46E5;word-break:break-all;">${newEmail}</p>
+          <p style="margin:0;font-size:14px;font-weight:700;color:#4F46E5;word-break:break-all;">${escapeHtml(newEmail)}</p>
         </td>
       </tr>
     </table>
 
     <p style="margin:0 0 0;color:#64748B;font-size:14px;line-height:1.7;background:#F1F5F9;border-radius:12px;padding:14px 18px;">
-      💡 &nbsp;A partir de ahora utiliza <strong style="color:#1E293B;">${newEmail}</strong> para iniciar sesión en el sistema de guardias.
+      💡 &nbsp;A partir de ahora utiliza <strong style="color:#1E293B;">${escapeHtml(newEmail)}</strong> para iniciar sesión en el sistema de guardias.
     </p>`
 
   await sendEmail({
@@ -181,7 +194,7 @@ export async function sendEmailChangeNotification(
       Tu correo ha sido cambiado
     </p>
     <p style="margin:0 0 28px;color:#64748B;font-size:15px;line-height:1.6;">
-      Hola <strong style="color:#1E293B;">${userName}</strong>, te informamos de que la dirección de correo asociada a tu cuenta ha sido modificada.
+      Hola <strong style="color:#1E293B;">${escapeHtml(userName)}</strong>, te informamos de que la dirección de correo asociada a tu cuenta ha sido modificada.
     </p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
@@ -231,7 +244,7 @@ export async function sendPasswordChangeNotification(
       Tu contraseña ha sido cambiada
     </p>
     <p style="margin:0 0 28px;color:#64748B;font-size:15px;line-height:1.6;">
-      Hola <strong style="color:#1E293B;">${userName}</strong>, tu contraseña de acceso al sistema de guardias judiciales ha sido actualizada correctamente.
+      Hola <strong style="color:#1E293B;">${escapeHtml(userName)}</strong>, tu contraseña de acceso al sistema de guardias judiciales ha sido actualizada correctamente.
     </p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
@@ -309,7 +322,7 @@ export function swapRequestEmail({
       Tienes una solicitud de intercambio
     </p>
     <p style="margin:0 0 28px;color:#64748B;font-size:15px;line-height:1.6;">
-      <strong style="color:#1E293B;">${requesterName}</strong> quiere intercambiar una guardia contigo.
+      <strong style="color:#1E293B;">${escapeHtml(requesterName)}</strong> quiere intercambiar una guardia contigo.
     </p>
 
     <!-- Swap card -->
@@ -341,8 +354,8 @@ export function swapRequestEmail({
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
       <tr>
         <td style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:14px;padding:16px 18px;">
-          <p style="margin:0 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#92400E;">Mensaje de ${requesterName}</p>
-          <p style="margin:0;font-size:14px;color:#78350F;line-height:1.6;font-style:italic;">"${message}"</p>
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#92400E;">Mensaje de ${escapeHtml(requesterName)}</p>
+          <p style="margin:0;font-size:14px;color:#78350F;line-height:1.6;font-style:italic;">&ldquo;${escapeHtml(message)}&rdquo;</p>
         </td>
       </tr>
     </table>` : ""}
@@ -401,8 +414,8 @@ export function swapResponseEmail({
   const statusIcon = accepted ? "✅" : "❌"
   const statusTitle = accepted ? "¡Intercambio aceptado!" : "Solicitud rechazada"
   const statusDesc = accepted
-    ? `<strong style="color:#166534;">${requestedName}</strong> ha aceptado el intercambio. <strong>El cambio ya está aplicado</strong> en el sistema de guardias.`
-    : `<strong style="color:#991B1B;">${requestedName}</strong> ha rechazado la solicitud. Tus guardias permanecen sin cambios.`
+    ? `<strong style="color:#166534;">${escapeHtml(requestedName)}</strong> ha aceptado el intercambio. <strong>El cambio ya está aplicado</strong> en el sistema de guardias.`
+    : `<strong style="color:#991B1B;">${escapeHtml(requestedName)}</strong> ha rechazado la solicitud. Tus guardias permanecen sin cambios.`
 
   const body = `
     <!-- Status banner -->
@@ -430,7 +443,7 @@ export function swapResponseEmail({
           <p style="margin:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94A3B8;">Tu guardia</p>
         </td>
         <td width="50%" style="padding:12px 18px;border-bottom:1px solid #E2E8F0;">
-          <p style="margin:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94A3B8;">Guardia de ${requestedName}</p>
+          <p style="margin:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94A3B8;">Guardia de ${escapeHtml(requestedName)}</p>
         </td>
       </tr>
       <tr>

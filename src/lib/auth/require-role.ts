@@ -67,7 +67,7 @@ export async function requireHeadmaster(): Promise<AuthCheck> {
 
   if (!auth.success) return auth
 
-  if (auth.role !== "headmaster") {
+  if (auth.role !== "headmaster" && auth.role !== "admin") {
     return {
       success: false,
       response: NextResponse.json(

@@ -108,7 +108,7 @@ export async function middleware(request: NextRequest) {
     pathname === route || pathname.startsWith(route + '/')
   ) || pathname.startsWith('/staff/') // Specific detail pages are still restricted
   
-  if (isHeadmasterRoute && staff.role !== 'headmaster') {
+  if (isHeadmasterRoute && staff.role !== 'headmaster' && staff.role !== 'admin') {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

@@ -16,12 +16,12 @@ interface PDFStaffMember {
 
 interface PDFGuard {
   id: string
-  week_number: number
+  week_number?: number
   start_date: string
   end_date: string
-  auxilio: { id: string; first_name: string; last_name: string } | null
-  tramitador: { id: string; first_name: string; last_name: string } | null
-  gestor: { id: string; first_name: string; last_name: string } | null
+  auxilio: { id: string; first_name: string; last_name?: string } | null
+  tramitador: { id: string; first_name: string; last_name?: string } | null
+  gestor: { id: string; first_name: string; last_name?: string } | null
 }
 
 interface PDFVacation {
@@ -30,7 +30,7 @@ interface PDFVacation {
   start_date: string
   end_date: string
   tipo?: string | null
-  staff?: { id: string; first_name: string; last_name: string } | null
+  staff?: { id?: string; first_name: string; last_name?: string } | null
 }
 
 interface PDFHoliday {

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic"
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireHeadmaster } from '@/lib/auth/require-role'
-import { validateBody } from '@/lib/validators/api'
+import { validateBody, apiError } from '@/lib/validators/api'
 import { staffDeactivateSchema } from '@/lib/validators/schemas'
 
 export async function POST(request: Request) {
@@ -36,9 +36,7 @@ export async function POST(request: Request) {
       .update({ is_active: false, end_date: today })
       .eq('id', staffId)
 
-    if (staffError) {
-      return NextResponse.json({ error: staffError.message }, { status: 400 })
-    }
+    if (staffError) throw staffError
 
     // 3. Banear al usuario en Supabase Auth
     if (staff.auth_user_id) {
@@ -72,7 +70,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Trabajador dado de baja' })
   } catch (error: unknown) {
-    console.error("Internal Error POST /api/staff/deactivate:", error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    return apiError(error)
   }
 }

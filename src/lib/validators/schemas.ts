@@ -9,7 +9,7 @@ import { z } from "zod"
 const uuid = z.string().uuid("ID inválido")
 const trimmedString = z.string().trim().min(1, "Campo obligatorio")
 const emailField = z.string().trim().toLowerCase().email("Email inválido")
-const passwordField = z.string().min(8, "Mínimo 8 caracteres")
+const passwordField = z.string().min(12, "Mínimo 12 caracteres").max(128, "Máximo 128 caracteres")
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato de fecha inválido (YYYY-MM-DD)")
 const roleField = z.enum(["headmaster", "worker"], { message: "Rol debe ser 'headmaster' o 'worker'" })
 const yearField = z.number().int().min(2024).max(2030)

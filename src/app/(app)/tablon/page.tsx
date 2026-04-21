@@ -8,7 +8,7 @@ import { getISOWeek, parseISO, format } from "date-fns"
 import { es } from "date-fns/locale"
 import { buildFullName } from "@/lib/staff/normalize"
 import TablonPageClient from "./TablonPageClient"
-import { getCurrentWeekKey, generateBulletin } from "@/lib/tablon/generate-bulletin"
+import { getGuardWeekKey, generateBulletin } from "@/lib/tablon/generate-bulletin"
 
 type StaffName = { first_name: string; last_name: string }
 
@@ -24,15 +24,25 @@ export default async function TablonPage() {
   const admin = createAdminClient()
   const today = new Date()
   const todayStr = today.toISOString().split("T")[0]
-  const currentWeekKey = getCurrentWeekKey()
 
-  // Check cache
+  // 1. Fetch guard period FIRST — the cache key depends on it
+  const { data: period } = await admin
+    .from("guard_periods")
+    .select("id, week_number, start_date, end_date")
+    .lte("start_date", todayStr)
+    .gte("end_date", todayStr)
+    .single()
+
+  // 2. Cache key based on guard period (changes every Friday when new period starts)
+  const currentWeekKey = getGuardWeekKey(period)
+
+  // 3. Check cache
   const cachedWeek = await getSetting(admin, "bulletin_week", "")
   const cachedContent = await getSetting(admin, "bulletin_content", "")
   const generatedAt = await getSetting(admin, "bulletin_generated_at", "")
   const isFresh = cachedWeek === currentWeekKey && !!cachedContent
 
-  // Auto-generate if stale (first visitor of the week pays the Groq cost once)
+  // 4. Auto-generate if stale (first visitor of the guard week triggers it once)
   let bulletinText = isFresh ? cachedContent : null
   let bulletinError: string | null = null
 
@@ -45,15 +55,7 @@ export default async function TablonPage() {
     }
   }
 
-  // Fetch current guard period for display
-  const { data: period } = await admin
-    .from("guard_periods")
-    .select("id, week_number, start_date, end_date")
-    .lte("start_date", todayStr)
-    .gte("end_date", todayStr)
-    .single()
-
-  // Guard assignments
+  // 5. Guard assignments this week
   type AssignRow = { staff: StaffName }
   const { data: assigns } = period
     ? await admin.from("guard_assignments")
@@ -64,7 +66,7 @@ export default async function TablonPage() {
     name: buildFullName(a.staff)
   }))
 
-  // Vacations this week
+  // 6. Vacations overlapping this week
   type VacRow = { staff: StaffName; start_date: string; end_date: string; tipo: string | null }
   const { data: vacations } = period
     ? await admin.from("vacations")
@@ -80,7 +82,7 @@ export default async function TablonPage() {
     end: format(parseISO(v.end_date), "d MMM", { locale: es }),
   }))
 
-  // Swaps this week
+  // 7. Swap requests this week
   type SwapRow = {
     id: string; status: string
     requester: StaffName; requested: StaffName
@@ -112,16 +114,12 @@ export default async function TablonPage() {
     ? `${format(parseISO(period.start_date), "d 'de' MMMM", { locale: es })} – ${format(parseISO(period.end_date), "d 'de' MMMM yyyy", { locale: es })}`
     : format(today, "MMMM yyyy", { locale: es })
 
-  const genAt = bulletinText && !isFresh
-    ? new Date().toISOString()
-    : generatedAt
-
   return (
     <TablonPageClient
       isAdmin={isAdmin}
       bulletinText={bulletinText}
       bulletinError={bulletinError}
-      generatedAt={genAt}
+      generatedAt={isFresh ? generatedAt : new Date().toISOString()}
       weekLabel={weekLabel}
       weekDates={weekDates}
       weekNumber={weekNumber}

@@ -7,11 +7,27 @@ import { SupabaseClient } from "@supabase/supabase-js"
 import { callGroq } from "@/lib/groq/client"
 import { getSetting, setSetting } from "@/lib/settings"
 import { buildFullName } from "@/lib/staff/normalize"
-import { getISOWeek, getISOWeekYear, parseISO, format } from "date-fns"
+import { getISOWeek, getISOWeekYear, parseISO, format, getYear } from "date-fns"
 import { es } from "date-fns/locale"
 
 type StaffName = { first_name: string; last_name: string }
 
+/**
+ * Clave de caché basada en el guard_period activo (no en la semana ISO).
+ * Cambia exactamente cuando empieza una nueva guardia (viernes).
+ * period puede ser null si no hay guardia activa hoy → fallback a semana ISO.
+ */
+export function getGuardWeekKey(period: { week_number: number; start_date: string } | null): string {
+  if (period) {
+    const year = getYear(parseISO(period.start_date))
+    return `${year}-GP${period.week_number}`
+  }
+  // Fallback: ISO week (no debería ocurrir si los periodos están bien generados)
+  const today = new Date()
+  return `${getISOWeekYear(today)}-W${String(getISOWeek(today)).padStart(2, "0")}`
+}
+
+/** @deprecated Usar getGuardWeekKey(period) para claves basadas en guardia real */
 export function getCurrentWeekKey(): string {
   const today = new Date()
   return `${getISOWeekYear(today)}-W${String(getISOWeek(today)).padStart(2, "0")}`
@@ -99,8 +115,8 @@ export async function generateBulletin(
   // Strip <think> blocks (deepseek-r1 style)
   text = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim()
 
-  // 6. Cache in app_settings
-  const weekKey = getCurrentWeekKey()
+  // 6. Cache in app_settings — clave basada en guard_period (cambia cada viernes)
+  const weekKey = getGuardWeekKey(period)
   await setSetting(admin, "bulletin_week", weekKey)
   await setSetting(admin, "bulletin_content", text)
   await setSetting(admin, "bulletin_generated_at", new Date().toISOString())

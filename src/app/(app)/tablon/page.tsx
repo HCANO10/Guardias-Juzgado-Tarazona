@@ -4,10 +4,11 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { getSetting } from "@/lib/settings"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { getISOWeek, getISOWeekYear, parseISO, format } from "date-fns"
+import { getISOWeek, parseISO, format } from "date-fns"
 import { es } from "date-fns/locale"
 import { buildFullName } from "@/lib/staff/normalize"
 import TablonPageClient from "./TablonPageClient"
+import { getCurrentWeekKey, generateBulletin } from "@/lib/tablon/generate-bulletin"
 
 type StaffName = { first_name: string; last_name: string }
 
@@ -23,15 +24,28 @@ export default async function TablonPage() {
   const admin = createAdminClient()
   const today = new Date()
   const todayStr = today.toISOString().split("T")[0]
+  const currentWeekKey = getCurrentWeekKey()
 
-  // Current week key for cache check
-  const currentWeekKey = `${getISOWeekYear(today)}-W${String(getISOWeek(today)).padStart(2, "0")}`
+  // Check cache
   const cachedWeek = await getSetting(admin, "bulletin_week", "")
   const cachedContent = await getSetting(admin, "bulletin_content", "")
   const generatedAt = await getSetting(admin, "bulletin_generated_at", "")
-  const hasFreshBulletin = cachedWeek === currentWeekKey && !!cachedContent
+  const isFresh = cachedWeek === currentWeekKey && !!cachedContent
 
-  // Fetch current guard period
+  // Auto-generate if stale (first visitor of the week pays the Groq cost once)
+  let bulletinText = isFresh ? cachedContent : null
+  let bulletinError: string | null = null
+
+  if (!isFresh) {
+    try {
+      bulletinText = await generateBulletin(admin, todayStr)
+    } catch (err: unknown) {
+      bulletinError = err instanceof Error ? err.message : "Error generando el tablón"
+      console.error("[tablon/page] auto-generation failed:", err)
+    }
+  }
+
+  // Fetch current guard period for display
   const { data: period } = await admin
     .from("guard_periods")
     .select("id, week_number, start_date, end_date")
@@ -39,18 +53,18 @@ export default async function TablonPage() {
     .gte("end_date", todayStr)
     .single()
 
-  // Guard assignments this week
-  type AssignRow = { staff: StaffName; guard_period_id: string }
+  // Guard assignments
+  type AssignRow = { staff: StaffName }
   const { data: assigns } = period
     ? await admin.from("guard_assignments")
-        .select("guard_period_id, staff(first_name, last_name)")
+        .select("staff(first_name, last_name)")
         .eq("guard_period_id", period.id)
     : { data: [] }
   const guards = ((assigns ?? []) as unknown as AssignRow[]).map(a => ({
     name: buildFullName(a.staff)
   }))
 
-  // Vacations overlapping this week
+  // Vacations this week
   type VacRow = { staff: StaffName; start_date: string; end_date: string; tipo: string | null }
   const { data: vacations } = period
     ? await admin.from("vacations")
@@ -66,7 +80,7 @@ export default async function TablonPage() {
     end: format(parseISO(v.end_date), "d MMM", { locale: es }),
   }))
 
-  // Swap requests this week
+  // Swaps this week
   type SwapRow = {
     id: string; status: string
     requester: StaffName; requested: StaffName
@@ -93,17 +107,21 @@ export default async function TablonPage() {
       requested: buildFullName(s.requested),
     }))
 
-  const weekLabel = period ? `Semana ${period.week_number}` : `Semana ${getISOWeek(today)}`
+  const weekLabel = period ? `Semana ${period.week_number}` : `Semana ${weekNumber}`
   const weekDates = period
     ? `${format(parseISO(period.start_date), "d 'de' MMMM", { locale: es })} – ${format(parseISO(period.end_date), "d 'de' MMMM yyyy", { locale: es })}`
     : format(today, "MMMM yyyy", { locale: es })
 
+  const genAt = bulletinText && !isFresh
+    ? new Date().toISOString()
+    : generatedAt
+
   return (
     <TablonPageClient
       isAdmin={isAdmin}
-      hasBulletin={hasFreshBulletin}
-      bulletinText={hasFreshBulletin ? cachedContent : null}
-      generatedAt={generatedAt}
+      bulletinText={bulletinText}
+      bulletinError={bulletinError}
+      generatedAt={genAt}
       weekLabel={weekLabel}
       weekDates={weekDates}
       weekNumber={weekNumber}

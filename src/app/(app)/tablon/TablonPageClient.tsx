@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Megaphone, Shield, Sun, ArrowLeftRight, Sparkles, RefreshCw, Clock } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Megaphone, Shield, Sun, ArrowLeftRight, Sparkles, RefreshCw, Clock, AlertTriangle } from "lucide-react"
 import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
 
@@ -14,8 +15,8 @@ interface SwapItem {
 
 interface TablonProps {
   isAdmin: boolean
-  hasBulletin: boolean
   bulletinText: string | null
+  bulletinError: string | null
   generatedAt: string
   weekLabel: string
   weekDates: string
@@ -26,36 +27,34 @@ interface TablonProps {
 }
 
 export default function TablonPageClient({
-  isAdmin, hasBulletin, bulletinText: initialText, generatedAt,
+  isAdmin, bulletinText, bulletinError, generatedAt,
   weekLabel, weekDates, weekNumber, guards, vacations, swaps,
 }: TablonProps) {
-  const [text, setText] = useState(initialText)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [wasGenerated, setWasGenerated] = useState(false)
+  const router = useRouter()
+  const [regenerating, setRegenerating] = useState(false)
+  const [regenError, setRegenError] = useState<string | null>(null)
 
-  const generate = async (force = false) => {
-    setLoading(true)
-    setError(null)
+  const handleRegenerate = async () => {
+    setRegenerating(true)
+    setRegenError(null)
     try {
       const res = await fetch("/api/tablon/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ force }),
+        body: JSON.stringify({ force: true }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? "Error desconocido")
-      setText(data.bulletin)
-      setWasGenerated(true)
+      router.refresh()
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Error generando el tablón")
+      setRegenError(e instanceof Error ? e.message : "Error al regenerar")
     } finally {
-      setLoading(false)
+      setRegenerating(false)
     }
   }
 
   const genTime = generatedAt
-    ? format(parseISO(generatedAt), "EEEE d MMM · HH:mm", { locale: es })
+    ? (() => { try { return format(parseISO(generatedAt), "EEEE d MMM · HH:mm", { locale: es }) } catch { return null } })()
     : null
 
   return (
@@ -73,15 +72,13 @@ export default function TablonPageClient({
           </h1>
           <p className="text-[14px] text-slate-500 mt-0.5">{weekDates}</p>
         </div>
-
-        {/* Week badge */}
-        <div className="flex-shrink-0 flex items-center gap-2">
+        <div className="flex-shrink-0">
           <div
-            className="flex items-center gap-2 px-4 py-2 rounded-2xl text-white text-[13px] font-semibold shadow-lg"
+            className="flex items-center gap-2 px-4 py-2 rounded-2xl text-white shadow-lg"
             style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}
           >
-            <span className="text-[20px] font-black opacity-60">S</span>
-            <span className="text-[28px] font-black leading-none">{weekNumber}</span>
+            <span className="text-[20px] font-black opacity-50">S</span>
+            <span className="text-[30px] font-black leading-none">{weekNumber}</span>
           </div>
         </div>
       </div>
@@ -91,7 +88,6 @@ export default function TablonPageClient({
         className="relative rounded-[24px] overflow-hidden shadow-xl"
         style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)" }}
       >
-        {/* Subtle mesh overlay */}
         <div className="absolute inset-0 opacity-[0.06]"
           style={{ backgroundImage: "radial-gradient(circle at 20% 80%, #818cf8 0%, transparent 50%), radial-gradient(circle at 80% 20%, #a78bfa 0%, transparent 50%)" }} />
 
@@ -103,51 +99,40 @@ export default function TablonPageClient({
             <span className="text-[11px] font-bold tracking-[2px] uppercase text-indigo-300">Resumen IA de la semana</span>
           </div>
 
-          {text ? (
-            <p className="text-[15px] sm:text-[16px] text-white/90 leading-relaxed font-light">{text}</p>
+          {bulletinText ? (
+            <p className="text-[15px] sm:text-[16px] text-white/90 leading-relaxed font-light">{bulletinText}</p>
+          ) : bulletinError ? (
+            <div className="flex items-start gap-3 bg-red-500/10 rounded-xl px-4 py-3">
+              <AlertTriangle className="h-4 w-4 text-red-300 mt-0.5 flex-shrink-0" />
+              <p className="text-[13px] text-red-200 leading-relaxed">{bulletinError}</p>
+            </div>
           ) : (
-            <p className="text-[15px] text-white/50 italic">
-              {loading ? "Generando resumen..." : "Aún no hay resumen generado para esta semana."}
-            </p>
+            <p className="text-[15px] text-white/40 italic">Generando resumen...</p>
           )}
 
-          {/* Footer row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-6 pt-5 border-t border-white/10">
             <div className="flex items-center gap-1.5 text-white/40 text-[12px]">
-              {!wasGenerated && genTime && (
+              {genTime && (
                 <>
                   <Clock className="h-3.5 w-3.5" />
-                  <span>Generado: {genTime}</span>
+                  <span>Actualizado: {genTime}</span>
                 </>
               )}
-              {wasGenerated && <span className="text-emerald-400">✓ Actualizado ahora</span>}
             </div>
-            <div className="flex gap-2">
-              {!text && !loading && (
-                <button
-                  onClick={() => generate(false)}
-                  disabled={loading}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-[13px] font-semibold transition-colors disabled:opacity-50"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Generar tablón
-                </button>
-              )}
-              {isAdmin && (
-                <button
-                  onClick={() => generate(true)}
-                  disabled={loading}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[13px] font-semibold transition-colors disabled:opacity-50"
-                >
-                  <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-                  {loading ? "Generando..." : "Regenerar"}
-                </button>
-              )}
-            </div>
+            {isAdmin && (
+              <button
+                onClick={handleRegenerate}
+                disabled={regenerating}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[13px] font-semibold transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${regenerating ? "animate-spin" : ""}`} />
+                {regenerating ? "Regenerando..." : "Regenerar"}
+              </button>
+            )}
           </div>
 
-          {error && (
-            <p className="mt-3 text-[13px] text-red-300 bg-red-500/10 rounded-xl px-4 py-2">{error}</p>
+          {regenError && (
+            <p className="mt-3 text-[13px] text-red-300 bg-red-500/10 rounded-xl px-4 py-2">{regenError}</p>
           )}
         </div>
       </div>
@@ -182,7 +167,7 @@ export default function TablonPageClient({
           )}
         </div>
 
-        {/* Vacaciones */}
+        {/* Ausencias */}
         <div className="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-8 w-8 rounded-[10px] bg-amber-50 flex items-center justify-center">
@@ -222,16 +207,12 @@ export default function TablonPageClient({
             <div className="space-y-2">
               {swaps.map((s) => (
                 <div key={s.id} className="py-2 border-b border-slate-50 last:border-0">
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-                      s.status === "accepted"
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700"
-                    }`}>
-                      {s.status === "accepted" ? "Confirmado" : "Pendiente"}
-                    </span>
-                  </div>
-                  <p className="text-[12px] text-slate-600 leading-snug">
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
+                    s.status === "accepted" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                  }`}>
+                    {s.status === "accepted" ? "Confirmado" : "Pendiente"}
+                  </span>
+                  <p className="text-[12px] text-slate-600 leading-snug mt-1">
                     {s.requester} <span className="text-slate-400">↔</span> {s.requested}
                   </p>
                 </div>
@@ -244,10 +225,8 @@ export default function TablonPageClient({
 
       </div>
 
-      {/* Info note */}
       <p className="text-center text-[12px] text-slate-400">
-        El tablón se actualiza automáticamente cada semana de guardia.
-        {isAdmin && " Como administrador puedes forzar la regeneración con el botón de arriba."}
+        Actualizado automáticamente cada semana de guardia.
       </p>
     </div>
   )

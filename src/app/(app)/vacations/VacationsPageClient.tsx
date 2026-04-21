@@ -222,8 +222,8 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
       setTipo("vacaciones")
       setConflictResult(null)
       router.refresh()
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Error al guardar", description: e.message })
+    } catch (e: unknown) {
+      toast({ variant: "destructive", title: "Error al guardar", description: e instanceof Error ? e.message : 'Error desconocido' })
     } finally {
       setIsSubmitting(false)
     }

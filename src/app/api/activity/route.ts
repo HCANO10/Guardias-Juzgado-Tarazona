@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const adminClient = createAdminClient()
 
     // Always use the authenticated user's staffId as performed_by — never trust the request body.
-    const { performed_by: _ignored, ...safeData } = validation.data
+    const { performed_by: _, ...safeData } = validation.data
     const { data, error } = await adminClient
       .from('activity_log')
       .insert({ ...safeData, performed_by: auth.staffId })

@@ -83,7 +83,8 @@ export async function POST(request: NextRequest) {
     if (startDate) periodsQuery = periodsQuery.gte('start_date', startDate)
     if (endDate) periodsQuery = periodsQuery.lte('end_date', endDate)
 
-    let { data: periodsData, error: periodsError } = await periodsQuery
+    const { data: periodsDataRaw, error: periodsError } = await periodsQuery
+    let periodsData = periodsDataRaw
 
     // Si no hay periodos, los generamos automáticamente
     if (periodsError || !periodsData || periodsData.length === 0) {

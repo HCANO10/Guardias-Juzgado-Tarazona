@@ -147,7 +147,7 @@ export function SwapRequestsPanel({ currentStaffId, requests }: Props) {
 
                 {r.message && (
                   <p className="text-[13px] text-slate-600 bg-white rounded-[12px] p-3 border border-slate-200 italic">
-                    "{r.message}"
+                    &ldquo;{r.message}&rdquo;
                   </p>
                 )}
 

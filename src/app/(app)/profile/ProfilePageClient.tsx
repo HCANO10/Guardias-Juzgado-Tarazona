@@ -322,7 +322,7 @@ export function ProfilePageClient({
                 </div>
                 {staffData.notes && (
                   <div className="md:col-span-2 p-5 bg-slate-50 rounded-[20px] border border-slate-200 italic text-[14px] text-slate-600">
-                     "{staffData.notes}"
+                     &ldquo;{staffData.notes}&rdquo;
                   </div>
                 )}
              </div>

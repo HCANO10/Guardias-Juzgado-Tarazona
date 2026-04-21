@@ -37,7 +37,7 @@ export async function callGroq(
     { role: 'user', content: userPrompt },
   ];
 
-  let lastError: Error | null = null;
+  const lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     // Timeout de 90 segundos para evitar que la request cuelgue indefinidamente

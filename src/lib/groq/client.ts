@@ -26,7 +26,8 @@ export async function callGroq(
   systemPrompt: string,
   userPrompt: string,
   model?: string,
-  jsonMode = true   // false → texto libre (tablón); true → json_object (guardias)
+  jsonMode = true,    // false → texto libre (tablón); true → json_object (guardias)
+  maxTokens = 12000   // reducir para llamadas de texto corto (tablón: 350)
 ): Promise<GroqResult> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error('GROQ_API_KEY no configurada. Añádela en .env.local');
@@ -57,7 +58,7 @@ export async function callGroq(
           model: groqModel,
           messages,
           temperature: 0.2,
-          max_tokens: 12000,
+          max_tokens: maxTokens,
           ...(jsonMode && { response_format: { type: 'json_object' } }),
         }),
         signal: controller.signal,

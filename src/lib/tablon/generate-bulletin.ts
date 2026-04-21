@@ -90,18 +90,11 @@ export async function generateBulletin(
   // 5. Call Groq
   const model = await getSetting(admin, "bulletin_model", "llama-3.3-70b-versatile")
 
-  const sysPrompt = `Eres el asistente del Juzgado de Primera Instancia e Instrucción de Tarazona (Zaragoza).
-Tu tarea es redactar el tablón de anuncios semanal para el personal del juzgado.
-Tono: profesional pero cercano, directo y positivo. Máximo 120 palabras. Sin listas ni markdown. Solo texto corrido en español.
-Termina con una frase de ánimo breve y apropiada para el ámbito judicial.`
+  const sysPrompt = `Asistente del Juzgado de Tarazona. Redacta el tablón semanal: tono cercano y profesional, máximo 100 palabras, texto corrido en español, sin listas ni markdown. Termina con una frase de ánimo breve.`
 
-  const usrPrompt = `Genera el tablón para la ${weekLabel}${weekDates ? ` (${weekDates})` : ""}:
-- De guardia: ${guardsText}
-- Vacaciones/ausencias: ${vacsText}
-- Intercambios: ${swapsText}
-Redacta mencionando por nombre a las personas relevantes.`
+  const usrPrompt = `${weekLabel}${weekDates ? ` (${weekDates})` : ""}. Guardia: ${guardsText}. Ausencias: ${vacsText}. Intercambios: ${swapsText}.`
 
-  const result = await callGroq(sysPrompt, usrPrompt, model, false) // texto libre, no JSON
+  const result = await callGroq(sysPrompt, usrPrompt, model, false, 350) // texto libre, 350 tokens máx
   let text = result.content?.trim() ?? ""
   // Strip <think> blocks (deepseek-r1 style)
   text = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim()

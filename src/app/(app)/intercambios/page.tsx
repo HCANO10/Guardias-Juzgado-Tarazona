@@ -99,7 +99,7 @@ export default async function IntercambiosPage() {
 
   const requests = (rawRequests ?? []) as unknown as SwapRequestRaw[]
   const upcomingGuards = ((myGuards ?? []) as unknown as MyGuardRow[])
-    .filter((g) => g.guard_periods?.start_date && g.guard_periods.start_date >= today)
+    .filter((g) => g.guard_periods?.end_date && g.guard_periods.end_date >= today)
     .slice(0, 10)
     .map((g) => g.guard_periods)
 

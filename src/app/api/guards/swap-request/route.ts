@@ -111,7 +111,22 @@ export async function POST(request: NextRequest) {
     const myPeriod = typedPeriods.find((p) => p.id === periodIdRequester)!
     const theirPeriod = typedPeriods.find((p) => p.id === periodIdRequested)!
 
-    // 5. Create the request record
+    // 5. Validate that neither period is in the past
+    const todayStr = new Date().toISOString().split("T")[0]
+    if (myPeriod.end_date < todayStr) {
+      return NextResponse.json(
+        { error: "No puedes solicitar un intercambio de una guardia que ya ha terminado" },
+        { status: 400 }
+      )
+    }
+    if (theirPeriod.end_date < todayStr) {
+      return NextResponse.json(
+        { error: "No puedes solicitar un intercambio por una guardia del compañero que ya ha terminado" },
+        { status: 400 }
+      )
+    }
+
+    // 6. Create the request record
     const { data: newRequest, error: insertError } = await admin
       .from("guard_swap_requests")
       .insert({
@@ -135,7 +150,7 @@ export async function POST(request: NextRequest) {
       throw insertError
     }
 
-    // 6. Send email notification to the requested person
+    // 7. Send email notification to the requested person
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
     const formatDates = (p: PeriodRow) =>

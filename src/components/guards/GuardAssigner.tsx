@@ -200,11 +200,11 @@ export function GuardAssigner({ open, onOpenChange, week, staffByCategory, onSuc
             )}
 
           </div>
-          <DialogFooter>
-            <DSButton variant="secondary" onClick={() => onOpenChange(false)} disabled={loading}>
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-1">
+            <DSButton variant="secondary" onClick={() => onOpenChange(false)} disabled={loading} className="w-full sm:w-auto">
               Cancelar
             </DSButton>
-            <DSButton variant="primary" onClick={handleSave} disabled={loading}>
+            <DSButton variant="primary" onClick={handleSave} disabled={loading} className="w-full sm:w-auto">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Guardar
             </DSButton>

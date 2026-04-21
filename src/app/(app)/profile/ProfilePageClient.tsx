@@ -281,7 +281,7 @@ export function ProfilePageClient({
           
           {/* Main Info Card */}
           <DSCard className="overflow-hidden p-0">
-             <div className="bg-gradient-to-r from-[#0066CC] to-[#004C99] p-8 text-white relative">
+             <div className="bg-gradient-to-r from-[#0066CC] to-[#004C99] p-5 sm:p-8 text-white relative">
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
                   <div className="h-20 w-20 md:h-24 md:w-24 rounded-[28px] md:rounded-[32px] bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-[28px] md:text-[32px] font-black shadow-2xl flex-shrink-0">
                     {staffData.first_name[0]}{staffData.last_name[0]}

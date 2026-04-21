@@ -151,7 +151,7 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="firstName"
@@ -267,7 +267,7 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
                       <Input type="password" placeholder="Dejar vacío para usar la contraseña por defecto" {...field} />
                     </FormControl>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Si no se indica, se usará la contraseña por defecto: <code className="bg-muted px-1 rounded">Tarazona123456</code>
+                      Opcional. Si se deja vacío se genera una contraseña segura automáticamente.
                     </p>
                     <FormMessage />
                   </FormItem>
@@ -314,11 +314,11 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
               )}
             />
 
-            <div className="flex justify-end pt-4 space-x-2">
-              <DSButton type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+              <DSButton type="button" variant="secondary" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
                 Cancelar
               </DSButton>
-              <DSButton type="submit" variant="primary" disabled={loading}>
+              <DSButton type="submit" variant="primary" disabled={loading} className="w-full sm:w-auto">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEditing ? 'Guardar Cambios' : 'Crear usuario'}
               </DSButton>

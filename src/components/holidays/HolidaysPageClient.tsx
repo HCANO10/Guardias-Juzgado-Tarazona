@@ -326,7 +326,7 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-[425px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden bg-white">
           <div className="h-2 bg-indigo-600 w-full" />
-          <div className="p-8">
+          <div className="p-5 sm:p-8">
             <DialogHeader className="mb-6">
               <DialogTitle className="text-[24px] font-bold text-slate-900">
                 {editingHoliday ? 'Editar Festivo' : 'Añadir Nuevo Festivo'}
@@ -385,11 +385,11 @@ export default function HolidaysPageClient({ initialHolidays }: HolidaysPageClie
               </div>
             </div>
 
-            <DialogFooter className="mt-10 gap-3">
-              <DSButton variant="secondary" onClick={() => setIsDialogOpen(false)} disabled={loading} className="flex-1">
+            <DialogFooter className="mt-6 sm:mt-10 flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
+              <DSButton variant="secondary" onClick={() => setIsDialogOpen(false)} disabled={loading} className="w-full sm:flex-1">
                 Cancelar
               </DSButton>
-              <DSButton onClick={handleSave} disabled={loading} className="flex-1">
+              <DSButton onClick={handleSave} disabled={loading} className="w-full sm:flex-1">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {editingHoliday ? 'Actualizar' : 'Guardar'}
               </DSButton>

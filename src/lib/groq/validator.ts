@@ -39,7 +39,7 @@ export function validateProposal(
     }
   }
   if (missingPeriods.length > 0) {
-    warnings.push(`La IA no asignó ${missingPeriods.length} semana(s): ${missingPeriods.slice(0, 5).join(', ')}${missingPeriods.length > 5 ? '...' : ''}`);
+    errors.push(`La IA no asignó ${missingPeriods.length} semana(s) — propuesta incompleta: ${missingPeriods.slice(0, 5).join(', ')}${missingPeriods.length > 5 ? ` (+${missingPeriods.length - 5} más)` : ''}. Regenera la propuesta antes de aplicar.`);
   }
 
   for (const a of assignments) {

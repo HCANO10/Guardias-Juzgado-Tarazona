@@ -72,6 +72,7 @@ export default async function IntercambiosPage() {
         .eq("positions.guard_role", myRole)
         .eq("is_active", true)
         .neq("id", currentStaff.id)
+        .neq("role", "admin")   // excluir admin invisible del selector
     : { data: [] }
 
   type SwapRequestRaw = {

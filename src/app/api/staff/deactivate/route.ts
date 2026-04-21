@@ -49,26 +49,33 @@ export async function POST(request: Request) {
       }
     }
 
-    // 4. Eliminar guard_assignments futuras
-    const { data: futurePeriods, error: periodsError } = await adminClient
+    // 4. Eliminar guard_assignments activas y futuras (semana en curso incluida)
+    const { data: activePeriods, error: periodsError } = await adminClient
       .from('guard_periods')
       .select('id')
-      .gt('start_date', today)
+      .gte('end_date', today)   // incluye la semana activa (start_date puede ser pasado)
 
-    if (!periodsError && futurePeriods && futurePeriods.length > 0) {
-      const periodIds = futurePeriods.map(p => p.id)
-      const { error: deleteGuardsError } = await adminClient
+    let cleanedAssignments = 0
+    if (!periodsError && activePeriods && activePeriods.length > 0) {
+      const periodIds = activePeriods.map(p => p.id)
+      const { count, error: deleteGuardsError } = await adminClient
         .from('guard_assignments')
-        .delete()
+        .delete({ count: 'exact' })
         .eq('staff_id', staffId)
         .in('guard_period_id', periodIds)
 
       if (deleteGuardsError) {
-        console.error("Error borrando asignaciones futuras:", deleteGuardsError)
+        console.error("Error borrando asignaciones activas/futuras:", deleteGuardsError)
+      } else {
+        cleanedAssignments = count ?? 0
       }
     }
 
-    return NextResponse.json({ success: true, message: 'Trabajador dado de baja' })
+    const message = cleanedAssignments > 0
+      ? `Trabajador dado de baja. Se han eliminado ${cleanedAssignments} guardia(s) activa(s)/futura(s).`
+      : 'Trabajador dado de baja'
+
+    return NextResponse.json({ success: true, message })
   } catch (error: unknown) {
     return apiError(error)
   }

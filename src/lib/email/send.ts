@@ -362,7 +362,7 @@ export function swapRequestEmail({
 
     <!-- Info text -->
     <p style="margin:0 0 28px;color:#64748B;font-size:14px;line-height:1.7;background:#F1F5F9;border-radius:12px;padding:14px 18px;">
-      💡 &nbsp;Entra en tu perfil para <strong style="color:#1E293B;">aceptar o rechazar</strong> esta solicitud. Si aceptas, el intercambio se aplicará automáticamente.
+      💡 &nbsp;Pulsa el botón de abajo para ir directamente a la pantalla de <strong style="color:#1E293B;">Intercambios</strong> donde podrás <strong style="color:#1E293B;">aceptar o rechazar</strong> esta solicitud. Si aceptas, el intercambio se aplicará automáticamente.
     </p>
 
     <!-- CTA Button -->
@@ -370,7 +370,7 @@ export function swapRequestEmail({
       <tr>
         <td style="border-radius:12px;background:linear-gradient(135deg,#4F46E5,#1D4ED8);">
           <a href="${actionUrl}" style="display:inline-block;padding:15px 32px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:-0.1px;">
-            Ver solicitud en mi perfil &rarr;
+            Ir a Intercambios &rarr;
           </a>
         </td>
       </tr>
@@ -463,7 +463,7 @@ export function swapResponseEmail({
       <tr>
         <td style="border-radius:12px;background:linear-gradient(135deg,#4F46E5,#1D4ED8);">
           <a href="${actionUrl}" style="display:inline-block;padding:15px 32px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:-0.1px;">
-            Ver mi perfil &rarr;
+            Ir a Intercambios &rarr;
           </a>
         </td>
       </tr>

@@ -216,7 +216,7 @@ export async function PATCH(
             requesterDates: formatDates(myPeriod),
             requestedWeek: theirPeriod.week_number,
             requestedDates: formatDates(theirPeriod),
-            actionUrl: `${appUrl}/profile`,
+            actionUrl: `${appUrl}/intercambios`,
           }),
         })
       } catch (emailErr) {

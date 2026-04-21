@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
         requestedWeek: theirPeriod.week_number,
         requestedDates: formatDates(theirPeriod),
         message,
-        actionUrl: `${appUrl}/profile`,
+        actionUrl: `${appUrl}/intercambios`,
       }),
     })
 

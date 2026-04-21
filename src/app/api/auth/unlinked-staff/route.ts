@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic"
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireHeadmaster } from '@/lib/auth/require-role'
+import { apiError } from '@/lib/validators/api'
 
 export async function GET() {
   const auth = await requireHeadmaster()
@@ -17,9 +18,7 @@ export async function GET() {
     .is('auth_user_id', null)
     .order('first_name')
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+  if (error) return apiError(error)
 
   return NextResponse.json({ staff: staff ?? [] })
 }

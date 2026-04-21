@@ -101,7 +101,7 @@ Termina con una frase de ánimo breve y apropiada para el ámbito judicial.`
 - Intercambios: ${swapsText}
 Redacta mencionando por nombre a las personas relevantes.`
 
-  const result = await callGroq(sysPrompt, usrPrompt, model)
+  const result = await callGroq(sysPrompt, usrPrompt, model, false) // texto libre, no JSON
   let text = result.content?.trim() ?? ""
   // Strip <think> blocks (deepseek-r1 style)
   text = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim()

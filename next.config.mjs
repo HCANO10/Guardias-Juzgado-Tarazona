@@ -24,10 +24,10 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      // Next.js needs inline scripts for hydration
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      // Supabase realtime + auth
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.groq.com https://api.resend.com",
+      // Next.js needs inline scripts for hydration; Vercel Live feedback toolbar
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel.live",
+      // Supabase realtime + auth; Vercel Live websocket
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.groq.com https://api.resend.com https://vercel.live wss://ws-us3.pusher.com",
       // Styles: inline (Tailwind) + fonts
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",

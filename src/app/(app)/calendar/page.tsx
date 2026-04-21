@@ -33,6 +33,7 @@ export default async function CalendarPage() {
     .from('staff')
     .select('id, first_name, last_name')
     .eq('is_active', true)
+    .neq('role', 'admin')
 
   const { data: holidays } = await supabase.from('holidays').select('*')
 

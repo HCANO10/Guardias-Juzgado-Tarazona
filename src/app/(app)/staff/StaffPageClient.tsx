@@ -103,6 +103,7 @@ export default function StaffPageClient({ positions }: { positions: Position[] }
         *,
         positions(name)
       `)
+      .neq('role', 'admin')   // cuentas de sistema ocultas del listado de personal
       .order('last_name', { ascending: true })
 
     if (!error && staffData) {

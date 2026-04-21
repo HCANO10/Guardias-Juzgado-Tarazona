@@ -51,6 +51,7 @@ export default async function DashboardPage() {
   const { data: allStaff } = await supabase
     .from('staff')
     .select('*, positions(name, guard_role)')
+    .neq('role', 'admin')
     .order('last_name')
 
   const currentStaff = allStaff?.find(s => s.email === user.email)

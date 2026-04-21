@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Scale,
   ArrowLeftRight,
+  Megaphone,
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
@@ -34,9 +35,10 @@ const navSections = {
   headmaster: [
     { label: "PRINCIPAL", items: [
       { title: "Dashboard",    url: "/dashboard",      icon: LayoutDashboard },
+      { title: "Tablón",       url: "/tablon",         icon: Megaphone },
       { title: "Guardias",     url: "/guards",         icon: Shield },
       { title: "Personal",     url: "/staff",          icon: Users },
-      { title: "Vacaciones",   url: "/vacations",      icon: Sun },
+      { title: "Ausencias",    url: "/vacations",      icon: Sun },
       { title: "Intercambios", url: "/intercambios",   icon: ArrowLeftRight },
       { title: "Calendario",   url: "/calendar",       icon: Calendar },
       { title: "Festivos",     url: "/holidays",       icon: Star },
@@ -50,9 +52,10 @@ const navSections = {
   worker: [
     { label: "PRINCIPAL", items: [
       { title: "Dashboard",    url: "/dashboard",      icon: LayoutDashboard },
+      { title: "Tablón",       url: "/tablon",         icon: Megaphone },
       { title: "Guardias",     url: "/guards",         icon: Shield },
       { title: "Personal",     url: "/staff",          icon: Users },
-      { title: "Vacaciones",   url: "/vacations",      icon: Sun },
+      { title: "Ausencias",    url: "/vacations",      icon: Sun },
       { title: "Intercambios", url: "/intercambios",   icon: ArrowLeftRight },
       { title: "Calendario",   url: "/calendar",       icon: Calendar },
       { title: "Festivos",     url: "/holidays",       icon: Star },

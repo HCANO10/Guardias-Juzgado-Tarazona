@@ -253,9 +253,9 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
   return (
     <div className="space-y-10 pb-20">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <DSPageHeader 
-          title="Gestión de Vacaciones" 
-          subtitle={`Solicita y gestiona tus periodos de descanso (${new Date().getFullYear()})`}
+        <DSPageHeader
+          title="Ausencias del Equipo"
+          subtitle={`Registro informativo de vacaciones y ausencias (${new Date().getFullYear()}). La gestión oficial corresponde a la DGA.`}
         />
       </div>
 
@@ -268,8 +268,8 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
             <div className="flex items-center gap-3 mb-6">
               <DSIconBox icon={Sun} variant="orange" />
               <div>
-                <h3 className="text-[20px] font-semibold text-slate-900">Nueva Solicitud</h3>
-                <p className="text-[13px] text-slate-500">Validación automática de conflictos con guardias.</p>
+                <h3 className="text-[20px] font-semibold text-slate-900">Registrar Ausencia</h3>
+                <p className="text-[13px] text-slate-500">Registra tu período para que tus compañeros lo vean. La gestión oficial la hace la DGA.</p>
               </div>
             </div>
 
@@ -432,9 +432,9 @@ export default function VacationsPageClient({ staff, vacations, currentStaffId, 
                       <SelectValue placeholder="Estado" />
                     </SelectTrigger>
                     <SelectContent className="rounded-[16px] border-slate-100 shadow-xl">
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="approved">Aprobadas</SelectItem>
-                      <SelectItem value="cancelled">Canceladas</SelectItem>
+                      <SelectItem value="all">Todas</SelectItem>
+                      <SelectItem value="approved">Activas</SelectItem>
+                      <SelectItem value="cancelled">Anuladas</SelectItem>
                     </SelectContent>
                   </Select>
                </div>

@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
   const adminClient = createAdminClient()
 
-  // Verificar que el staff_id existe, es activo y tiene email .local (no vinculado)
+  // Verificar que el staff_id existe y está activo
   const { data: targetStaff, error: staffError } = await adminClient
     .from('staff')
     .select('id, first_name, last_name, email, auth_user_id')
@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Perfil de personal no encontrado' }, { status: 404 })
   }
 
-  // Seguridad: solo permitir vinculación a cuentas con email .local (cuentas de prueba)
-  if (!targetStaff.email?.endsWith('.local')) {
-    return NextResponse.json({ error: 'Esta cuenta ya tiene un email real vinculado. Contacta con el administrador.' }, { status: 400 })
+  // Seguridad: no permitir vincular si el staff ya tiene auth_user_id asignado
+  if (targetStaff.auth_user_id !== null) {
+    return NextResponse.json({ error: 'Este perfil ya está vinculado a otra cuenta. Contacta con el administrador.' }, { status: 400 })
   }
 
   // Verificar que no haya otro staff ya vinculado a este auth_user_id (no duplicados)

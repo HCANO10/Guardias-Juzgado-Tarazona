@@ -2,11 +2,11 @@ export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { requireHeadmaster } from '@/lib/auth/require-role'
+import { requireAuth } from '@/lib/auth/require-role'
 import { apiError } from '@/lib/validators/api'
 
 export async function GET() {
-  const auth = await requireHeadmaster()
+  const auth = await requireAuth()
   if (!auth.success) return auth.response
 
   const adminClient = createAdminClient()

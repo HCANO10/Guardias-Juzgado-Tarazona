@@ -3,12 +3,8 @@ export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { requireAuth } from '@/lib/auth/require-role'
 
 export async function GET() {
-  const auth = await requireAuth()
-  if (!auth.success) return auth.response
-
   try {
     const supabaseAdmin = createAdminClient()
     const { data, error } = await supabaseAdmin

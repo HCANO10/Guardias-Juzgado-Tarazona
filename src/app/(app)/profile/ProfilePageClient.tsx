@@ -127,6 +127,9 @@ export function ProfilePageClient({
   const [confirmEmail, setConfirmEmail] = useState("")
   const [updatingEmail, setUpdatingEmail] = useState(false)
 
+  // Vacation cancel
+  const [cancellingVacation, setCancellingVacation] = useState<string | null>(null)
+
   // Google link state
   const [userIdentities, setUserIdentities] = useState<UserIdentity[]>([])
   const [hasPassword, setHasPassword] = useState(true)
@@ -252,15 +255,19 @@ export function ProfilePageClient({
   }
 
   const handleCancelVacation = async (vacationId: string) => {
-    const { error } = await supabase
-      .from('vacations')
-      .update({ status: 'cancelled' })
-      .eq('id', vacationId)
-    if (error) {
-      toast({ variant: "destructive", title: "Error al cancelar" })
-    } else {
-      toast({ title: "Periodo cancelado" })
+    setCancellingVacation(vacationId)
+    try {
+      const { error } = await supabase
+        .from('vacations')
+        .update({ status: 'cancelled' })
+        .eq('id', vacationId)
+      if (error) throw error
+      toast({ title: "Periodo de ausencia anulado" })
       router.refresh()
+    } catch {
+      toast({ variant: "destructive", title: "Error al anular el periodo" })
+    } finally {
+      setCancellingVacation(null)
     }
   }
 

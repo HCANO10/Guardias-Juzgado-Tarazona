@@ -21,10 +21,11 @@ export function GuardDeleteDialog({ open, onOpenChange, activeYear, onSuccess }:
   const [endDate, setEndDate] = useState("")
   const [mode, setMode] = useState<DeleteMode>("all")
   const [deleting, setDeleting] = useState(false)
+  const [confirmed, setConfirmed] = useState(false)
   const { toast } = useToast()
 
   const dateError = startDate && endDate && startDate >= endDate
-  const canDelete = !dateError && !deleting
+  const canDelete = !dateError && !deleting && confirmed
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -59,6 +60,7 @@ export function GuardDeleteDialog({ open, onOpenChange, activeYear, onSuccess }:
     setStartDate("")
     setEndDate("")
     setMode("all")
+    setConfirmed(false)
   }
 
   const handleClose = () => {
@@ -184,6 +186,19 @@ export function GuardDeleteDialog({ open, onOpenChange, activeYear, onSuccess }:
                 }
               </span>
             </DSAlert>
+
+            {/* Confirmación explícita */}
+            <label className="flex items-center gap-3 cursor-pointer select-none p-3 rounded-xl border-2 border-red-200 bg-red-50 hover:bg-red-100 transition-colors">
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={e => setConfirmed(e.target.checked)}
+                className="h-4 w-4 accent-red-600 cursor-pointer"
+              />
+              <span className="text-[13px] font-semibold text-red-800">
+                Entiendo que esta acción es irreversible y no podrá deshacerse
+              </span>
+            </label>
           </div>
 
           <DialogFooter className="flex-col-reverse sm:flex-row gap-2">

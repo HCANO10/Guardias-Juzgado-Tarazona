@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CalendarIcon, Loader2, Shield } from "lucide-react"
+import { CalendarIcon, Loader2, Shield, Copy, Check } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
@@ -59,8 +59,17 @@ interface StaffFormProps {
 
 export function StaffForm({ open, onOpenChange, positions, initialData, onSuccess }: StaffFormProps) {
   const [loading, setLoading] = useState(false)
+  const [tempPassword, setTempPassword] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
   const { toast } = useToast()
   const supabase = createClient()
+
+  const handleCopyPassword = async () => {
+    if (!tempPassword) return
+    await navigator.clipboard.writeText(tempPassword)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const isEditing = !!initialData
 
@@ -118,10 +127,19 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
         }
         if (!response.ok) throw new Error(result.error || 'Error al crear trabajador')
 
-        toast({
-          title: "✅ Usuario creado",
-          description: result.message || `${data.firstName} ${data.lastName} ya puede acceder a la aplicación.`,
-        })
+        // Mostrar contraseña temporal si la API la devuelve
+        if (result.temporaryPassword) {
+          setTempPassword(result.temporaryPassword)
+        } else {
+          toast({
+            title: "✅ Usuario creado",
+            description: result.message || `${data.firstName} ${data.lastName} ya puede acceder a la aplicación.`,
+          })
+          onSuccess()
+          onOpenChange(false)
+          form.reset()
+        }
+        return
       }
 
       onSuccess()
@@ -325,6 +343,64 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
             </div>
           </form>
         </Form>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Modal: contraseña temporal generada */}
+    <Dialog open={!!tempPassword} onOpenChange={(v) => {
+      if (!v) {
+        setTempPassword(null)
+        setCopied(false)
+        onSuccess()
+        onOpenChange(false)
+        form.reset()
+      }
+    }}>
+      <DialogContent className="max-w-[95vw] sm:max-w-[420px] rounded-[28px] border-none shadow-2xl p-0 overflow-hidden">
+        <div className="h-2 bg-emerald-500 w-full" />
+        <div className="p-6 sm:p-8 space-y-6">
+          <DialogHeader>
+            <DialogTitle className="text-[20px] font-bold text-slate-900">Usuario creado correctamente</DialogTitle>
+            <DialogDescription className="text-[14px] text-slate-500">
+              Copia y comparte esta contraseña con el trabajador ahora. <strong>No volverá a mostrarse.</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <p className="text-[11px] font-black uppercase tracking-widest text-slate-500">Contraseña temporal</p>
+            <div className="flex items-center gap-3 p-4 rounded-[16px] bg-slate-50 border-2 border-dashed border-slate-200">
+              <code className="flex-1 text-[18px] font-mono font-bold text-slate-900 tracking-widest break-all">
+                {tempPassword}
+              </code>
+              <button
+                onClick={handleCopyPassword}
+                className="shrink-0 h-10 w-10 rounded-[12px] bg-white border border-slate-200 flex items-center justify-center hover:bg-emerald-50 hover:border-emerald-300 transition-all"
+                title="Copiar contraseña"
+              >
+                {copied
+                  ? <Check className="h-4 w-4 text-emerald-600" />
+                  : <Copy className="h-4 w-4 text-slate-500" />
+                }
+              </button>
+            </div>
+            <p className="text-[12px] text-amber-700 bg-amber-50 border border-amber-200 rounded-[12px] px-4 py-3 font-medium">
+              ⚠️ El trabajador deberá cambiar esta contraseña en su primer inicio de sesión.
+            </p>
+          </div>
+
+          <DSButton
+            className="w-full h-12 bg-emerald-600 hover:bg-emerald-700"
+            onClick={() => {
+              setTempPassword(null)
+              setCopied(false)
+              onSuccess()
+              onOpenChange(false)
+              form.reset()
+            }}
+          >
+            Entendido, cerrar
+          </DSButton>
         </div>
       </DialogContent>
     </Dialog>

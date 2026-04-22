@@ -70,6 +70,7 @@ export function GuardAssigner({ open, onOpenChange, week, staffByCategory, onSuc
 
       if (error) {
         console.error("Error vacacionales:", error)
+        toast({ variant: "destructive", title: "Error al verificar vacaciones", description: "No se pudieron cargar los conflictos de ausencias." })
         return
       }
 

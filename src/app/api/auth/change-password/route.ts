@@ -51,6 +51,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Registro de auditoría
+    const { data: staffRow2 } = await adminClient
+      .from('staff')
+      .select('id')
+      .eq('auth_user_id', auth.userId)
+      .single()
+    if (staffRow2?.id) {
+      await adminClient.from('activity_log').insert({
+        action: 'change_password',
+        entity_type: 'staff',
+        entity_id: staffRow2.id,
+        details: { description: `${userName} cambió su contraseña` },
+        performed_by: staffRow2.id,
+      }).catch(err => console.error('Error logging password change:', err))
+    }
+
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
     return apiError(error)

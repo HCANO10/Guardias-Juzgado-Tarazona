@@ -68,6 +68,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Registro de auditoría
+    const { data: staffRow2 } = await adminClient
+      .from('staff')
+      .select('id')
+      .eq('auth_user_id', auth.userId)
+      .single()
+    if (staffRow2?.id) {
+      await adminClient.from('activity_log').insert({
+        action: 'update_email',
+        entity_type: 'staff',
+        entity_id: staffRow2.id,
+        details: { old_email: oldEmail, new_email: newEmail, description: `${userName} cambió su email` },
+        performed_by: staffRow2.id,
+      }).catch(err => console.error('Error logging email change:', err))
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Email actualizado correctamente. Por favor, usa tu nuevo email la próxima vez que inicies sesión.',

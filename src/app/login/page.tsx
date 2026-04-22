@@ -127,23 +127,12 @@ function LoginContent() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (
-      !firstName ||
-      !lastName ||
-      !regEmail ||
-      !regPassword ||
-      !positionId ||
-      !acceptTerms
-    ) {
+    if (!firstName || !lastName || !regEmail || !regPassword || !acceptTerms) {
       toast({ variant: "destructive", title: "Campos incompletos" })
       return
     }
     if (regPassword !== regPasswordConfirm) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Las contraseñas no coinciden",
-      })
+      toast({ variant: "destructive", title: "Error", description: "Las contraseñas no coinciden" })
       return
     }
 
@@ -157,16 +146,24 @@ function LoginContent() {
           last_name: lastName,
           email: regEmail,
           password: regPassword,
-          position_id: positionId,
+          ...(positionId ? { position_id: positionId } : {}),
         }),
       })
-      const data = await res.json()
+      const data = await res.json() as { error?: string; needs_linking?: boolean }
       if (!res.ok) throw new Error(data.error)
 
-      toast({
-        title: "Cuenta creada",
-        description: "Ya puedes iniciar sesión.",
-      })
+      if (data.needs_linking) {
+        // Cuenta creada sin perfil → iniciar sesión y vincular manualmente
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: regEmail,
+          password: regPassword,
+        })
+        if (signInError) throw new Error("Cuenta creada pero no se pudo iniciar sesión automáticamente. Intenta entrar manualmente.")
+        router.push("/auth/complete-profile")
+        return
+      }
+
+      toast({ title: "Cuenta creada", description: "Ya puedes iniciar sesión." })
       setLoginEmail(regEmail)
       setActiveTab("login")
     } catch (err: unknown) {

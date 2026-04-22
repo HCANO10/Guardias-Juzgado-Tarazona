@@ -98,17 +98,7 @@ export default function CompleteProfilePage() {
         return
       }
 
-      // Determinar proveedor de autenticación
-      const provider = user.app_metadata?.provider as string | undefined
-
-      // Si el proveedor es email (contraseña), el perfil ya debería estar vinculado
-      // en el momento del registro → redirigir al dashboard directamente
-      if (provider !== 'google') {
-        router.replace('/dashboard')
-        return
-      }
-
-      // Proveedor Google: cargar puestos y staff pendiente de vincular en paralelo
+      // Cargar puestos y staff pendiente de vincular en paralelo
       const [posRes, unlRes] = await Promise.all([
         fetch('/api/auth/positions'),
         fetch('/api/auth/unlinked-staff'),

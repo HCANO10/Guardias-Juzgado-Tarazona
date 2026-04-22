@@ -92,7 +92,7 @@ export const authRegisterSchema = z.object({
   email: emailField,
   phone: z.string().trim().optional(),
   password: passwordField,
-  position_id: uuid,
+  position_id: uuid.optional(),
 })
 
 export const authCompleteProfileSchema = z.object({

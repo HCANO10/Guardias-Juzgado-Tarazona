@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
 import type { EventInput } from '@fullcalendar/core';
@@ -86,6 +87,16 @@ export default function UnifiedCalendar({
   const [showGuards, setShowGuards] = useState(true);
   const [showVacations, setShowVacations] = useState(true);
   const [showHolidays, setShowHolidays] = useState(true);
+
+  // Vista responsive: lista en móvil, mes en escritorio
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const events = useMemo(() => {
     const allEvents: EventInput[] = [];
@@ -307,16 +318,22 @@ export default function UnifiedCalendar({
       <DSCard className="p-4 md:p-6 overflow-hidden">
         <div className="calendar-container">
           <FullCalendar
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
+            plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
+            initialView={isMobile ? "listMonth" : "dayGridMonth"}
+            key={isMobile ? "mobile" : "desktop"}
             locale={esLocale}
             events={events}
-            headerToolbar={{
+            headerToolbar={isMobile ? {
+              left: 'prev,next',
+              center: 'title',
+              right: 'today',
+            } : {
               left: 'prev,next today',
               center: 'title',
-              right: 'dayGridMonth,dayGridWeek',
+              right: 'dayGridMonth,listMonth',
             }}
-            buttonText={{ today: 'Hoy', month: 'Mes', week: 'Semana' }}
+            buttonText={{ today: 'Hoy', month: 'Mes', week: 'Semana', list: 'Lista' }}
+            noEventsText="Sin eventos este mes"
             firstDay={5}
             height="auto"
             dayMaxEvents={true}
@@ -376,11 +393,12 @@ export default function UnifiedCalendar({
           .fc .fc-toolbar { flex-wrap: wrap !important; gap: 8px !important; }
           .fc .fc-toolbar-title { font-size: 0.95rem !important; }
           .fc .fc-button { padding: 6px 8px !important; font-size: 0.75rem !important; margin-left: 2px !important; }
-          .fc .fc-dayGridWeek-button { display: none !important; }
           .fc th { padding: 6px 0 !important; font-size: 10px !important; }
           .fc-daygrid-day-number { font-size: 0.7rem !important; padding: 4px !important; }
           .fc-dayGridMonth-view .fc-event { margin: 1px 2px !important; }
           .fc .fc-event-title { font-size: 10px !important; }
+          .fc-list-event-title { font-size: 13px !important; }
+          .fc-list-day-cushion { background: #f8faff !important; }
         }
         .fc .fc-button:hover { background: #e5e5ea !important; }
         .fc .fc-button-active { background: #1d1d1f !important; color: white !important; }

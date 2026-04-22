@@ -154,6 +154,7 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto rounded-[28px] border-none shadow-2xl p-0 overflow-hidden">
         <div className="h-2 bg-[#0066CC] w-full" />
@@ -404,5 +405,6 @@ export function StaffForm({ open, onOpenChange, positions, initialData, onSucces
         </div>
       </DialogContent>
     </Dialog>
+    </>
   )
 }

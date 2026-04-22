@@ -58,13 +58,17 @@ export async function POST(request: NextRequest) {
       .eq('auth_user_id', auth.userId)
       .single()
     if (staffRow2?.id) {
-      await adminClient.from('activity_log').insert({
-        action: 'change_password',
-        entity_type: 'staff',
-        entity_id: staffRow2.id,
-        details: { description: `${userName} cambió su contraseña` },
-        performed_by: staffRow2.id,
-      }).catch(err => console.error('Error logging password change:', err))
+      try {
+        await adminClient.from('activity_log').insert({
+          action: 'change_password',
+          entity_type: 'staff',
+          entity_id: staffRow2.id,
+          details: { description: `${userName} cambió su contraseña` },
+          performed_by: staffRow2.id,
+        })
+      } catch (logErr) {
+        console.error('Error logging password change:', logErr)
+      }
     }
 
     return NextResponse.json({ success: true })

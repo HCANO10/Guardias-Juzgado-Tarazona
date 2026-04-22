@@ -107,7 +107,18 @@ export default function TablonPageClient({
               <p className="text-[13px] text-red-200 leading-relaxed">{bulletinError}</p>
             </div>
           ) : (
-            <p className="text-[15px] text-white/40 italic">Generando resumen...</p>
+            /* Skeleton mientras la IA genera el boletín */
+            <div className="space-y-3 animate-pulse">
+              <div className="h-3 bg-white/10 rounded-full w-full" />
+              <div className="h-3 bg-white/10 rounded-full w-5/6" />
+              <div className="h-3 bg-white/10 rounded-full w-4/6" />
+              <div className="h-3 bg-white/10 rounded-full w-full mt-2" />
+              <div className="h-3 bg-white/10 rounded-full w-3/4" />
+              <p className="text-[12px] text-white/30 italic pt-2 flex items-center gap-2">
+                <Sparkles className="h-3 w-3 animate-spin" />
+                La IA está redactando el resumen semanal...
+              </p>
+            </div>
           )}
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-6 pt-5 border-t border-white/10">

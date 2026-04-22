@@ -75,13 +75,17 @@ export async function POST(request: NextRequest) {
       .eq('auth_user_id', auth.userId)
       .single()
     if (staffRow2?.id) {
-      await adminClient.from('activity_log').insert({
-        action: 'update_email',
-        entity_type: 'staff',
-        entity_id: staffRow2.id,
-        details: { old_email: oldEmail, new_email: newEmail, description: `${userName} cambió su email` },
-        performed_by: staffRow2.id,
-      }).catch(err => console.error('Error logging email change:', err))
+      try {
+        await adminClient.from('activity_log').insert({
+          action: 'update_email',
+          entity_type: 'staff',
+          entity_id: staffRow2.id,
+          details: { old_email: oldEmail, new_email: newEmail, description: `${userName} cambió su email` },
+          performed_by: staffRow2.id,
+        })
+      } catch (logErr) {
+        console.error('Error logging email change:', logErr)
+      }
     }
 
     return NextResponse.json({

@@ -64,7 +64,23 @@ const navSections = {
   ],
 }
 
-export function AppSidebar({ userEmail }: { userEmail?: string }) {
+const ROLE_LABELS: Record<string, string> = {
+  headmaster: "Secretario/a",
+  admin:      "Administrador",
+  worker:     "Personal",
+}
+
+export function AppSidebar({
+  userEmail,
+  userName,
+  userRole,
+  pendingSwapsCount = 0,
+}: {
+  userEmail?: string
+  userName?: string
+  userRole?: string
+  pendingSwapsCount?: number
+}) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -78,9 +94,13 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
   }
 
   const sections = isHeadmaster ? navSections.headmaster : navSections.worker
-  const userInitials = userEmail
-    ? userEmail.substring(0, 2).toUpperCase()
-    : "??"
+  const displayName = userName || userEmail?.split("@")[0] || "Usuario"
+  const userInitials = userName
+    ? userName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()
+    : userEmail
+      ? userEmail.substring(0, 2).toUpperCase()
+      : "??"
+  const roleLabel = ROLE_LABELS[userRole ?? ""] ?? ""
 
   return (
     <>
@@ -136,7 +156,13 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
                           strokeWidth={isActive ? 2.2 : 1.8}
                         />
                         <span className="flex-1">{item.title}</span>
-                        {isActive && (
+                        {/* Badge de intercambios pendientes */}
+                        {item.url === "/intercambios" && pendingSwapsCount > 0 && (
+                          <span className="h-5 min-w-5 px-1 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center flex-shrink-0">
+                            {pendingSwapsCount > 9 ? "9+" : pendingSwapsCount}
+                          </span>
+                        )}
+                        {isActive && pendingSwapsCount === 0 && (
                           <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
                         )}
                       </div>
@@ -153,18 +179,24 @@ export function AppSidebar({ userEmail }: { userEmail?: string }) {
           {userEmail && (
             <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-100">
               <div
-                className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
+                className="h-9 w-9 rounded-[10px] flex items-center justify-center text-[12px] font-bold text-white flex-shrink-0 shadow-sm"
                 style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}
               >
                 {userInitials}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[12.5px] font-semibold text-slate-700 truncate leading-tight">
-                  {userEmail.split("@")[0]}
+                <div className="text-[13px] font-bold text-slate-800 truncate leading-tight">
+                  {displayName}
                 </div>
-                <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
-                  {userEmail}
-                </div>
+                {roleLabel ? (
+                  <div className="text-[10px] font-semibold text-indigo-500 uppercase tracking-wide leading-tight mt-0.5">
+                    {roleLabel}
+                  </div>
+                ) : (
+                  <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
+                    {userEmail}
+                  </div>
+                )}
               </div>
             </div>
           )}

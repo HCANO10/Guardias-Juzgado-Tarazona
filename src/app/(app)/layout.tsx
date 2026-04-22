@@ -1,11 +1,40 @@
 import { AppSidebar } from "@/components/layout/AppSidebar"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import MobileNav from "@/components/layout/MobileNav"
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const userInitials = user?.email ? user.email.substring(0, 2).toUpperCase() : "??"
+
+  // Fetch staff info and pending swap count for sidebar enrichment
+  let userName = ""
+  let userRole = ""
+  let pendingSwapsCount = 0
+
+  if (user?.email) {
+    const admin = createAdminClient()
+    const { data: staffRow } = await admin
+      .from("staff")
+      .select("id, first_name, last_name, role")
+      .eq("email", user.email)
+      .single()
+
+    if (staffRow) {
+      userName = `${staffRow.first_name} ${staffRow.last_name}`.trim()
+      userRole = staffRow.role ?? ""
+
+      // Count pending swaps where this user is the requested party
+      const { count } = await admin
+        .from("guard_swap_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("requested_id", staffRow.id)
+        .eq("status", "pending")
+
+      pendingSwapsCount = count ?? 0
+    }
+  }
 
   return (
     <div
@@ -26,7 +55,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {/* Desktop sidebar — fijo, 260px */}
       <aside className="hidden md:flex md:fixed md:inset-y-0 md:left-0 md:w-[260px] md:flex-col z-30 bg-white/95 border-r border-slate-200/60"
         style={{ backdropFilter: "blur(12px)", boxShadow: "1px 0 12px rgba(79,70,229,0.06)" }}>
-        <AppSidebar userEmail={user?.email} />
+        <AppSidebar
+          userEmail={user?.email}
+          userName={userName}
+          userRole={userRole}
+          pendingSwapsCount={pendingSwapsCount}
+        />
       </aside>
 
       {/* Main content */}

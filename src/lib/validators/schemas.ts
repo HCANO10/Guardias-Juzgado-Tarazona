@@ -88,9 +88,9 @@ export const guardSwapSchema = z.object({
 export const authRegisterSchema = z.object({
   first_name: trimmedString,
   last_name: trimmedString,
-  second_last_name: z.string().trim().optional(),
+  second_last_name: z.string().trim().nullish(),
   email: emailField,
-  phone: z.string().trim().optional(),
+  phone: z.string().trim().nullish(),
   password: passwordField,
   position_id: uuid.optional(),
 })
@@ -98,8 +98,8 @@ export const authRegisterSchema = z.object({
 export const authCompleteProfileSchema = z.object({
   first_name: trimmedString,
   last_name: trimmedString,
-  second_last_name: z.string().trim().optional(),
-  phone: z.string().trim().optional(),
+  second_last_name: z.string().trim().nullish(),
+  phone: z.string().trim().nullish(),
   position_id: uuid,
 })
 

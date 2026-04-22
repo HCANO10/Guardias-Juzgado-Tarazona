@@ -311,6 +311,7 @@ export default function GuardsPageClient({ initialGuards, staffByCategory, activ
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => handleEditClick(g)}
+                          aria-label={`Editar semana ${g.week_number}`}
                           className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition-all duration-200 text-slate-500 hover:text-indigo-600"
                         >
                           <Edit2 className="h-4 w-4" />

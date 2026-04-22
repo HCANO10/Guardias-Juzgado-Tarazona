@@ -87,7 +87,10 @@ export async function callGroq(
       if (response.status === 429) {
         throw new Error('Groq está saturado (rate limit). Espera unos segundos e inténtalo de nuevo.');
       }
-      throw new Error(`Groq API error ${response.status}: ${errorText}`);
+      // Sanitize: never expose the raw error text to the client
+      // (could contain request headers or partial API key info in some providers)
+      const safeError = errorText.replace(/Bearer\s+[A-Za-z0-9._-]{8,}/gi, 'Bearer [REDACTED]');
+      throw new Error(`Groq API error ${response.status}: ${safeError}`);
     }
 
     const data: GroqResponse = await response.json();

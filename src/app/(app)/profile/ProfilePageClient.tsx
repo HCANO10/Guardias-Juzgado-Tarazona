@@ -540,6 +540,7 @@ export function ProfilePageClient({
                              <button
                                onClick={() => setSwapDialog({ open: true, periodId: g.guard_period_id, weekNumber: g.guard_periods?.week_number ?? 0 })}
                                className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 transition-colors"
+                               aria-label={`Solicitar intercambio semana ${g.guard_periods?.week_number ?? ''}`}
                                title="Solicitar intercambio"
                              >
                                <ArrowLeftRight className="h-3.5 w-3.5" />

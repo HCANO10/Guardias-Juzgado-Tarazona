@@ -7,6 +7,24 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
   const pathname = request.nextUrl.pathname
 
+  // ── CSRF protection: validar Origin en rutas de escritura ──
+  if (
+    pathname.startsWith('/api/') &&
+    ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)
+  ) {
+    const origin = request.headers.get('origin')
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+    // Allow same-origin, localhost dev, and Vercel preview URLs
+    const isAllowed = !origin
+      || origin === appUrl
+      || origin.startsWith('http://localhost')
+      || origin.startsWith('https://localhost')
+      || origin.endsWith('.vercel.app')
+    if (!isAllowed) {
+      return NextResponse.json({ error: 'Origen no permitido' }, { status: 403 })
+    }
+  }
+
   // ── Rate limiting for API routes ──
   if (pathname.startsWith('/api/')) {
     const rateConfig = getApiRateLimit(pathname, request.method)

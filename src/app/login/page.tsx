@@ -175,7 +175,7 @@ function LoginContent() {
   }
 
   const inputClasses =
-    "h-12 rounded-xl bg-gray-50 border-gray-200 text-[15px] placeholder:text-gray-400 focus:bg-white focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC]/20 transition-all"
+    "h-12 rounded-xl bg-gray-50 border-gray-200 text-[15px] placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-all"
 
   return (
     <div className="flex min-h-screen w-full">
@@ -184,7 +184,7 @@ function LoginContent() {
         <div className="mx-auto w-full max-w-[420px]">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-10">
-            <div className="h-11 w-11 rounded-xl bg-[#0066CC] flex items-center justify-center">
+            <div className="h-11 w-11 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }}>
               <Scale className="h-6 w-6 text-white" strokeWidth={2} />
             </div>
             <div>
@@ -242,7 +242,7 @@ function LoginContent() {
                       <div className="flex items-center justify-between">
                         <label className="text-[13px] font-medium text-gray-700">Contraseña</label>
                         <button type="button" onClick={() => { setForgotEmail(loginEmail); setShowForgotPassword(true) }}
-                          className="text-[12px] text-[#0066CC] hover:underline font-medium">
+                          className="text-[12px] text-indigo-600 hover:underline font-medium">
                           ¿Olvidaste tu contraseña?
                         </button>
                       </div>
@@ -454,13 +454,16 @@ function LoginContent() {
       </div>
 
       {/* RIGHT: Dark Visual Panel */}
-      <div className="hidden lg:flex lg:w-[560px] relative overflow-hidden bg-[#0A1628]">
+      <div className="hidden lg:flex lg:w-[560px] relative overflow-hidden bg-indigo-950">
         <img
           src="/juzgado-tarazona.jpg"
           alt="Interior Juzgado"
-          className="absolute inset-0 w-full h-full object-cover opacity-20"
+          className="absolute inset-0 w-full h-full object-cover opacity-[0.18]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628] via-[#0A1628]/80 to-transparent" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #1e1b4b 0%, rgba(30,27,75,0.85) 50%, rgba(67,56,202,0.3) 100%)" }} />
+        {/* Decorative orbs */}
+        <div className="absolute top-[-80px] right-[-80px] w-[400px] h-[400px] rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle, #7C3AED 0%, transparent 70%)" }} />
+        <div className="absolute bottom-[-60px] left-[-60px] w-[300px] h-[300px] rounded-full opacity-15 pointer-events-none" style={{ background: "radial-gradient(circle, #4F46E5 0%, transparent 70%)" }} />
 
         <div className="relative z-10 w-full h-full flex flex-col justify-end p-12">
           <div className="space-y-8">
@@ -473,7 +476,7 @@ function LoginContent() {
                 <br />
                 de Guardias Judiciales
               </h3>
-              <p className="text-[15px] text-gray-400 leading-relaxed max-w-[380px]">
+              <p className="text-[15px] text-indigo-200/70 leading-relaxed max-w-[380px]">
                 Automatiza la asignación de guardias con inteligencia
                 artificial. Gestión equitativa, transparente y eficiente.
               </p>
@@ -487,16 +490,16 @@ function LoginContent() {
                 >
                   52
                 </p>
-                <p className="text-xs text-gray-500 mt-1">Semanas/año</p>
+                <p className="text-xs text-indigo-300/60 mt-1">Semanas/año</p>
               </div>
               <div>
                 <p
-                  className="text-3xl font-semibold text-[#0066CC]"
+                  className="text-3xl font-semibold text-indigo-400"
                   style={{ fontFamily: tokens.fonts.heading }}
                 >
                   100%
                 </p>
-                <p className="text-xs text-gray-500 mt-1">Cobertura</p>
+                <p className="text-xs text-indigo-300/60 mt-1">Cobertura</p>
               </div>
               <div>
                 <p
@@ -505,7 +508,7 @@ function LoginContent() {
                 >
                   IA
                 </p>
-                <p className="text-xs text-gray-500 mt-1">Optimización</p>
+                <p className="text-xs text-indigo-300/60 mt-1">Optimización</p>
               </div>
             </div>
           </div>
@@ -520,7 +523,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen w-full items-center justify-center bg-white">
-          <Loader2 className="h-8 w-8 animate-spin text-[#0066CC]" />
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
         </div>
       }
     >
